@@ -1,0 +1,123 @@
+{
+  "interval_seconds": 5,
+  "concurrent_mode": true,
+  "direct_to_cart": true,
+  "only_amazon_seller": true,
+  "auto_open_browser": true,
+  "sound_alert": true,
+  "desktop_notification": true,
+  "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
+  "line_token": "2011679626:4f5958263e42dfbd8f5b49d8d7f6c9c9",
+  "items": [
+    {
+      "enabled": true,
+      "name": "UX-15 シャークスケイルデッキセット",
+      "asin": "B0FH4FD9NB",
+      "note": "鯊魚利刃牌組套裝",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BX-52 スターター (待公布頁面)",
+      "asin": "B0HJ783F18",
+      "note": "官方公布 ASIN/網址後請點編輯填入",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BX-53 オールインワンセット (待公布頁面)",
+      "asin": "B0HJ75X3PN",
+      "note": "官方公布 ASIN/網址後請點編輯填入",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "UX-17 メテオドラグーン (測試對照品)",
+      "asin": "B0G1QZR681",
+      "note": "測試商品用",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BEYBLADE X UX-20",
+      "asin": "B0H4PPV8MR",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BEYBLADE X UX-21",
+      "asin": "B0H861Y9Y3",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "Beyblade X UX-17",
+      "asin": "B0G1QZR681",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BEYBLADE X UX-19",
+      "asin": "B0GS4F6977",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BEYBLADE X BX-48",
+      "asin": "B0GG8QM8YS",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BEYBLADE X UX-06",
+      "asin": "B0D91K2WMS",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:11"
+    },
+    {
+      "enabled": true,
+      "name": "BEYBLADE X CX-05",
+      "asin": "B0F12RK1F4",
+      "note": "",
+      "last_status": "⚪ 缺貨中 / 暫無在庫",
+      "last_price": "暫無官方價格",
+      "last_seller": "第三方賣家",
+      "last_time": "22:11:12"
+    }
+  ]
+}

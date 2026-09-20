@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>戰鬥陀螺 雲端極速監控系統</title>
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 40px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    
+    /* Header */
+    header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .logo-area { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { font-size: 24px; color: #60a5fa; }
+    .app-title { font-size: 16px; font-weight: bold; }
+    .app-subtitle { font-size: 11px; color: var(--text-muted); }
+    .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-running { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-stopped { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    
+    /* Control Bar */
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    button { padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+    .btn-start { background: #059669; color: white; }
+    .btn-start:active { background: #047857; }
+    .btn-stop { background: #dc2626; color: white; }
+    .btn-stop:active { background: #b91c1c; }
+    .btn-check { background: #2563eb; color: white; }
+    .btn-check:active { background: #1d4ed8; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+    .stat-card { background: var(--card-bg); padding: 10px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 18px; font-weight: bold; color: #60a5fa; }
+    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Section Header */
+    .section-title { font-size: 14px; font-weight: 600; margin: 14px 4px 8px 4px; display: flex; align-items: center; justify-content: space-between; }
+    
+    /* Item Card */
+    .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); position: relative; }
+    .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.05); }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .item-name { font-size: 14px; font-weight: 600; color: #f1f5f9; line-height: 1.4; flex: 1; padding-right: 8px; }
+    .item-asin { font-size: 11px; font-family: monospace; color: var(--text-muted); background: #0f172a; padding: 2px 6px; border-radius: 4px; }
+    .item-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .item-status { font-size: 12px; font-weight: 600; }
+    .item-price { font-size: 15px; font-weight: bold; color: #f59e0b; }
+    .item-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-buy { flex: 1; background: #ea580c; color: white; font-size: 13px; padding: 8px; text-decoration: none; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; }
+    .btn-buy:active { background: #c2410c; }
+    .toggle-btn { background: #334155; color: #cbd5e1; font-size: 12px; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    .toggle-btn.active { background: #0284c7; color: white; }
+
+    /* Log Box */
+    .log-box { background: #090d16; border: 1px solid var(--border); border-radius: 10px; padding: 10px; height: 160px; overflow-y: auto; font-family: monospace; font-size: 11px; line-height: 1.5; color: #cbd5e1; }
+    .log-entry { margin-bottom: 4px; }
+    .log-time { color: #64748b; margin-right: 4px; }
+    .log-SUCCESS { color: #34d399; font-weight: bold; }
+    .log-WARNING { color: #fbbf24; }
+    .log-ERROR { color: #f87171; font-weight: bold; }
+    .log-INFO { color: #94a3b8; }
+
+    /* Footer Note */
+    .footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="logo-area">
+        <i class="fa-solid fa-hurricane logo-icon"></i>
+        <div>
+          <div class="app-title">戰鬥陀螺 雲端極速監控</div>
+          <div class="app-subtitle">Amazon.co.jp 24H 官方直購</div>
+        </div>
+      </div>
+      <div id="statusBadge" class="badge-status badge-stopped">
+        <i class="fa-solid fa-circle" style="font-size: 8px;"></i> <span id="statusText">載入中...</span>
+      </div>
+    </header>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button id="toggleMonitorBtn" class="btn-start" onclick="toggleMonitoring()">
+        <i class="fa-solid fa-play"></i> <span id="btnActionText">啟動雲端監控</span>
+      </button>
+      <button class="btn-check" onclick="checkAllNow()">
+        <i class="fa-solid fa-bolt"></i> 立即全檢 (並發)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div id="statTotal" class="stat-val">11</div>
+        <div class="stat-lbl">追蹤商品</div>
+      </div>
+      <div class="stat-card">
+        <div id="statInStock" class="stat-val" style="color: #34d399;">0</div>
+        <div class="stat-lbl">官方現貨</div>
+      </div>
+      <div class="stat-card">
+        <div id="statInterval" class="stat-val">5s</div>
+        <div class="stat-lbl">檢查間隔</div>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <div class="section-title">
+      <span><i class="fa-solid fa-list-check"></i> 監控陀螺清單 (<span id="activeCount">0</span> 啟用)</span>
+      <span style="font-size: 11px; color: var(--text-muted);">點擊右側按鈕切換啟用/略過</span>
+    </div>
+    <div id="itemsContainer">
+      <!-- Dynamic Item Cards -->
+    </div>
+
+    <!-- Real-time Logs -->
+    <div class="section-title">
+      <span><i class="fa-solid fa-terminal"></i> 即時日誌紀錄</span>
+      <button onclick="clearLogs()" style="background: transparent; color: #64748b; font-size: 11px; padding: 2px 6px;">清空日誌</button>
+    </div>
+    <div id="logBox" class="log-box">
+      <div class="log-entry"><span class="log-time">[系統]</span> 連線至雲端伺服器中...</div>
+    </div>
+
+    <div class="footer-note">
+      Amazon Japan Beyblade X Monitor • 支援 LINE & Discord 雙向秒殺推播
+    </div>
+  </div>
+
+  <script>
+    let isRunning = false;
+    let itemsData = [];
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        
+        isRunning = data.is_monitoring;
+        itemsData = data.items || [];
+        
+        // Update Status Badge & Button
+        const badge = document.getElementById('statusBadge');
+        const text = document.getElementById('statusText');
+        const btn = document.getElementById('toggleMonitorBtn');
+        const btnText = document.getElementById('btnActionText');
+
+        if (isRunning) {
+          badge.className = 'badge-status badge-running';
+          text.innerText = '雲端極速監控中';
+          btn.className = 'btn-stop';
+          btn.innerHTML = '<i class="fa-solid fa-stop"></i> 暫停雲端監控';
+        } else {
+          badge.className = 'badge-status badge-stopped';
+          text.innerText = '監控已暫停';
+          btn.className = 'btn-start';
+          btn.innerHTML = '<i class="fa-solid fa-play"></i> 啟動雲端監控';
+        }
+
+        // Stats
+        document.getElementById('statTotal').innerText = itemsData.length;
+        document.getElementById('statInterval').innerText = (data.interval_seconds || 5) + 's';
+        
+        let inStockCount = 0;
+        let activeCount = 0;
+        itemsData.forEach(it => {
+          if (it.enabled) activeCount++;
+          if (it.last_status && it.last_status.includes('官方現貨')) inStockCount++;
+        });
+        document.getElementById('statInStock').innerText = inStockCount;
+        document.getElementById('activeCount').innerText = activeCount;
+
+        renderItems(itemsData);
+        updateLogs(data.logs || []);
+      } catch (e) {
+        console.error("Fetch status error:", e);
+      }
+    }
+
+    function renderItems(items) {
+      const container = document.getElementById('itemsContainer');
+      container.innerHTML = '';
+
+      items.forEach((it, idx) => {
+        const card = document.createElement('div');
+        const isInStock = it.last_status && it.last_status.includes('官方現貨');
+        card.className = `item-card ${isInStock ? 'in-stock' : ''}`;
+
+        const isEnabled = it.enabled !== false;
+        
+        card.innerHTML = `
+          <div class="item-header">
+            <div class="item-name">${it.name}</div>
+            <span class="item-asin">${it.asin}</span>
+          </div>
+          <div class="item-meta">
+            <div>
+              <div class="item-status" style="color: ${isInStock ? '#34d399' : '#94a3b8'}">${it.last_status || '待檢查'}</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">賣家: ${it.last_seller || '-'} | 時間: ${it.last_time || '-'}</div>
+            </div>
+            <div class="item-price">${it.last_price || '-'}</div>
+          </div>
+          <div class="item-actions">
+            <button class="toggle-btn ${isEnabled ? 'active' : ''}" onclick="toggleItem(${idx})">
+              ${isEnabled ? '☑ 監控中' : '☐ 略過'}
+            </button>
+            <a href="https://www.amazon.co.jp/dp/${it.asin}?m=AN1VRQENFRJN5&th=1&psc=1" target="_blank" class="btn-buy">
+              <i class="fa-solid fa-cart-shopping"></i> 1-Click 官方直達
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateLogs(logs) {
+      const box = document.getElementById('logBox');
+      if (!logs || logs.length === 0) return;
+      box.innerHTML = '';
+      logs.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.innerHTML = `<span class="log-time">[${l.time}]</span> <span class="log-${l.level}">${l.msg}</span>`;
+        box.appendChild(div);
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function toggleMonitoring() {
+      const action = isRunning ? 'stop' : 'start';
+      try {
+        await fetch(`/api/${action}`, { method: 'POST' });
+        fetchStatus();
+      } catch (e) {
+        alert("操作失敗: " + e);
+      }
+    }
+
+    async function checkAllNow() {
+      try {
+        await fetch('/api/check_now', { method: 'POST' });
+        fetchStatus();
+      } catch (e) {
+        alert("檢查失敗: " + e);
+      }
+    }
+
+    async function toggleItem(idx) {
+      try {
+        await fetch(`/api/toggle_item?index=${idx}`, { method: 'POST' });
+        fetchStatus();
+      } catch (e) {
+        alert("切換失敗: " + e);
+      }
+    }
+
+    function clearLogs() {
+      document.getElementById('logBox').innerHTML = '';
+    }
+
+    // Polling every 3.5 seconds
+    fetchStatus();
+    setInterval(fetchStatus, 3500);
+  </script>
+</body>
+</html>
