@@ -38,9 +38,24 @@ def extract_asin(text: str) -> str:
 
 
 class AmazonJPChecker:
+    _session = None
+
+    @classmethod
+    def get_session(cls):
+        if cls._session is None:
+            s = requests.Session()
+            adapter = requests.adapters.HTTPAdapter(
+                pool_connections=25,
+                pool_maxsize=25,
+                max_retries=1
+            )
+            s.mount("https://", adapter)
+            cls._session = s
+        return cls._session
+
     @classmethod
     def check_asin(cls, asin: str) -> Dict[str, Any]:
-        """檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態 (支援 Linux/Render 與 Windows)"""
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態 (雲端連線池 + 高速正則解析，0 耗 CPU)"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
@@ -49,51 +64,19 @@ class AmazonJPChecker:
         html = None
         status_code = 200
 
-        # 優先使用系統 curl (Linux/Windows 原生支援 HTTP/2，不帶偽造 Chrome 標頭以避開 TLS 指紋檢測)
-        curl_bin = shutil.which("curl") or ("curl.exe" if sys.platform == "win32" else "curl")
+        session = cls.get_session()
+        headers = {
+            "Accept-Language": "ja-JP,ja;q=0.9",
+            "Cookie": "i18n-prefs=JPY; lc-acbjp=ja_JP",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        }
+
         try:
-            cmd = [
-                curl_bin, "-s", "-L", "--compressed",
-                "-H", "Accept-Language: ja-JP,ja;q=0.9,en-US;q=0.8",
-                "-H", "Cookie: i18n-prefs=JPY; lc-acbjp=ja_JP",
-                url
-            ]
-            creationflags = 0
-            startupinfo = None
-            if sys.platform == "win32":
-                creationflags = subprocess.CREATE_NO_WINDOW
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = subprocess.SW_HIDE
-
-            res = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="ignore",
-                timeout=8,
-                startupinfo=startupinfo,
-                creationflags=creationflags
-            )
-            if res.returncode == 0 and res.stdout and len(res.stdout) > 500:
-                html = res.stdout
-        except Exception:
-            pass
-
-        # 若 curl 不可用則回退至 requests
-        if not html:
-            headers = {
-                "Accept-Language": "ja-JP,ja;q=0.9",
-                "Cookie": "i18n-prefs=JPY; lc-acbjp=ja_JP",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            }
-            try:
-                r = requests.get(url, headers=headers, timeout=6)
-                status_code = r.status_code
-                html = r.text
-            except Exception as e:
-                return {"ok": False, "msg": f"網路錯誤: {str(e)[:30]}"}
+            r = session.get(url, headers=headers, timeout=4)
+            status_code = r.status_code
+            html = r.text
+        except Exception as e:
+            return {"ok": False, "msg": f"網路超時: {str(e)[:25]}"}
 
         if not html:
             return {"ok": False, "msg": "無法獲取頁面內容"}
@@ -109,22 +92,14 @@ class AmazonJPChecker:
         elif status_code != 200 and not ("<html" in html.lower()):
             return {"ok": False, "msg": f"HTTP {status_code}"}
 
-        soup = BeautifulSoup(html, "html.parser")
+        # 高速正則抽取標題 (免解析整個 1MB DOM 樹，大幅降低 CPU 佔用)
+        title_m = re.search(r'id="productTitle"[^>]*>(.*?)</span>', html, re.DOTALL)
+        title = " ".join(title_m.group(1).split()) if title_m else ""
 
-        # 商品標題
-        title_el = soup.find(id="productTitle")
-        title = title_el.text.strip() if title_el else ""
-
-        # 購買/預購按鈕判斷
-        buybox = soup.find(id="desktop_buybox") or soup.find(id="buybox") or soup.find(id="apex_desktop")
-        has_cart = bool(soup.find(id="add-to-cart-button"))
-        has_buy_now = bool(soup.find(id="buy-now-button"))
-        has_preorder_btn = bool(
-            soup.find(id=lambda x: x and "preorder" in x.lower()) or 
-            soup.find("input", {"name": lambda x: x and "preorder" in x.lower()})
-        )
-        has_preorder_text = bool(buybox and ("予約注文" in buybox.text or "pre-order" in buybox.text.lower()))
-        has_preorder = has_preorder_btn or has_preorder_text
+        # 購買/預購按鈕判斷 (極速子字串檢索)
+        has_cart = ('id="add-to-cart-button"' in html) or ('name="submit.add-to-cart"' in html)
+        has_buy_now = ('id="buy-now-button"' in html) or ('name="submit.buy-now"' in html)
+        has_preorder = ('preorder' in html.lower()) or ('予約注文' in html)
 
         no_featured_offer = (
             "おすすめ出品はありません" in html or
@@ -132,14 +107,14 @@ class AmazonJPChecker:
             "没有精选优惠" in html
         ) and not (has_cart or has_buy_now or has_preorder)
 
-        seller_profile = soup.find(id="sellerProfileTriggerId")
-        has_third_party_profile = bool(seller_profile)
+        has_third_party_profile = 'id="sellerProfileTriggerId"' in html
 
-        # 賣家資訊
-        merchant_el = soup.find(id=lambda x: x and "merchantInfo" in x) or soup.find(id="merchant-info")
-        fulfiller_el = soup.find(id=lambda x: x and "fulfillerInfo" in x)
-        merchant_text = " ".join(merchant_el.text.split()) if merchant_el else ""
-        fulfiller_text = " ".join(fulfiller_el.text.split()) if fulfiller_el else ""
+        # 賣家資訊高速抽取
+        merchant_m = re.search(r'id="(?:merchantInfo|merchant-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
+        merchant_text = " ".join(re.sub(r'<[^>]+>', ' ', merchant_m.group(1)).split()) if merchant_m else ""
+
+        fulfiller_m = re.search(r'id="(?:fulfillerInfo|fulfiller-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
+        fulfiller_text = " ".join(re.sub(r'<[^>]+>', ' ', fulfiller_m.group(1)).split()) if fulfiller_m else ""
 
         is_amazon_sold = (
             ("amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text) and
@@ -147,27 +122,19 @@ class AmazonJPChecker:
         )
         is_amazon_fulfilled = "amazon" in fulfiller_text.lower()
 
-        # 價格抽取
+        # 價格高速正則抽取
         price = ""
-        price_selectors = [
-            "#corePrice_desktop .a-price .a-offscreen",
-            "#corePriceDisplay_desktop_feature_div .a-price .a-offscreen",
-            "#priceblock_ourprice",
-            "#priceblock_dealprice",
-            ".apexPriceToPay .a-offscreen",
-            "#price_inside_buybox",
-            ".a-price .a-offscreen"
-        ]
-        for sel in price_selectors:
-            el = soup.select_one(sel)
-            if el and el.text.strip() and "￥" in el.text:
-                price = el.text.strip()
-                break
-
-        if not price and buybox:
-            m = re.search(r"￥\s*([\d,]+)", buybox.text)
-            if m:
-                price = f"￥{m.group(1)}"
+        m_price = re.search(r'class="a-price\s*[^"]*".*?<span class="a-offscreen">\s*([^\s<]+)\s*</span>', html, re.DOTALL)
+        if m_price:
+            price = m_price.group(1).strip()
+        else:
+            m_price2 = re.search(r'id="(?:priceblock_ourprice|priceblock_dealprice|price_inside_buybox)"[^>]*>\s*([^\s<]+)\s*<', html, re.DOTALL)
+            if m_price2:
+                price = m_price2.group(1).strip()
+            else:
+                m_price3 = re.search(r'￥\s*([\d,]+)', html[:200000])
+                if m_price3:
+                    price = f"￥{m_price3.group(1)}"
 
         # 官方現貨/庫存判斷
         in_stock = False
@@ -182,9 +149,7 @@ class AmazonJPChecker:
             else:
                 in_stock = True
                 is_official = False
-                if seller_profile and seller_profile.text.strip():
-                    seller_name = seller_profile.text.strip()
-                elif merchant_text:
+                if merchant_text:
                     seller_name = merchant_text[:25]
                 if is_amazon_fulfilled:
                     seller_name += " (Amazon 配送)"
