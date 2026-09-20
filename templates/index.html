@@ -68,6 +68,8 @@
     .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.2); color: white; }
     .tab-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
     .tab-mute-icon { font-size: 10px; color: #f87171; margin-left: 2px; }
+    .tab-btn.paused { opacity: 0.7; border-style: dashed; }
+    .tab-pause-badge { font-size: 10px; background: #334155; color: #fbbf24; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
     @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
     /* Per-Store Control Bar */
@@ -330,15 +332,27 @@
       </div>
     </div>
 
-    <!-- Active Store Notification Bar -->
-    <div class="store-notify-bar" id="storeNotifyBar">
-      <div class="notify-status-badge" id="storeNotifyStatus">
-        <i class="fa-solid fa-bell notify-on"></i>
-        <span>載入賣場推播狀態中...</span>
+    <!-- Active Store Control Bar (監控開關 + 推播開關) -->
+    <div class="store-notify-bar" id="storeControlBar">
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <div class="notify-status-badge" id="storeMonitorStatus">
+          <i class="fa-solid fa-radar notify-on"></i>
+          <span>載入賣場監控狀態中...</span>
+        </div>
+        <button id="btnToggleStoreMonitor" class="btn-store-notify" onclick="toggleActiveStoreMonitor()">
+          <i class="fa-solid fa-toggle-on"></i> 切換監控
+        </button>
       </div>
-      <button id="btnToggleStoreNotify" class="btn-store-notify" onclick="toggleActiveStoreNotify()">
-        <i class="fa-solid fa-toggle-on"></i> 切換推播開關
-      </button>
+
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <div class="notify-status-badge" id="storeNotifyStatus">
+          <i class="fa-solid fa-bell notify-on"></i>
+          <span>載入推播狀態中...</span>
+        </div>
+        <button id="btnToggleStoreNotify" class="btn-store-notify" onclick="toggleActiveStoreNotify()">
+          <i class="fa-solid fa-toggle-on"></i> 切換推播
+        </button>
+      </div>
     </div>
 
     <!-- Items List Header -->
@@ -441,7 +455,7 @@
         }
 
         renderTabs(data.store_counts || {});
-        renderStoreNotifyBar();
+        renderStoreControlBar();
         renderItems();
         updateLogs(data.logs || []);
 
@@ -486,14 +500,16 @@
         const btn = document.createElement('div');
         const count = counts[key] || 0;
         const sSet = storeSettingsData[key] || {};
+        const isMonitored = sSet.enable_monitoring !== false;
         const isNotifyOn = sSet.enable_notifications !== false;
         
         const hasStock = itemsData.some(it => (it.store || 'amazon_jp') === key && it.last_status && it.last_status.includes('現貨'));
 
-        btn.className = `tab-btn ${key === currentStoreTab ? 'active' : ''}`;
+        btn.className = `tab-btn ${key === currentStoreTab ? 'active' : ''} ${!isMonitored ? 'paused' : ''}`;
         btn.onclick = () => switchStoreTab(key);
         btn.innerHTML = `
           <span>${cfg.flag} ${cfg.short_name}</span>
+          ${!isMonitored ? '<span class="tab-pause-badge" title="此賣場監控已暫停">暫停</span>' : ''}
           ${!isNotifyOn ? '<span class="tab-mute-icon" title="該賣場推播已停用"><i class="fa-solid fa-bell-slash"></i></span>' : ''}
           ${hasStock ? '<span class="tab-dot" title="有現貨"></span>' : ''}
           <span class="tab-badge">${count}</span>
@@ -509,29 +525,67 @@
       document.getElementById('statTabCount').innerText = curItems.length;
     }
 
-    function renderStoreNotifyBar() {
+    function renderStoreControlBar() {
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
       const sSet = storeSettingsData[currentStoreTab] || {};
+      const isMonitored = sSet.enable_monitoring !== false;
       const isNotifyOn = sSet.enable_notifications !== false;
       const customWebhook = (sSet.discord_webhook || '').trim();
 
-      const statusEl = document.getElementById('storeNotifyStatus');
-      const btnEl = document.getElementById('btnToggleStoreNotify');
+      const monStatusEl = document.getElementById('storeMonitorStatus');
+      const monBtnEl = document.getElementById('btnToggleStoreMonitor');
+      const notStatusEl = document.getElementById('storeNotifyStatus');
+      const notBtnEl = document.getElementById('btnToggleStoreNotify');
 
-      if (isNotifyOn) {
-        statusEl.innerHTML = `
-          <i class="fa-solid fa-bell notify-on"></i>
-          <span><b>${curCfg.flag} ${curCfg.name}</b>：<span style="color: #34d399;">推播通知已啟用</span> ${customWebhook ? '<span style="color: #60a5fa; font-size: 11px;">(專屬 Webhook)</span>' : '<span style="color: #94a3b8; font-size: 11px;">(預設 Webhook)</span>'}</span>
+      // 1. 賣場監控開關
+      if (isMonitored) {
+        monStatusEl.innerHTML = `
+          <i class="fa-solid fa-radar notify-on"></i>
+          <span><b>${curCfg.flag} ${curCfg.name}</b>：<span style="color: #34d399;">監控中 (排程檢查)</span></span>
         `;
-        btnEl.className = 'btn-store-notify turn-off';
-        btnEl.innerHTML = '<i class="fa-solid fa-bell-slash"></i> 停用此賣場通知';
+        monBtnEl.className = 'btn-store-notify turn-off';
+        monBtnEl.innerHTML = '<i class="fa-solid fa-pause"></i> 暫停監控此賣場';
       } else {
-        statusEl.innerHTML = `
-          <i class="fa-solid fa-bell-slash notify-off"></i>
-          <span><b>${curCfg.flag} ${curCfg.name}</b>：<span style="color: #f87171;">推播已停用 (該賣場所有商品有貨時均不發送警報)</span></span>
+        monStatusEl.innerHTML = `
+          <i class="fa-solid fa-pause notify-off"></i>
+          <span><b>${curCfg.flag} ${curCfg.name}</b>：<span style="color: #f87171;">已暫停 (不執行爬取)</span></span>
         `;
-        btnEl.className = 'btn-store-notify turn-on';
-        btnEl.innerHTML = '<i class="fa-solid fa-bell"></i> 啟用此賣場通知';
+        monBtnEl.className = 'btn-store-notify turn-on';
+        monBtnEl.innerHTML = '<i class="fa-solid fa-play"></i> 啟用此賣場監控';
+      }
+
+      // 2. 賣場推播開關
+      if (isNotifyOn) {
+        notStatusEl.innerHTML = `
+          <i class="fa-solid fa-bell notify-on"></i>
+          <span><b>推播通知</b>：<span style="color: #34d399;">開啟</span> ${customWebhook ? '<span style="color: #60a5fa; font-size: 11px;">(專屬Hook)</span>' : '<span style="color: #94a3b8; font-size: 11px;">(預設Hook)</span>'}</span>
+        `;
+        notBtnEl.className = 'btn-store-notify turn-off';
+        notBtnEl.innerHTML = '<i class="fa-solid fa-bell-slash"></i> 停用推播';
+      } else {
+        notStatusEl.innerHTML = `
+          <i class="fa-solid fa-bell-slash notify-off"></i>
+          <span><b>推播通知</b>：<span style="color: #f87171;">已關閉</span></span>
+        `;
+        notBtnEl.className = 'btn-store-notify turn-on';
+        notBtnEl.innerHTML = '<i class="fa-solid fa-bell"></i> 開啟推播';
+      }
+    }
+
+    async function toggleActiveStoreMonitor() {
+      try {
+        const res = await fetch(`/api/toggle_store_monitor?store=${currentStoreTab}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          if (!storeSettingsData[currentStoreTab]) storeSettingsData[currentStoreTab] = {};
+          storeSettingsData[currentStoreTab].enable_monitoring = data.enabled;
+          renderStoreControlBar();
+          renderTabs(getCurrentCounts());
+        } else {
+          alert("切換失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("操作失敗: " + e);
       }
     }
 
@@ -540,12 +594,9 @@
         const res = await fetch(`/api/toggle_store_notify?store=${currentStoreTab}`, { method: 'POST' });
         const data = await res.json();
         if (data.ok) {
-          if (storeSettingsData[currentStoreTab]) {
-            storeSettingsData[currentStoreTab].enable_notifications = data.enabled;
-          } else {
-            storeSettingsData[currentStoreTab] = { enable_notifications: data.enabled };
-          }
-          renderStoreNotifyBar();
+          if (!storeSettingsData[currentStoreTab]) storeSettingsData[currentStoreTab] = {};
+          storeSettingsData[currentStoreTab].enable_notifications = data.enabled;
+          renderStoreControlBar();
           renderTabs(getCurrentCounts());
         } else {
           alert("切換失敗: " + (data.msg || "未知錯誤"));
@@ -562,6 +613,7 @@
       Object.keys(storesConfig).forEach(k => {
         const cfg = storesConfig[k];
         const sSet = storeSettingsData[k] || {};
+        const isMonitored = sSet.enable_monitoring !== false;
         const isNotifyOn = sSet.enable_notifications !== false;
         const hookUrl = sSet.discord_webhook || '';
         const isAmazon = (k === 'amazon_jp');
@@ -574,14 +626,27 @@
             <div class="store-card-name" style="color: ${cfg.color};">
               <i class="${cfg.icon || 'fa-solid fa-store'}"></i> ${cfg.flag} ${cfg.name}
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 11px; color: ${isNotifyOn ? '#34d399' : '#f87171'};">
-                ${isNotifyOn ? '通知開啟' : '通知關閉'}
-              </span>
-              <label class="switch">
-                <input type="checkbox" id="store_notify_${k}" ${isNotifyOn ? 'checked' : ''} onchange="onStoreSwitchChange('${k}')">
-                <span class="slider"></span>
-              </label>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <!-- 賣場監控開關 -->
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 11px; color: ${isMonitored ? '#34d399' : '#f87171'};">
+                  ${isMonitored ? '📡 監控開' : '⏸ 監控關'}
+                </span>
+                <label class="switch">
+                  <input type="checkbox" id="store_monitor_${k}" ${isMonitored ? 'checked' : ''} onchange="onStoreMonitorChange('${k}')">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <!-- 賣場推播開關 -->
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 11px; color: ${isNotifyOn ? '#34d399' : '#f87171'};">
+                  ${isNotifyOn ? '🔔 推播開' : '🔕 推播關'}
+                </span>
+                <label class="switch">
+                  <input type="checkbox" id="store_notify_${k}" ${isNotifyOn ? 'checked' : ''} onchange="onStoreNotifyChange('${k}')">
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
           </div>
           <div class="store-card-hook">
@@ -604,18 +669,24 @@
       });
     }
 
-    function onStoreSwitchChange(k) {
+    function onStoreMonitorChange(k) {
+      isEditingSettings = true;
+      const chk = document.getElementById(`store_monitor_${k}`);
+      if (!storeSettingsData[k]) storeSettingsData[k] = {};
+      storeSettingsData[k].enable_monitoring = chk.checked;
+    }
+
+    function onStoreNotifyChange(k) {
       isEditingSettings = true;
       const chk = document.getElementById(`store_notify_${k}`);
-      if (storeSettingsData[k]) {
-        storeSettingsData[k].enable_notifications = chk.checked;
-      }
+      if (!storeSettingsData[k]) storeSettingsData[k] = {};
+      storeSettingsData[k].enable_notifications = chk.checked;
     }
 
     function switchStoreTab(storeKey) {
       currentStoreTab = storeKey;
       renderTabs(getCurrentCounts());
-      renderStoreNotifyBar();
+      renderStoreControlBar();
       renderItems();
     }
 
@@ -736,11 +807,13 @@
       const amazonInterval = parseFloat(document.getElementById('settingAmazonInterval').value) || 0.6;
       const store_settings = {};
       Object.keys(storesConfig).forEach(k => {
-        const chk = document.getElementById(`store_notify_${k}`);
+        const monChk = document.getElementById(`store_monitor_${k}`);
+        const notChk = document.getElementById(`store_notify_${k}`);
         const hook = document.getElementById(`store_webhook_${k}`);
         const ivalInput = document.getElementById(`store_interval_${k}`);
         store_settings[k] = {
-          enable_notifications: chk ? chk.checked : true,
+          enable_monitoring: monChk ? monChk.checked : true,
+          enable_notifications: notChk ? notChk.checked : true,
           discord_webhook: hook ? hook.value.trim() : "",
           item_interval_seconds: ivalInput ? (parseFloat(ivalInput.value) || 0.6) : (k === 'amazon_jp' ? amazonInterval : 0.6)
         };

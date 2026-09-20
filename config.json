@@ -11,31 +11,38 @@
   "amazon_item_interval": 0.6,
   "store_settings": {
     "amazon_jp": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
       "item_interval_seconds": 0.6
     },
     "pchome": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": ""
     },
     "mm_shop": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": ""
     },
     "funbox_tw": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": ""
     },
     "twj_toys": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": ""
     },
     "eslite": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": ""
     },
     "shopee": {
+      "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": ""
     }

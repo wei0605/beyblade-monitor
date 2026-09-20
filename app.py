@@ -80,14 +80,21 @@ class MonitorState:
             if s_key not in cfg["store_settings"]:
                 default_wh = cfg.get("discord_webhook", "") if s_key == "amazon_jp" else ""
                 cfg["store_settings"][s_key] = {
+                    "enable_monitoring": True,
                     "enable_notifications": True,
                     "discord_webhook": default_wh
                 }
             else:
+                cfg["store_settings"][s_key].setdefault("enable_monitoring", True)
                 cfg["store_settings"][s_key].setdefault("enable_notifications", True)
                 cfg["store_settings"][s_key].setdefault("discord_webhook", "")
 
         return cfg
+
+    def is_store_monitored(self, store: str) -> bool:
+        """檢查特定賣場是否開啟了監控 (True 表示要爬取，False 表示略過)"""
+        s_set = self.config.get("store_settings", {}).get(store, {})
+        return s_set.get("enable_monitoring", True)
 
     def get_amazon_item_interval(self) -> float:
         """獲取 Amazon 每項商品檢查間隔 (秒，預設 0.6 秒)"""
@@ -132,10 +139,17 @@ def background_monitor_worker():
     state.add_log("=== 雲端 24H 多賣場背景監控已啟動 ===", "SUCCESS")
     while not state.stop_event.is_set():
         items = state.config.get("items", [])
-        active_items = [(i, it) for i, it in enumerate(items) if it.get("enabled", True) and it.get("asin")]
+        active_items = []
+        for i, it in enumerate(items):
+            if not it.get("enabled", True) or not it.get("asin"):
+                continue
+            store = it.get("store", "amazon_jp")
+            if not state.is_store_monitored(store):
+                continue
+            active_items.append((i, it))
 
         if not active_items:
-            time.sleep(5)
+            time.sleep(3)
             continue
 
         amazon_delay = state.get_amazon_item_interval()
@@ -380,6 +394,8 @@ async def api_update_settings(req: Request):
         for s_key, s_val in data["store_settings"].items():
             if s_key in STORE_CONFIG:
                 state.config.setdefault("store_settings", {}).setdefault(s_key, {})
+                if "enable_monitoring" in s_val:
+                    state.config["store_settings"][s_key]["enable_monitoring"] = bool(s_val["enable_monitoring"])
                 if "enable_notifications" in s_val:
                     state.config["store_settings"][s_key]["enable_notifications"] = bool(s_val["enable_notifications"])
                 if "discord_webhook" in s_val:
@@ -398,9 +414,23 @@ async def api_update_settings(req: Request):
     return {"ok": True, "config": state.config}
 
 
+@app.post("/api/toggle_store_monitor")
+async def api_toggle_store_monitor(store: str = Query(...)):
+    """單鍵切換特定賣場之【監控開關】(是否納入輪詢爬取)"""
+    if store in STORE_CONFIG:
+        cur = state.config.setdefault("store_settings", {}).setdefault(store, {}).get("enable_monitoring", True)
+        new_val = not cur
+        state.config["store_settings"][store]["enable_monitoring"] = new_val
+        state.save_config()
+        s_name = STORE_CONFIG[store]["short_name"]
+        state.add_log(f"📡 已{'【開啟】' if new_val else '【暫停】'} [{s_name}] 賣場背景監控", "SUCCESS" if new_val else "WARNING")
+        return {"ok": True, "store": store, "enabled": new_val}
+    return JSONResponse({"ok": False, "msg": "無效賣場"}, status_code=400)
+
+
 @app.post("/api/toggle_store_notify")
 async def api_toggle_store_notify(store: str = Query(...)):
-    """單鍵切換特定賣場之推播開關"""
+    """單鍵切換特定賣場之【推播開關】"""
     if store in STORE_CONFIG:
         cur = state.config.setdefault("store_settings", {}).setdefault(store, {}).get("enable_notifications", True)
         new_val = not cur
@@ -614,7 +644,19 @@ async def api_check_now(background_tasks: BackgroundTasks):
     """立即多線程並發全檢 (跨 7 大賣場秒級檢查)"""
     def _do_check():
         items = state.config.get("items", [])
-        active_items = [(i, it) for i, it in enumerate(items) if it.get("enabled", True) and it.get("asin")]
+        active_items = []
+        for i, it in enumerate(items):
+            if not it.get("enabled", True) or not it.get("asin"):
+                continue
+            store = it.get("store", "amazon_jp")
+            if not state.is_store_monitored(store):
+                continue
+            active_items.append((i, it))
+
+        if not active_items:
+            state.add_log("提示: 目前沒有任何已開啟監控的賣場商品可檢查！", "WARNING")
+            return
+
         amazon_delay = state.get_amazon_item_interval()
         state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品，Amazon每項間隔 {amazon_delay}s)...", "INFO")
         t0 = time.time()
