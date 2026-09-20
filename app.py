@@ -1,7 +1,7 @@
 """
 戰鬥陀螺 全通路雲端極速監控 Web 服務 (FastAPI + LINE Messaging API Webhook)
 支援 7 大賣場：Amazon Japan / PChome 24h / M.M小舖 / 麗嬰官網 / 童無忌 / 誠品線上 / 蝦皮 Funbox
-專為 Render.com 打造，提供手機分頁儀表板、LINE 雙向遙控與 24H 背景自動推播。
+專為 Render.com 打造，提供手機分頁儀表板、各賣場獨立 Discord Webhook & 推播開關、LINE 雙向遙控與 24H 背景自動推播。
 """
 
 import concurrent.futures
@@ -18,7 +18,6 @@ try:
     sys.stderr.reconfigure(encoding="utf-8")
 except Exception:
     pass
-
 
 from fastapi import FastAPI, Request, BackgroundTasks, Query
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -47,32 +46,48 @@ class MonitorState:
         self.stop_event = threading.Event()
         self.monitor_thread = None
         self.logs: List[Dict[str, str]] = []
-        self.max_logs = 70
+        self.max_logs = 80
         self.config: Dict[str, Any] = self.load_config()
         self.in_stock_state: Dict[str, bool] = {}
 
     def load_config(self) -> Dict[str, Any]:
+        cfg = {}
         if os.path.exists(CONFIG_PATH):
             try:
                 with open(CONFIG_PATH, "r", encoding="utf-8") as f:
                     cfg = json.load(f)
-                    # 確保現有項目相容性：未標記 store 者預設為 amazon_jp
-                    for it in cfg.get("items", []):
-                        if "store" not in it:
-                            it["store"] = "amazon_jp"
-                    return cfg
             except Exception:
-                pass
-        return {
-            "interval_seconds": 5,
-            "concurrent_mode": True,
-            "only_amazon_seller": True,
-            "enable_discord": True,
-            "enable_line": True,
-            "discord_webhook": "",
-            "line_token": "",
-            "items": []
-        }
+                cfg = {}
+
+        # 基礎預設值
+        cfg.setdefault("interval_seconds", 5)
+        cfg.setdefault("concurrent_mode", True)
+        cfg.setdefault("only_amazon_seller", True)
+        cfg.setdefault("enable_discord", True)
+        cfg.setdefault("enable_line", True)
+        cfg.setdefault("discord_webhook", "")
+        cfg.setdefault("line_token", "")
+        cfg.setdefault("items", [])
+        cfg.setdefault("store_settings", {})
+
+        # 確保現有項目相容性：未標記 store 者預設為 amazon_jp
+        for it in cfg.get("items", []):
+            if "store" not in it:
+                it["store"] = "amazon_jp"
+
+        # 確保 7 大賣場皆有獨立推播設定 (預設啟用，若 amazon_jp 且全域有 webhook 則繼承)
+        for s_key in STORE_CONFIG.keys():
+            if s_key not in cfg["store_settings"]:
+                default_wh = cfg.get("discord_webhook", "") if s_key == "amazon_jp" else ""
+                cfg["store_settings"][s_key] = {
+                    "enable_notifications": True,
+                    "discord_webhook": default_wh
+                }
+            else:
+                cfg["store_settings"][s_key].setdefault("enable_notifications", True)
+                cfg["store_settings"][s_key].setdefault("discord_webhook", "")
+
+        return cfg
 
     def save_config(self):
         try:
@@ -94,7 +109,6 @@ class MonitorState:
                 print(f"[{ts}] [{level}] {safe_msg}")
             except Exception:
                 pass
-
 
 state = MonitorState()
 
@@ -148,11 +162,16 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     store = item.get("store", "amazon_jp")
     item_key = f"{store}_{asin}"
 
+    store_cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
+    store_short = store_cfg.get("short_name", store)
+    s_settings = state.config.get("store_settings", {}).get(store, {})
+    store_notify_enabled = s_settings.get("enable_notifications", True)
+
     if not res.get("ok"):
         msg = res.get("msg", "檢測異常")
         item["last_status"] = msg
         item["last_time"] = now_str
-        state.add_log(f"[{name}] 檢查失敗: {msg}", "WARNING")
+        state.add_log(f"[{store_short} - {name}] 檢查失敗: {msg}", "WARNING")
         return
 
     price = res.get("price", "-")
@@ -197,25 +216,31 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     should_trigger = is_alert_worthy and (not prev_was_in_stock or is_manual)
 
     if is_alert_worthy:
-        store_cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
         flag = store_cfg.get("flag", "⚡")
-        state.add_log(f"🔥【補貨通知】{flag} {name} 價格: {price}！", "SUCCESS")
+        state.add_log(f"🔥【補貨】{flag} [{store_short}] {name} 價格: {price}！", "SUCCESS")
 
     if should_trigger:
-        trigger_notifications(item, name, asin, price, seller, url)
+        if store_notify_enabled:
+            trigger_notifications(item, name, asin, price, seller, url)
+        else:
+            state.add_log(f"🔕 [{store_short}] 已關閉推播通知，已略過本次推播", "INFO")
 
 
 def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: str, url: str):
-    """發送 Discord 與 LINE 官方推播 (包含賣場資訊與一鍵直達)"""
+    """發送 Discord 與 LINE 官方推播 (支援各賣場獨立 Webhook 與獨立開關)"""
     store = item.get("store", "amazon_jp")
     store_cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
     store_name = store_cfg.get("name", "線上商城")
     flag = store_cfg.get("flag", "⚡")
     btn_text = store_cfg.get("btn_text", "👉 點此直達購買")
 
-    # 1. Discord 推播
+    s_settings = state.config.get("store_settings", {}).get(store, {})
+    if not s_settings.get("enable_notifications", True):
+        return
+
+    # 1. Discord 推播 (優先使用該賣場專屬 Webhook，若無則回退全域 Webhook)
     if state.config.get("enable_discord", True):
-        discord_url = state.config.get("discord_webhook", "").strip()
+        discord_url = s_settings.get("discord_webhook", "").strip() or state.config.get("discord_webhook", "").strip()
         if discord_url:
             def _send_d():
                 ok, msg = NotificationManager.send_discord(discord_url, name, asin, price, seller, url, store=store)
@@ -270,7 +295,6 @@ async def index(request: Request):
 
 @app.get("/health")
 async def health_check():
-    """保活與健康檢查"""
     return {
         "status": "healthy",
         "monitoring": state.is_monitoring,
@@ -281,12 +305,9 @@ async def health_check():
 
 @app.get("/api/status")
 async def get_status():
-    """獲取最新即時狀態、商品清單、賣場定義與日誌"""
+    """獲取最新即時狀態、商品清單、賣場定義、獨立賣場設定與日誌"""
     items = state.config.get("items", [])
-    # 統計各賣場商品數
-    store_counts = {}
-    for s_key in STORE_CONFIG.keys():
-        store_counts[s_key] = 0
+    store_counts = {s_key: 0 for s_key in STORE_CONFIG.keys()}
     for it in items:
         s = it.get("store", "amazon_jp")
         store_counts[s] = store_counts.get(s, 0) + 1
@@ -301,6 +322,7 @@ async def get_status():
         "line_token": state.config.get("line_token", ""),
         "stores": STORE_CONFIG,
         "store_counts": store_counts,
+        "store_settings": state.config.get("store_settings", {}),
         "items": items,
         "logs": state.logs
     }
@@ -308,7 +330,7 @@ async def get_status():
 
 @app.post("/api/settings")
 async def api_update_settings(req: Request):
-    """更新全域推播與監控設定"""
+    """更新全域與各賣場獨立設定"""
     data = await req.json()
     if "interval_seconds" in data:
         state.config["interval_seconds"] = max(2, int(data["interval_seconds"]))
@@ -322,9 +344,34 @@ async def api_update_settings(req: Request):
         state.config["discord_webhook"] = str(data["discord_webhook"]).strip()
     if "line_token" in data:
         state.config["line_token"] = str(data["line_token"]).strip()
+
+    # 各賣場獨立設定 (獨立通知開關 & 獨立 Discord Webhook)
+    if "store_settings" in data and isinstance(data["store_settings"], dict):
+        for s_key, s_val in data["store_settings"].items():
+            if s_key in STORE_CONFIG:
+                state.config.setdefault("store_settings", {}).setdefault(s_key, {})
+                if "enable_notifications" in s_val:
+                    state.config["store_settings"][s_key]["enable_notifications"] = bool(s_val["enable_notifications"])
+                if "discord_webhook" in s_val:
+                    state.config["store_settings"][s_key]["discord_webhook"] = str(s_val["discord_webhook"]).strip()
+
     state.save_config()
-    state.add_log("⚙️ 雲端推播與系統設定已儲存！", "SUCCESS")
+    state.add_log("⚙️ 雲端全域與各賣場專屬設定已儲存！", "SUCCESS")
     return {"ok": True, "config": state.config}
+
+
+@app.post("/api/toggle_store_notify")
+async def api_toggle_store_notify(store: str = Query(...)):
+    """單鍵切換特定賣場之推播開關"""
+    if store in STORE_CONFIG:
+        cur = state.config.setdefault("store_settings", {}).setdefault(store, {}).get("enable_notifications", True)
+        new_val = not cur
+        state.config["store_settings"][store]["enable_notifications"] = new_val
+        state.save_config()
+        s_name = STORE_CONFIG[store]["short_name"]
+        state.add_log(f"🔔 已{'【開啟】' if new_val else '【關閉】'} [{s_name}] 賣場推播通知", "SUCCESS" if new_val else "WARNING")
+        return {"ok": True, "store": store, "enabled": new_val}
+    return JSONResponse({"ok": False, "msg": "無效賣場"}, status_code=400)
 
 
 @app.post("/api/add_item")
@@ -342,7 +389,6 @@ async def api_add_item(req: Request, background_tasks: BackgroundTasks):
     if not raw_input:
         return JSONResponse({"ok": False, "msg": "請輸入商品編號或網址！"}, status_code=400)
 
-    # 針對不同賣場標準化 ID 提取
     if store == "amazon_jp":
         asin = extract_asin(raw_input)
     elif store == "pchome":
@@ -462,21 +508,28 @@ async def api_delete_item(index: int = Query(...)):
 
 @app.post("/api/test_discord")
 async def api_test_discord(req: Request):
-    """從 Web 介面測試 Discord 推播"""
+    """從 Web 介面測試指定賣場之 Discord 推播"""
     data = await req.json()
-    webhook_url = data.get("webhook_url", "").strip() or state.config.get("discord_webhook", "").strip()
-    if not webhook_url:
-        return JSONResponse({"ok": False, "msg": "請填寫 Discord Webhook 網址！"}, status_code=400)
+    store = data.get("store", "amazon_jp")
+    webhook_url = data.get("webhook_url", "").strip()
 
-    prod_url = get_product_url("B0H861Y9Y3")
+    if not webhook_url:
+        s_settings = state.config.get("store_settings", {}).get(store, {})
+        webhook_url = s_settings.get("discord_webhook", "").strip() or state.config.get("discord_webhook", "").strip()
+
+    if not webhook_url:
+        return JSONResponse({"ok": False, "msg": "請填寫該賣場專屬或全域 Discord Webhook 網址！"}, status_code=400)
+
+    s_cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
+    prod_url = s_cfg["default_url"].replace("{id}", "TEST-ITEM")
     ok, msg = NotificationManager.send_discord(
         webhook_url,
-        "【測試】UX-21 赫爾茲地獄 (雲端多賣場推播測試)",
-        "B0H861Y9Y3",
-        "￥4,500",
-        "Amazon.co.jp (官方自營)",
+        f"【測試】{s_cfg['name']} 專屬推播測試",
+        "TEST-SAMPLE",
+        "NT$ 999",
+        s_cfg["name"],
         prod_url,
-        store="amazon_jp"
+        store=store
     )
     return {"ok": ok, "msg": msg}
 
@@ -577,7 +630,6 @@ async def line_webhook(request: Request):
                 items = state.config.get("items", [])
                 lines = ["📋【戰鬥陀螺 7 大賣場庫存概況】"]
                 
-                # 分組統計
                 by_store = {}
                 for it in items:
                     s = it.get("store", "amazon_jp")
@@ -587,7 +639,10 @@ async def line_webhook(request: Request):
                     s_items = by_store.get(s_key, [])
                     if not s_items:
                         continue
-                    lines.append(f"\n{s_cfg['flag']} 【{s_cfg['name']}】({len(s_items)}項):")
+                    s_settings = state.config.get("store_settings", {}).get(s_key, {})
+                    is_on = s_settings.get("enable_notifications", True)
+                    bell = "🔔" if is_on else "🔕(已關閉推播)"
+                    lines.append(f"\n{s_cfg['flag']} 【{s_cfg['name']}】{bell} ({len(s_items)}項):")
                     for it in s_items[:4]:
                         name = it.get("name", "")[:14]
                         status = it.get("last_status", "待檢查")
@@ -614,7 +669,7 @@ async def line_webhook(request: Request):
                     "支援 7 大電商賣場即時秒殺！\n"
                     "👉 傳送「開始」：啟動 24H 雲端監控\n"
                     "👉 傳送「停止」：暫停雲端監控\n"
-                    "👉 傳送「查庫存」：依賣場查看最新庫存\n"
+                    "👉 傳送「查庫存」：依賣場查看最新庫存與推播狀態\n"
                     "👉 傳送「全檢」：立即重新檢查所有商品"
                 )
 

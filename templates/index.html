@@ -54,7 +54,7 @@
     .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
     /* Store Tabs Bar */
-    .tabs-wrapper { margin-bottom: 14px; position: relative; }
+    .tabs-wrapper { margin-bottom: 12px; position: relative; }
     .tabs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
     .tabs-title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .store-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
@@ -67,7 +67,46 @@
     .tab-badge { background: #0f172a; color: #94a3b8; font-size: 11px; padding: 2px 7px; border-radius: 12px; font-weight: bold; }
     .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.2); color: white; }
     .tab-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
+    .tab-mute-icon { font-size: 10px; color: #f87171; margin-left: 2px; }
     @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+    /* Per-Store Control Bar */
+    .store-notify-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .notify-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .notify-on { color: #34d399; }
+    .notify-off { color: #f87171; }
+    .btn-store-notify {
+      background: #334155;
+      color: #cbd5e1;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid #475569;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-store-notify:hover { background: #475569; color: white; }
+    .btn-store-notify.turn-on { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #34d399; }
+    .btn-store-notify.turn-off { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
 
     /* Settings Panel */
     .settings-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none; }
@@ -78,7 +117,7 @@
     .switch-label { font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 8px; }
     
     /* Toggle Switch */
-    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .3s; border-radius: 24px; }
     .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
@@ -91,7 +130,18 @@
     .form-select { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 13px; }
     .input-with-btn { display: flex; gap: 8px; }
     .btn-test { background: #334155; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; }
-    .btn-save-settings { width: 100%; background: #2563eb; color: white; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 8px; margin-top: 8px; }
+    .btn-save-settings { width: 100%; background: #2563eb; color: white; padding: 11px; font-size: 13px; font-weight: bold; border-radius: 8px; margin-top: 10px; }
+
+    /* Store Settings Cards */
+    .store-settings-block { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .store-settings-title { font-size: 13px; font-weight: bold; color: #38bdf8; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .store-card-config { background: #0f172a; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+    .store-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .store-card-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .store-card-hook { display: flex; gap: 6px; align-items: center; }
+    .store-hook-input { flex: 1; padding: 6px 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; font-size: 12px; }
+    .btn-test-sm { background: #334155; color: #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 11px; border: 1px solid #475569; white-space: nowrap; }
+    .btn-test-sm:hover { background: #475569; color: white; }
 
     /* Section Header */
     .section-title { font-size: 14px; font-weight: 600; margin: 16px 4px 8px 4px; display: flex; align-items: center; justify-content: space-between; }
@@ -173,7 +223,7 @@
       </div>
 
       <div class="switch-row">
-        <div class="switch-label"><i class="fa-brands fa-discord" style="color: #5865F2;"></i> 啟用 Discord 推播通知</div>
+        <div class="switch-label"><i class="fa-brands fa-discord" style="color: #5865F2;"></i> 啟用 Discord 全域推播</div>
         <label class="switch">
           <input type="checkbox" id="settingEnableDiscord">
           <span class="slider"></span>
@@ -202,7 +252,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Discord Webhook 網址:</label>
+        <label class="form-label">全域預設 Discord Webhook 網址 (各賣場未自訂時使用):</label>
         <div class="input-with-btn">
           <input type="text" id="settingDiscordUrl" class="form-input" placeholder="https://discord.com/api/webhooks/...">
           <button class="btn-test" onclick="testDiscord()"><i class="fa-solid fa-paper-plane"></i> 測試</button>
@@ -217,8 +267,18 @@
         </div>
       </div>
 
+      <!-- 7 大賣場獨立 Discord Webhook 與推播開關 -->
+      <div class="store-settings-block">
+        <div class="store-settings-title">
+          <i class="fa-solid fa-bell-concierge"></i> 7 大賣場獨立推播開關與專用 Discord Webhook
+        </div>
+        <div id="storeSettingsContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
       <button class="btn-save-settings" onclick="saveSettings()">
-        <i class="fa-solid fa-floppy-disk"></i> 儲存設定
+        <i class="fa-solid fa-floppy-disk"></i> 儲存所有推播與賣場設定
       </button>
     </div>
 
@@ -262,6 +322,17 @@
       </div>
     </div>
 
+    <!-- Active Store Notification Bar -->
+    <div class="store-notify-bar" id="storeNotifyBar">
+      <div class="notify-status-badge" id="storeNotifyStatus">
+        <i class="fa-solid fa-bell notify-on"></i>
+        <span>載入賣場推播狀態中...</span>
+      </div>
+      <button id="btnToggleStoreNotify" class="btn-store-notify" onclick="toggleActiveStoreNotify()">
+        <i class="fa-solid fa-toggle-on"></i> 切換推播開關
+      </button>
+    </div>
+
     <!-- Items List Header -->
     <div class="section-title">
       <span id="tabHeading"><i class="fa-solid fa-list-check"></i> 🇯🇵 Amazon Japan 商品清單 (<span id="activeCount">0</span> 啟用)</span>
@@ -284,7 +355,7 @@
     </div>
 
     <div class="footer-note">
-      戰鬥陀螺 7 大通路雲端秒殺系統 • 支援 LINE & Discord 雙向即時推播<br>
+      戰鬥陀螺 7 大通路雲端秒殺系統 • 支援 LINE & 各賣場獨立 Discord Webhook<br>
       🇯🇵 Amazon JP • 🇹🇼 PChome 24h • 🏬 M.M小舖 • 🧸 麗嬰官網 • 🎯 童無忌 • 📚 誠品線上 • 🦐 蝦皮 Funbox
     </div>
   </div>
@@ -310,7 +381,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">商品型號 / 名稱 (選填，留空將自動透過 API 抓取官方標題):</label>
+        <label class="form-label">商品型號 / 名稱 (選填，留空將自動抓取標題):</label>
         <input type="text" id="modalItemName" class="form-input" placeholder="例如：BX-50 大會套組">
       </div>
 
@@ -330,7 +401,9 @@
     let isRunning = false;
     let itemsData = [];
     let storesConfig = {};
+    let storeSettingsData = {};
     let currentStoreTab = 'amazon_jp';
+    let isEditingSettings = false;
 
     async function fetchStatus() {
       try {
@@ -340,6 +413,7 @@
         isRunning = data.is_monitoring;
         itemsData = data.items || [];
         storesConfig = data.stores || {};
+        storeSettingsData = data.store_settings || {};
         
         // Update Status Badge & Button
         const badge = document.getElementById('statusBadge');
@@ -359,6 +433,7 @@
         }
 
         renderTabs(data.store_counts || {});
+        renderStoreNotifyBar();
         renderItems();
         updateLogs(data.logs || []);
 
@@ -374,8 +449,8 @@
         });
         document.getElementById('statInStock').innerText = inStockCount;
 
-        // Settings inputs
-        if (!document.getElementById('settingsPanel').classList.contains('user-editing')) {
+        // Settings inputs (only if user is not actively editing)
+        if (!isEditingSettings) {
           document.getElementById('settingEnableDiscord').checked = data.enable_discord !== false;
           document.getElementById('settingEnableLine').checked = data.enable_line !== false;
           document.getElementById('settingOnlyAmazon').checked = data.only_amazon_seller !== false;
@@ -386,6 +461,7 @@
           if (!document.getElementById('settingLineToken').value) {
             document.getElementById('settingLineToken').value = data.line_token || '';
           }
+          renderStoreSettingsCards();
         }
       } catch (e) {
         console.error("Fetch status error:", e);
@@ -400,21 +476,23 @@
         const cfg = storesConfig[key];
         const btn = document.createElement('div');
         const count = counts[key] || 0;
+        const sSet = storeSettingsData[key] || {};
+        const isNotifyOn = sSet.enable_notifications !== false;
         
-        // 檢查該賣場是否有現貨
         const hasStock = itemsData.some(it => (it.store || 'amazon_jp') === key && it.last_status && it.last_status.includes('現貨'));
 
         btn.className = `tab-btn ${key === currentStoreTab ? 'active' : ''}`;
         btn.onclick = () => switchStoreTab(key);
         btn.innerHTML = `
           <span>${cfg.flag} ${cfg.short_name}</span>
-          ${hasStock ? '<span class="tab-dot"></span>' : ''}
+          ${!isNotifyOn ? '<span class="tab-mute-icon" title="該賣場推播已停用"><i class="fa-solid fa-bell-slash"></i></span>' : ''}
+          ${hasStock ? '<span class="tab-dot" title="有現貨"></span>' : ''}
           <span class="tab-badge">${count}</span>
         `;
         container.appendChild(btn);
       });
 
-      // 更新分頁抬頭
+      // Update Heading
       const curCfg = storesConfig[currentStoreTab] || { name: '商品清單', flag: '⚡' };
       const curItems = itemsData.filter(it => (it.store || 'amazon_jp') === currentStoreTab);
       const activeInTab = curItems.filter(it => it.enabled !== false).length;
@@ -422,9 +500,102 @@
       document.getElementById('statTabCount').innerText = curItems.length;
     }
 
+    function renderStoreNotifyBar() {
+      const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
+      const sSet = storeSettingsData[currentStoreTab] || {};
+      const isNotifyOn = sSet.enable_notifications !== false;
+      const customWebhook = (sSet.discord_webhook || '').trim();
+
+      const statusEl = document.getElementById('storeNotifyStatus');
+      const btnEl = document.getElementById('btnToggleStoreNotify');
+
+      if (isNotifyOn) {
+        statusEl.innerHTML = `
+          <i class="fa-solid fa-bell notify-on"></i>
+          <span><b>${curCfg.flag} ${curCfg.name}</b>：<span style="color: #34d399;">推播通知已啟用</span> ${customWebhook ? '<span style="color: #60a5fa; font-size: 11px;">(專屬 Webhook)</span>' : '<span style="color: #94a3b8; font-size: 11px;">(預設 Webhook)</span>'}</span>
+        `;
+        btnEl.className = 'btn-store-notify turn-off';
+        btnEl.innerHTML = '<i class="fa-solid fa-bell-slash"></i> 停用此賣場通知';
+      } else {
+        statusEl.innerHTML = `
+          <i class="fa-solid fa-bell-slash notify-off"></i>
+          <span><b>${curCfg.flag} ${curCfg.name}</b>：<span style="color: #f87171;">推播已停用 (該賣場所有商品有貨時均不發送警報)</span></span>
+        `;
+        btnEl.className = 'btn-store-notify turn-on';
+        btnEl.innerHTML = '<i class="fa-solid fa-bell"></i> 啟用此賣場通知';
+      }
+    }
+
+    async function toggleActiveStoreNotify() {
+      try {
+        const res = await fetch(`/api/toggle_store_notify?store=${currentStoreTab}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          if (storeSettingsData[currentStoreTab]) {
+            storeSettingsData[currentStoreTab].enable_notifications = data.enabled;
+          } else {
+            storeSettingsData[currentStoreTab] = { enable_notifications: data.enabled };
+          }
+          renderStoreNotifyBar();
+          renderTabs(getCurrentCounts());
+        } else {
+          alert("切換失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("操作失敗: " + e);
+      }
+    }
+
+    function renderStoreSettingsCards() {
+      const container = document.getElementById('storeSettingsContainer');
+      container.innerHTML = '';
+
+      Object.keys(storesConfig).forEach(k => {
+        const cfg = storesConfig[k];
+        const sSet = storeSettingsData[k] || {};
+        const isNotifyOn = sSet.enable_notifications !== false;
+        const hookUrl = sSet.discord_webhook || '';
+
+        const card = document.createElement('div');
+        card.className = 'store-card-config';
+        card.innerHTML = `
+          <div class="store-card-top">
+            <div class="store-card-name" style="color: ${cfg.color};">
+              <i class="${cfg.icon || 'fa-solid fa-store'}"></i> ${cfg.flag} ${cfg.name}
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; color: ${isNotifyOn ? '#34d399' : '#f87171'};">
+                ${isNotifyOn ? '通知開啟' : '通知關閉'}
+              </span>
+              <label class="switch">
+                <input type="checkbox" id="store_notify_${k}" ${isNotifyOn ? 'checked' : ''} onchange="onStoreSwitchChange('${k}')">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="store-card-hook">
+            <input type="text" id="store_webhook_${k}" class="store-hook-input" value="${escapeHtml(hookUrl)}" placeholder="專屬 Discord Webhook 網址 (留空則繼承全域 Webhook)" onfocus="isEditingSettings = true;">
+            <button class="btn-test-sm" onclick="testDiscordForStore('${k}')">
+              <i class="fa-solid fa-paper-plane"></i> 測試
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function onStoreSwitchChange(k) {
+      isEditingSettings = true;
+      const chk = document.getElementById(`store_notify_${k}`);
+      if (storeSettingsData[k]) {
+        storeSettingsData[k].enable_notifications = chk.checked;
+      }
+    }
+
     function switchStoreTab(storeKey) {
       currentStoreTab = storeKey;
       renderTabs(getCurrentCounts());
+      renderStoreNotifyBar();
       renderItems();
     }
 
@@ -538,16 +709,28 @@
     function toggleSettingsPanel() {
       const p = document.getElementById('settingsPanel');
       p.classList.toggle('active');
+      isEditingSettings = p.classList.contains('active');
     }
 
     async function saveSettings() {
+      const store_settings = {};
+      Object.keys(storesConfig).forEach(k => {
+        const chk = document.getElementById(`store_notify_${k}`);
+        const hook = document.getElementById(`store_webhook_${k}`);
+        store_settings[k] = {
+          enable_notifications: chk ? chk.checked : true,
+          discord_webhook: hook ? hook.value.trim() : ""
+        };
+      });
+
       const payload = {
         enable_discord: document.getElementById('settingEnableDiscord').checked,
         enable_line: document.getElementById('settingEnableLine').checked,
         only_amazon_seller: document.getElementById('settingOnlyAmazon').checked,
         interval_seconds: parseInt(document.getElementById('settingInterval').value) || 5,
         discord_webhook: document.getElementById('settingDiscordUrl').value.trim(),
-        line_token: document.getElementById('settingLineToken').value.trim()
+        line_token: document.getElementById('settingLineToken').value.trim(),
+        store_settings: store_settings
       };
 
       try {
@@ -559,6 +742,7 @@
         const data = await res.json();
         if (data.ok) {
           alert("✅ 設定已成功儲存！");
+          isEditingSettings = false;
           fetchStatus();
         } else {
           alert("❌ 儲存失敗: " + (data.msg || "未知錯誤"));
@@ -570,7 +754,7 @@
 
     async function testDiscord() {
       const url = document.getElementById('settingDiscordUrl').value.trim();
-      if (!url) { alert("請先填寫 Discord Webhook 網址！"); return; }
+      if (!url) { alert("請先填寫全域 Discord Webhook 網址！"); return; }
       try {
         const res = await fetch('/api/test_discord', {
           method: 'POST',
@@ -579,6 +763,24 @@
         });
         const data = await res.json();
         alert(data.msg);
+      } catch (e) {
+        alert("測試發送失敗: " + e);
+      }
+    }
+
+    async function testDiscordForStore(storeKey) {
+      const hookInput = document.getElementById(`store_webhook_${storeKey}`);
+      const customUrl = hookInput ? hookInput.value.trim() : '';
+      const cfg = storesConfig[storeKey] || {};
+      
+      try {
+        const res = await fetch('/api/test_discord', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ store: storeKey, webhook_url: customUrl })
+        });
+        const data = await res.json();
+        alert(`[${cfg.name || storeKey}] ${data.msg}`);
       } catch (e) {
         alert("測試發送失敗: " + e);
       }

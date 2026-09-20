@@ -8,6 +8,36 @@
   "desktop_notification": true,
   "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
   "line_token": "2011679626:4f5958263e42dfbd8f5b49d8d7f6c9c9",
+  "store_settings": {
+    "amazon_jp": {
+      "enable_notifications": true,
+      "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC"
+    },
+    "pchome": {
+      "enable_notifications": true,
+      "discord_webhook": ""
+    },
+    "mm_shop": {
+      "enable_notifications": true,
+      "discord_webhook": ""
+    },
+    "funbox_tw": {
+      "enable_notifications": true,
+      "discord_webhook": ""
+    },
+    "twj_toys": {
+      "enable_notifications": true,
+      "discord_webhook": ""
+    },
+    "eslite": {
+      "enable_notifications": true,
+      "discord_webhook": ""
+    },
+    "shopee": {
+      "enable_notifications": true,
+      "discord_webhook": ""
+    }
+  },
   "items": [
     {
       "enabled": true,
@@ -153,7 +183,6 @@
       "last_time": "-"
     }
   ],
-
   "enable_discord": true,
   "enable_line": true
 }
