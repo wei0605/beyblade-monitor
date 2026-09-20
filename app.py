@@ -91,16 +91,10 @@ def background_monitor_worker():
             res = AmazonJPChecker.check_asin(item.get("asin"))
             return idx, item, res
 
-        max_workers = min(len(active_items), 8)
+        max_workers = min(len(active_items), 10)
         t0 = time.time()
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for it in active_items:
-                if state.stop_event.is_set():
-                    break
-                futures.append(executor.submit(worker, it))
-                time.sleep(0.35)  # 0.35s 微錯開，徹底避免並發被擋
-
+            futures = [executor.submit(worker, it) for it in active_items]
             for f in concurrent.futures.as_completed(futures):
                 if state.stop_event.is_set():
                     break
@@ -110,7 +104,7 @@ def background_monitor_worker():
                     handle_result(idx, item, res)
 
         dt = time.time() - t0
-        state.add_log(f"⚡ 本輪檢查完成 (耗時 {dt:.2f} 秒)", "INFO")
+        state.add_log(f"⚡ 本輪同時檢查完成 (耗時 {dt:.2f} 秒)", "INFO")
 
         interval = max(3, state.config.get("interval_seconds", 5))
         for _ in range(int(interval * 10)):
@@ -279,19 +273,32 @@ async def api_toggle_item(index: int = Query(...)):
 
 @app.post("/api/check_now")
 async def api_check_now(background_tasks: BackgroundTasks):
-    """立即並發檢查所有項目"""
+    """立即多線程並發檢查所有項目 (同桌面版極速秒查)"""
     def _do_check():
         items = state.config.get("items", [])
         active_items = [(i, it) for i, it in enumerate(items) if it.get("enabled", True) and it.get("asin")]
-        state.add_log(f"⚡ 手動觸發全檢 ({len(active_items)} 項)...", "INFO")
-        for idx, item in active_items:
+        state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品)...", "INFO")
+        t0 = time.time()
+
+        def worker(item_tuple):
+            idx, item = item_tuple
             res = AmazonJPChecker.check_asin(item.get("asin"))
-            handle_result(idx, item, res, is_manual=True)
-            time.sleep(0.35)
-        state.add_log("⚡ 手動全檢完成！", "SUCCESS")
+            return idx, item, res
+
+        max_workers = min(len(active_items), 10)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(worker, it) for it in active_items]
+            for f in concurrent.futures.as_completed(futures):
+                result = f.result()
+                if result:
+                    idx, item, res = result
+                    handle_result(idx, item, res, is_manual=True)
+
+        dt = time.time() - t0
+        state.add_log(f"⚡ 全部 {len(active_items)} 項商品檢查完成 (共耗時 {dt:.2f} 秒)！", "SUCCESS")
 
     background_tasks.add_task(_do_check)
-    return {"ok": True, "msg": "已開始全檢"}
+    return {"ok": True, "msg": "已開始極速並發全檢"}
 
 
 # ================== LINE 聊天室雙向遙控 Webhook ==================
@@ -331,11 +338,15 @@ async def line_webhook(request: Request):
                 lines.append("\n💡 點擊任一商品推播即可 1-Click 秒殺！")
                 reply_msg = "\n".join(lines)
             elif user_text in ("全檢", "檢查", "check"):
-                threading.Thread(target=lambda: [
-                    handle_result(i, it, AmazonJPChecker.check_asin(it.get("asin")), True)
-                    for i, it in enumerate(state.config.get("items", [])) if it.get("enabled", True)
-                ], daemon=True).start()
-                reply_msg = "⚡ 已開始為您立即並發檢查所有陀螺！最新結果可在聊天室或 Web 儀表板查看。"
+                def _do_line_check():
+                    active_items = [(i, it) for i, it in enumerate(state.config.get("items", [])) if it.get("enabled", True) and it.get("asin")]
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                        futures = [executor.submit(lambda it: (it[0], it[1], AmazonJPChecker.check_asin(it[1].get("asin"))), it) for it in active_items]
+                        for f in concurrent.futures.as_completed(futures):
+                            idx, item, res = f.result()
+                            handle_result(idx, item, res, is_manual=True)
+                threading.Thread(target=_do_line_check, daemon=True).start()
+                reply_msg = "⚡ 已開始為您極速並發檢查所有陀螺！最新結果可在聊天室或 Web 儀表板查看。"
             else:
                 reply_msg = (
                     "🤖【戰鬥陀螺雲端監控助手】\n"
