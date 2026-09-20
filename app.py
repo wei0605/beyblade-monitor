@@ -89,6 +89,20 @@ class MonitorState:
 
         return cfg
 
+    def get_amazon_item_interval(self) -> float:
+        """獲取 Amazon 每項商品檢查間隔 (秒，預設 0.6 秒)"""
+        s_val = self.config.get("store_settings", {}).get("amazon_jp", {}).get("item_interval_seconds")
+        if s_val is not None:
+            try:
+                return max(0.1, float(s_val))
+            except (ValueError, TypeError):
+                pass
+        r_val = self.config.get("amazon_item_interval", 0.6)
+        try:
+            return max(0.1, float(r_val))
+        except (ValueError, TypeError):
+            return 0.6
+
     def save_config(self):
         try:
             with open(CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -114,7 +128,7 @@ state = MonitorState()
 
 
 def background_monitor_worker():
-    """雲端 24H 背景監控輪詢核心 (多平台並發)"""
+    """雲端 24H 背景監控輪詢核心 (多平台並發 + Amazon 專屬 0.6s 間隔節流)"""
     state.add_log("=== 雲端 24H 多賣場背景監控已啟動 ===", "SUCCESS")
     while not state.stop_event.is_set():
         items = state.config.get("items", [])
@@ -124,19 +138,27 @@ def background_monitor_worker():
             time.sleep(5)
             continue
 
-        state.add_log(f"⚡ 開始檢查 {len(active_items)} 項商品 (跨 7 大賣場)...", "INFO")
+        amazon_delay = state.get_amazon_item_interval()
+        state.add_log(f"⚡ 開始檢查 {len(active_items)} 項商品 (跨 7 大賣場，Amazon每項間隔 {amazon_delay}s)...", "INFO")
         
         def worker(item_tuple):
             if state.stop_event.is_set():
                 return None
             idx, item = item_tuple
-            res = check_store_item(item)
+            res = check_store_item(item, amazon_interval=amazon_delay)
             return idx, item, res
 
         max_workers = min(len(active_items), 12)
         t0 = time.time()
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(worker, it) for it in active_items]
+            futures = []
+            for it in active_items:
+                if state.stop_event.is_set():
+                    break
+                futures.append(executor.submit(worker, it))
+                store = it[1].get("store", "amazon_jp")
+                if store == "amazon_jp" and amazon_delay > 0:
+                    time.sleep(amazon_delay)
             for f in concurrent.futures.as_completed(futures):
                 if state.stop_event.is_set():
                     break
@@ -315,6 +337,7 @@ async def get_status():
     return {
         "is_monitoring": state.is_monitoring,
         "interval_seconds": state.config.get("interval_seconds", 5),
+        "amazon_item_interval": state.get_amazon_item_interval(),
         "only_amazon_seller": state.config.get("only_amazon_seller", True),
         "enable_discord": state.config.get("enable_discord", True),
         "enable_line": state.config.get("enable_line", True),
@@ -334,6 +357,13 @@ async def api_update_settings(req: Request):
     data = await req.json()
     if "interval_seconds" in data:
         state.config["interval_seconds"] = max(2, int(data["interval_seconds"]))
+    if "amazon_item_interval" in data:
+        try:
+            val = max(0.1, float(data["amazon_item_interval"]))
+            state.config["amazon_item_interval"] = val
+            state.config.setdefault("store_settings", {}).setdefault("amazon_jp", {})["item_interval_seconds"] = val
+        except (ValueError, TypeError):
+            pass
     if "only_amazon_seller" in data:
         state.config["only_amazon_seller"] = bool(data["only_amazon_seller"])
     if "enable_discord" in data:
@@ -345,7 +375,7 @@ async def api_update_settings(req: Request):
     if "line_token" in data:
         state.config["line_token"] = str(data["line_token"]).strip()
 
-    # 各賣場獨立設定 (獨立通知開關 & 獨立 Discord Webhook)
+    # 各賣場獨立設定 (獨立通知開關 & 獨立 Discord Webhook & 商品間隔)
     if "store_settings" in data and isinstance(data["store_settings"], dict):
         for s_key, s_val in data["store_settings"].items():
             if s_key in STORE_CONFIG:
@@ -354,6 +384,14 @@ async def api_update_settings(req: Request):
                     state.config["store_settings"][s_key]["enable_notifications"] = bool(s_val["enable_notifications"])
                 if "discord_webhook" in s_val:
                     state.config["store_settings"][s_key]["discord_webhook"] = str(s_val["discord_webhook"]).strip()
+                if "item_interval_seconds" in s_val:
+                    try:
+                        ival = max(0.1, float(s_val["item_interval_seconds"]))
+                        state.config["store_settings"][s_key]["item_interval_seconds"] = ival
+                        if s_key == "amazon_jp":
+                            state.config["amazon_item_interval"] = ival
+                    except (ValueError, TypeError):
+                        pass
 
     state.save_config()
     state.add_log("⚙️ 雲端全域與各賣場專屬設定已儲存！", "SUCCESS")
@@ -577,17 +615,23 @@ async def api_check_now(background_tasks: BackgroundTasks):
     def _do_check():
         items = state.config.get("items", [])
         active_items = [(i, it) for i, it in enumerate(items) if it.get("enabled", True) and it.get("asin")]
-        state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品)...", "INFO")
+        amazon_delay = state.get_amazon_item_interval()
+        state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品，Amazon每項間隔 {amazon_delay}s)...", "INFO")
         t0 = time.time()
 
         def worker(item_tuple):
             idx, item = item_tuple
-            res = check_store_item(item)
+            res = check_store_item(item, amazon_interval=amazon_delay)
             return idx, item, res
 
         max_workers = min(len(active_items), 12)
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(worker, it) for it in active_items]
+            futures = []
+            for it in active_items:
+                futures.append(executor.submit(worker, it))
+                store = it[1].get("store", "amazon_jp")
+                if store == "amazon_jp" and amazon_delay > 0:
+                    time.sleep(amazon_delay)
             for f in concurrent.futures.as_completed(futures):
                 result = f.result()
                 if result:

@@ -15,6 +15,7 @@ import json
 import os
 import re
 import time
+import threading
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
 
@@ -154,12 +155,29 @@ def extract_asin(text: str) -> str:
 
 
 class AmazonJPChecker:
+    _last_req_time: float = 0.0
+    _lock = threading.Lock()
+
     @classmethod
-    def check_asin(cls, asin: str) -> Dict[str, Any]:
-        """極速檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態"""
+    def throttle(cls, interval: float = 0.6):
+        """保證任意兩次 Amazon 請求之間至少間隔 interval 秒，防 503 / 頻率限制"""
+        if interval <= 0:
+            return
+        with cls._lock:
+            now = time.time()
+            elapsed = now - cls._last_req_time
+            if elapsed < interval:
+                time.sleep(interval - elapsed)
+            cls._last_req_time = time.time()
+
+    @classmethod
+    def check_asin(cls, asin: str, interval: float = 0.6) -> Dict[str, Any]:
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態 (支援自訂商品檢查間隔)"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
+
+        cls.throttle(interval)
 
         url = get_product_url(asin)
         session = get_shared_session()
@@ -720,13 +738,13 @@ class ShopeeChecker:
 # 8. 通用調度中心 (依據 store 欄位派發)
 # =========================================================================
 
-def check_store_item(item: Dict[str, Any]) -> Dict[str, Any]:
+def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6) -> Dict[str, Any]:
     """多通路統一檢查調度器"""
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
 
     if store == "amazon_jp":
-        return AmazonJPChecker.check_asin(asin)
+        return AmazonJPChecker.check_asin(asin, interval=amazon_interval)
     elif store == "pchome":
         return PChomeChecker.check_prod(asin)
     elif store == "mm_shop":
@@ -738,7 +756,7 @@ def check_store_item(item: Dict[str, Any]) -> Dict[str, Any]:
     elif store == "shopee":
         return ShopeeChecker.check_item(asin)
     else:
-        return AmazonJPChecker.check_asin(asin)
+        return AmazonJPChecker.check_asin(asin, interval=amazon_interval)
 
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:

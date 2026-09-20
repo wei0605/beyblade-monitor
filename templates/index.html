@@ -247,8 +247,16 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">檢查間隔 (秒，建議 3~8 秒):</label>
+        <label class="form-label">輪詢循環間隔 (秒，建議 3~8 秒):</label>
         <input type="number" id="settingInterval" class="form-input" min="2" max="300" value="5">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-amazon" style="color: #f59e0b;"></i> Amazon 每項商品檢查間隔 (秒，預設 0.6 秒):</label>
+        <input type="number" id="settingAmazonInterval" class="form-input" step="0.1" min="0.1" max="10" value="0.6">
+        <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block;">
+          每項 Amazon 商品檢查的緩衝間隔，避免頻繁請求觸發 503 或 CAPTCHA 驗證碼。
+        </span>
       </div>
 
       <div class="form-group">
@@ -455,6 +463,7 @@
           document.getElementById('settingEnableLine').checked = data.enable_line !== false;
           document.getElementById('settingOnlyAmazon').checked = data.only_amazon_seller !== false;
           document.getElementById('settingInterval').value = data.interval_seconds || 5;
+          document.getElementById('settingAmazonInterval').value = data.amazon_item_interval !== undefined ? data.amazon_item_interval : 0.6;
           if (!document.getElementById('settingDiscordUrl').value) {
             document.getElementById('settingDiscordUrl').value = data.discord_webhook || '';
           }
@@ -555,6 +564,8 @@
         const sSet = storeSettingsData[k] || {};
         const isNotifyOn = sSet.enable_notifications !== false;
         const hookUrl = sSet.discord_webhook || '';
+        const isAmazon = (k === 'amazon_jp');
+        const amazonIntervalVal = sSet.item_interval_seconds !== undefined ? sSet.item_interval_seconds : (document.getElementById('settingAmazonInterval')?.value || 0.6);
 
         const card = document.createElement('div');
         card.className = 'store-card-config';
@@ -579,6 +590,15 @@
               <i class="fa-solid fa-paper-plane"></i> 測試
             </button>
           </div>
+          ${isAmazon ? `
+          <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; background: #1e293b; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155;">
+            <span style="color: #cbd5e1;"><i class="fa-solid fa-stopwatch" style="color: #f59e0b;"></i> 每項商品檢查間隔:</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <input type="number" id="store_interval_${k}" class="store-hook-input" style="width: 65px; padding: 3px 6px; text-align: center;" step="0.1" min="0.1" max="10" value="${escapeHtml(amazonIntervalVal)}" onfocus="isEditingSettings = true;" oninput="document.getElementById('settingAmazonInterval').value = this.value">
+              <span style="color: #94a3b8; font-size: 11px;">秒</span>
+            </div>
+          </div>
+          ` : ''}
         `;
         container.appendChild(card);
       });
@@ -713,13 +733,16 @@
     }
 
     async function saveSettings() {
+      const amazonInterval = parseFloat(document.getElementById('settingAmazonInterval').value) || 0.6;
       const store_settings = {};
       Object.keys(storesConfig).forEach(k => {
         const chk = document.getElementById(`store_notify_${k}`);
         const hook = document.getElementById(`store_webhook_${k}`);
+        const ivalInput = document.getElementById(`store_interval_${k}`);
         store_settings[k] = {
           enable_notifications: chk ? chk.checked : true,
-          discord_webhook: hook ? hook.value.trim() : ""
+          discord_webhook: hook ? hook.value.trim() : "",
+          item_interval_seconds: ivalInput ? (parseFloat(ivalInput.value) || 0.6) : (k === 'amazon_jp' ? amazonInterval : 0.6)
         };
       });
 
@@ -728,6 +751,7 @@
         enable_line: document.getElementById('settingEnableLine').checked,
         only_amazon_seller: document.getElementById('settingOnlyAmazon').checked,
         interval_seconds: parseInt(document.getElementById('settingInterval').value) || 5,
+        amazon_item_interval: amazonInterval,
         discord_webhook: document.getElementById('settingDiscordUrl').value.trim(),
         line_token: document.getElementById('settingLineToken').value.trim(),
         store_settings: store_settings
