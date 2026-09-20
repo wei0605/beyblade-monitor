@@ -1,23 +1,139 @@
 """
-Amazon Japan 戰鬥陀螺 (Beyblade X) 雲端監控引擎核心
-專為 Render.com / Linux 雲端環境優化，支援極速並發、微錯開防封與精準 BuyBox 判定。
+戰鬥陀螺 (Beyblade X) 雲端全方位多通路監控引擎核心
+支援 7 大電商平台：
+1. 🇯🇵 Amazon Japan (amazon_jp)
+2. 🇹🇼 PChome 24h (pchome)
+3. 🏬 M.M小舖 (mm_shop)
+4. 🧸 麗嬰國際官網 (funbox_tw)
+5. 🎯 童無忌玩具 (twj_toys)
+6. 📚 誠品線上 (eslite)
+7. 🦐 蝦皮 Funbox (shopee)
+專為 Render.com / Linux 雲端環境優化，連線池複用、前段串流快速提取，0 耗 CPU。
 """
 
 import json
 import os
 import re
-import shutil
-import subprocess
-import sys
 import time
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
 
 import requests
-from bs4 import BeautifulSoup
+
+try:
+    from curl_cffi import requests as cffi_requests
+except ImportError:
+    cffi_requests = None
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
+# 7 大電商賣場基礎設定與外觀定義
+STORE_CONFIG = {
+    "amazon_jp": {
+        "key": "amazon_jp",
+        "name": "Amazon Japan",
+        "short_name": "Amazon JP",
+        "icon": "fa-brands fa-amazon",
+        "flag": "🇯🇵",
+        "color": "#f59e0b",
+        "btn_text": "⚡ 1-Click 官方直達",
+        "default_url": "https://www.amazon.co.jp/dp/{id}?m=AN1VRQENFRJN5&th=1&psc=1",
+        "id_label": "ASIN 或 Amazon 網址",
+        "id_placeholder": "例如: B0HJ783F18 或 商品網址",
+    },
+    "pchome": {
+        "key": "pchome",
+        "name": "PChome 24h",
+        "short_name": "PChome 24h",
+        "icon": "fa-solid fa-cart-shopping",
+        "flag": "🇹🇼",
+        "color": "#ef4444",
+        "btn_text": "🛒 PChome 直達",
+        "default_url": "https://24h.pchome.com.tw/prod/{id}",
+        "id_label": "商品編號或 PChome 網址",
+        "id_placeholder": "例如: DEASSW-A900KGOV3 或 商品網址",
+    },
+    "mm_shop": {
+        "key": "mm_shop",
+        "name": "M.M小舖",
+        "short_name": "M.M小舖",
+        "icon": "fa-solid fa-store",
+        "flag": "🏬",
+        "color": "#06b6d4",
+        "btn_text": "🏬 M.M小舖直達",
+        "default_url": "https://mmtoyshop.com/item/{id}",
+        "id_label": "商品 ID 或 M.M小舖網址",
+        "id_placeholder": "例如: shopee6a3bdb48bde45 或 商品網址",
+    },
+    "funbox_tw": {
+        "key": "funbox_tw",
+        "name": "麗嬰國際官網",
+        "short_name": "麗嬰官網",
+        "icon": "fa-solid fa-cube",
+        "flag": "🧸",
+        "color": "#ec4899",
+        "btn_text": "🧸 麗嬰官網直達",
+        "default_url": "https://shop.funbox.com.tw/products/{id}",
+        "id_label": "商品編號或麗嬰官網網址",
+        "id_placeholder": "例如: sm53043 或 商品網址",
+    },
+    "twj_toys": {
+        "key": "twj_toys",
+        "name": "童無忌玩具",
+        "short_name": "童無忌",
+        "icon": "fa-solid fa-bullseye",
+        "flag": "🎯",
+        "color": "#10b981",
+        "btn_text": "🎯 童無忌直達",
+        "default_url": "https://www.twj.tw/products/{id}",
+        "id_label": "商品代碼或童無忌網址",
+        "id_placeholder": "例如: 20268beyblade-x-bx-00- 或 網址",
+    },
+    "eslite": {
+        "key": "eslite",
+        "name": "誠品線上",
+        "short_name": "誠品線上",
+        "icon": "fa-solid fa-book",
+        "flag": "📚",
+        "color": "#8b5cf6",
+        "btn_text": "📚 誠品線上直達",
+        "default_url": "https://www.eslite.com/product/{id}",
+        "id_label": "商品編號或誠品網址",
+        "id_placeholder": "例如: 2683194026001 或 商品網址",
+    },
+    "shopee": {
+        "key": "shopee",
+        "name": "蝦皮 Funbox",
+        "short_name": "蝦皮 Funbox",
+        "icon": "fa-solid fa-shrimp",
+        "flag": "🦐",
+        "color": "#f97316",
+        "btn_text": "🦐 蝦皮直達",
+        "default_url": "https://shopee.tw/product/{id}",
+        "id_label": "蝦皮商品網址或代號",
+        "id_placeholder": "例如: https://shopee.tw/product/... 或 -i.{shopid}.{itemid}",
+    }
+}
+
+
+def get_shared_session():
+    """共用 HTTP 連線池，最大化連線重用"""
+    if not hasattr(get_shared_session, "_session"):
+        s = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=30,
+            pool_maxsize=30,
+            max_retries=1
+        )
+        s.mount("https://", adapter)
+        s.mount("http://", adapter)
+        get_shared_session._session = s
+    return get_shared_session._session
+
+
+# =========================================================================
+# 1. Amazon Japan Checker (維持現有極速 BuyBox 檢測)
+# =========================================================================
 
 def get_product_url(asin: str) -> str:
     """生成鎖定官方自營的 1-Click 極速購買商品頁網址"""
@@ -38,37 +154,20 @@ def extract_asin(text: str) -> str:
 
 
 class AmazonJPChecker:
-    _session = None
-
-    @classmethod
-    def get_session(cls):
-        if cls._session is None:
-            s = requests.Session()
-            adapter = requests.adapters.HTTPAdapter(
-                pool_connections=25,
-                pool_maxsize=25,
-                max_retries=1
-            )
-            s.mount("https://", adapter)
-            cls._session = s
-        return cls._session
-
     @classmethod
     def check_asin(cls, asin: str) -> Dict[str, Any]:
-        """極速檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態 (雲端連線池 + 高速正則解析，0 耗 CPU)"""
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
 
         url = get_product_url(asin)
-        html = None
-        status_code = 200
-
-        session = cls.get_session()
+        session = get_shared_session()
         headers = {
             "Accept-Language": "ja-JP,ja;q=0.9",
             "Cookie": "i18n-prefs=JPY; lc-acbjp=ja_JP",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         }
 
         try:
@@ -81,7 +180,6 @@ class AmazonJPChecker:
         if not html:
             return {"ok": False, "msg": "無法獲取頁面內容"}
 
-        # 驗證碼與錯誤頁判定
         if "/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html:
             return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證)"}
 
@@ -92,11 +190,9 @@ class AmazonJPChecker:
         elif status_code != 200 and not ("<html" in html.lower()):
             return {"ok": False, "msg": f"HTTP {status_code}"}
 
-        # 高速正則抽取標題 (免解析整個 1MB DOM 樹，大幅降低 CPU 佔用)
         title_m = re.search(r'id="productTitle"[^>]*>(.*?)</span>', html, re.DOTALL)
         title = " ".join(title_m.group(1).split()) if title_m else ""
 
-        # 購買/預購按鈕判斷 (極速子字串檢索)
         has_cart = ('id="add-to-cart-button"' in html) or ('name="submit.add-to-cart"' in html)
         has_buy_now = ('id="buy-now-button"' in html) or ('name="submit.buy-now"' in html)
         has_preorder = ('preorder' in html.lower()) or ('予約注文' in html)
@@ -109,7 +205,6 @@ class AmazonJPChecker:
 
         has_third_party_profile = 'id="sellerProfileTriggerId"' in html
 
-        # 賣家資訊高速抽取
         merchant_m = re.search(r'id="(?:merchantInfo|merchant-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
         merchant_text = " ".join(re.sub(r'<[^>]+>', ' ', merchant_m.group(1)).split()) if merchant_m else ""
 
@@ -122,7 +217,6 @@ class AmazonJPChecker:
         )
         is_amazon_fulfilled = "amazon" in fulfiller_text.lower()
 
-        # 價格高速正則抽取
         price = ""
         m_price = re.search(r'class="a-price\s*[^"]*".*?<span class="a-offscreen">\s*([^\s<]+)\s*</span>', html, re.DOTALL)
         if m_price:
@@ -136,7 +230,6 @@ class AmazonJPChecker:
                 if m_price3:
                     price = f"￥{m_price3.group(1)}"
 
-        # 官方現貨/庫存判斷
         in_stock = False
         is_official = False
         seller_name = "第三方賣家"
@@ -162,50 +255,554 @@ class AmazonJPChecker:
 
         return {
             "ok": True,
+            "store": "amazon_jp",
             "asin": asin,
             "title": title,
             "price": price,
             "in_stock": in_stock,
             "is_official": is_official,
             "is_preorder": has_preorder,
-            "no_featured_offer": no_featured_offer,
             "seller": seller_name,
             "url": url,
             "raw_merchant": merchant_text
         }
 
 
+# =========================================================================
+# 2. PChome 24h Checker (官方即時庫存按鈕 API，0.05 秒回傳)
+# =========================================================================
+
+class PChomeChecker:
+    @staticmethod
+    def extract_prod_id(text: str) -> str:
+        if not text:
+            return ""
+        text = text.strip()
+        m = re.search(r"([A-Z0-9]{6}-[A-Z0-9]{9}(?:-[0-9]{3})?)", text, re.IGNORECASE)
+        if m:
+            return m.group(1).upper()
+        return text.upper()
+
+    @classmethod
+    def check_prod(cls, prod_id_or_url: str) -> Dict[str, Any]:
+        prod_id = cls.extract_prod_id(prod_id_or_url)
+        if not prod_id:
+            return {"ok": False, "msg": "無效 PChome 商品編號"}
+
+        product_url = f"https://24h.pchome.com.tw/prod/{prod_id}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Referer": "https://24h.pchome.com.tw/"
+        }
+
+        # 1. 查詢即時購買按鈕狀態與庫存數量
+        btn_url = f"https://ecapi.pchome.com.tw/ecshop/prodapi/v2/prod/button&id={prod_id}&fields=Seq,Id,Price,Qty,ButtonType,SaleStatus"
+        try:
+            r = session.get(btn_url, headers=headers, timeout=4)
+            btn_data = r.json()
+        except Exception as e:
+            return {"ok": False, "msg": f"PChome 連線失敗: {str(e)[:25]}"}
+
+        if not btn_data or not isinstance(btn_data, list):
+            return {"ok": False, "msg": "查無此商品或已下架"}
+
+        item_info = btn_data[0]
+        button_type = item_info.get("ButtonType", "")
+        qty = item_info.get("Qty", 0)
+        price_val = item_info.get("Price", {}).get("P", 0)
+
+        in_stock = (button_type == "ForSale") and (qty > 0)
+        price_str = f"NT$ {price_val:,}" if price_val else "暫無價格"
+
+        # 2. 自動抓取商品名稱 (透過快速搜尋 API)
+        title = ""
+        try:
+            search_url = f"https://ecshweb.pchome.com.tw/search/v3.3/all/results?q={prod_id}"
+            rs = session.get(search_url, headers=headers, timeout=3)
+            s_data = rs.json()
+            if s_data.get("prods"):
+                title = s_data["prods"][0].get("name", "")
+        except Exception:
+            pass
+
+        seller = "PChome 24h 購物"
+        if not in_stock:
+            status_text = "⚪ 缺貨中 / 暫無庫存"
+        else:
+            status_text = f"🟢 現貨有貨 (剩餘 {qty} 件)"
+
+        return {
+            "ok": True,
+            "store": "pchome",
+            "asin": prod_id,
+            "title": title or prod_id,
+            "price": price_str,
+            "in_stock": in_stock,
+            "is_official": True,
+            "seller": seller,
+            "url": product_url,
+            "qty": qty,
+            "status_text": status_text
+        }
+
+
+# =========================================================================
+# 3. M.M小舖 Checker (Nuxt SSR 前 250KB 串流解析 Schema.org LD+JSON)
+# =========================================================================
+
+class MMShopChecker:
+    @staticmethod
+    def extract_item_id(text: str) -> str:
+        if not text:
+            return ""
+        text = text.strip()
+        m = re.search(r"mmtoyshop\.com/item/([a-zA-Z0-9_-]+)", text, re.IGNORECASE)
+        if m:
+            return m.group(1)
+        return text.replace("https://", "").replace("http://", "").strip("/")
+
+    @classmethod
+    def check_item(cls, item_id_or_url: str) -> Dict[str, Any]:
+        item_id = cls.extract_item_id(item_id_or_url)
+        if not item_id:
+            return {"ok": False, "msg": "無效 M.M小舖 商品 ID"}
+
+        url = f"https://mmtoyshop.com/item/{item_id}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+
+        try:
+            r = session.get(url, headers=headers, stream=True, timeout=6)
+            if r.status_code == 404:
+                return {"ok": False, "msg": "商品頁面不存在 (404)"}
+            
+            content = b""
+            for chunk in r.iter_content(chunk_size=32768):
+                content += chunk
+                if b'"@type":"Product"' in content or b'"@type": "Product"' in content:
+                    try:
+                        content += next(r.iter_content(chunk_size=32768))
+                    except StopIteration:
+                        pass
+                    break
+                if len(content) > 400000:
+                    break
+            r.close()
+        except Exception as e:
+            return {"ok": False, "msg": f"M.M小舖連線逾時: {str(e)[:25]}"}
+
+        html = content.decode("utf-8", errors="ignore")
+        product_ld = None
+        for m in re.finditer(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
+            try:
+                d = json.loads(m.group(1))
+                if isinstance(d, dict) and d.get("@type") == "Product":
+                    product_ld = d
+                    break
+            except Exception:
+                pass
+
+        if product_ld:
+            title = product_ld.get("name", "")
+            offers = product_ld.get("offers", {})
+            avail = offers.get("availability", "")
+            in_stock = ("InStock" in avail) and ("OutOfStock" not in avail)
+            price_val = offers.get("price", "")
+            price_str = f"NT$ {price_val}" if price_val else "未標示"
+        else:
+            title_m = re.search(r"<title>(.*?)(?: - |\||M\.M).*?</title>", html)
+            title = title_m.group(1).strip() if title_m else item_id
+            in_stock = ("加入購物車" in html or "立即購買" in html) and ("已售完" not in html and "缺貨" not in html)
+            p_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', html)
+            price_str = f"NT$ {p_m.group(1)}" if p_m else "未標示"
+
+        return {
+            "ok": True,
+            "store": "mm_shop",
+            "asin": item_id,
+            "title": title or item_id,
+            "price": price_str,
+            "in_stock": in_stock,
+            "is_official": True,
+            "seller": "M.M小舖",
+            "url": url
+        }
+
+
+# =========================================================================
+# 4 & 5. Cyberbiz Checker (通用於 麗嬰國際官網 & 童無忌玩具)
+# =========================================================================
+
+class CyberbizChecker:
+    @staticmethod
+    def extract_slug(text: str) -> str:
+        if not text:
+            return ""
+        text = text.strip()
+        m = re.search(r"/products/([a-zA-Z0-9%_-]+)", text)
+        if m:
+            return m.group(1)
+        return text.replace("https://", "").replace("http://", "").strip("/")
+
+    @classmethod
+    def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw") -> Dict[str, Any]:
+        slug = cls.extract_slug(slug_or_url)
+        if not slug:
+            return {"ok": False, "msg": "無效商品編號"}
+
+        if store_key == "twj_toys":
+            base_url = "https://www.twj.tw/products"
+            seller_name = "童無忌玩具"
+        else:
+            base_url = "https://shop.funbox.com.tw/products"
+            seller_name = "麗嬰國際官網 (Funbox)"
+
+        url = f"{base_url}/{slug}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+
+        try:
+            r = session.get(url, headers=headers, stream=True, timeout=6)
+            if r.status_code == 404:
+                return {"ok": False, "msg": "商品頁面不存在 (404)"}
+
+            content = b""
+            for chunk in r.iter_content(chunk_size=16384):
+                content += chunk
+                if b'"@type":"Product"' in content or b'"@type": "Product"' in content:
+                    try:
+                        content += next(r.iter_content(chunk_size=16384))
+                    except StopIteration:
+                        pass
+                    break
+                if len(content) > 80000:
+                    break
+            r.close()
+        except Exception as e:
+            return {"ok": False, "msg": f"連線逾時: {str(e)[:25]}"}
+
+        html = content.decode("utf-8", errors="ignore")
+        product_ld = None
+        for m in re.finditer(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
+            try:
+                d = json.loads(m.group(1))
+                if isinstance(d, dict) and d.get("@type") == "Product":
+                    product_ld = d
+                    break
+            except Exception:
+                pass
+
+        if product_ld:
+            title = product_ld.get("name", "")
+            offers = product_ld.get("offers", {})
+            if isinstance(offers, list) and offers:
+                offers = offers[0]
+            avail = offers.get("availability", "")
+            in_stock = ("InStock" in avail) and ("OutOfStock" not in avail)
+            price_val = offers.get("price", "")
+            try:
+                price_str = f"NT$ {int(float(price_val)):,}" if price_val else "未標示"
+            except Exception:
+                price_str = f"NT$ {price_val}"
+        else:
+            title_m = re.search(r"<title>(.*?)</title>", html)
+            title = title_m.group(1).strip() if title_m else slug
+            in_stock = ("加入購物車" in html) and ("已售完" not in html and "缺貨" not in html)
+            price_str = "未標示"
+
+        return {
+            "ok": True,
+            "store": store_key,
+            "asin": slug,
+            "title": title or slug,
+            "price": price_str,
+            "in_stock": in_stock,
+            "is_official": True,
+            "seller": seller_name,
+            "url": url
+        }
+
+
+# =========================================================================
+# 6. Eslite Checker (誠品線上 Athena 官方 API)
+# =========================================================================
+
+class EsliteChecker:
+    @staticmethod
+    def extract_id(text: str) -> str:
+        if not text:
+            return ""
+        text = text.strip()
+        m = re.search(r"/product/([0-9]+)", text)
+        if m:
+            return m.group(1)
+        m2 = re.search(r"(\d{10,24})", text)
+        if m2:
+            return m2.group(1)
+        return text
+
+    @classmethod
+    def check_prod(cls, id_or_url: str) -> Dict[str, Any]:
+        full_id = cls.extract_id(id_or_url)
+        if not full_id:
+            return {"ok": False, "msg": "無效誠品商品代號"}
+
+        sn_id = full_id[-13:] if len(full_id) >= 13 else full_id
+        product_url = f"https://www.eslite.com/product/{full_id}"
+
+        api_url = f"https://athena.eslite.com/api/v3/products/{sn_id}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Origin": "https://www.eslite.com",
+            "Referer": "https://www.eslite.com/"
+        }
+
+        try:
+            r = session.get(api_url, headers=headers, timeout=5)
+            if r.status_code != 200:
+                return {"ok": False, "msg": f"誠品 API HTTP {r.status_code}"}
+            data = r.json()
+        except Exception as e:
+            return {"ok": False, "msg": f"誠品連線異常: {str(e)[:25]}"}
+
+        if not data or not isinstance(data, list):
+            return {"ok": False, "msg": "誠品未收錄或查無此商品"}
+
+        item = data[0]
+        title = item.get("product_name", "")
+        price_val = item.get("retail_price") or item.get("final_price") or 0
+        published = item.get("published", False)
+        preorder = item.get("preorder", False)
+        link = item.get("product_link") or product_url
+
+        in_stock = bool(published or preorder)
+        price_str = f"NT$ {int(price_val):,}" if price_val else "未標示"
+
+        return {
+            "ok": True,
+            "store": "eslite",
+            "asin": full_id,
+            "title": title or full_id,
+            "price": price_str,
+            "in_stock": in_stock,
+            "is_official": True,
+            "seller": "誠品線上 (Eslite)",
+            "url": link
+        }
+
+
+# =========================================================================
+# 7. Shopee Checker (蝦皮 Funbox / 蝦皮商品，curl_cffi 繞過 Cloudflare/BFF)
+# =========================================================================
+
+class ShopeeChecker:
+    @staticmethod
+    def extract_ids(text: str) -> Tuple[str, str]:
+        if not text:
+            return "", ""
+        text = text.strip()
+        m = re.search(r"-i\.(\d+)\.(\d+)", text)
+        if m:
+            return m.group(1), m.group(2)
+        m2 = re.search(r"/product/(\d+)/(\d+)", text)
+        if m2:
+            return m2.group(1), m2.group(2)
+        m3 = re.search(r"(\d{6,12})[/_.](\d{6,14})", text)
+        if m3:
+            return m3.group(1), m3.group(2)
+        return "", ""
+
+    @classmethod
+    def check_item(cls, text_or_url: str) -> Dict[str, Any]:
+        shop_id, item_id = cls.extract_ids(text_or_url)
+        if not shop_id or not item_id:
+            url = text_or_url.strip()
+        else:
+            url = f"https://shopee.tw/product/{shop_id}/{item_id}"
+
+        if not cffi_requests:
+            return {"ok": False, "msg": "缺少 curl_cffi 套件，無法解析蝦皮"}
+
+        try:
+            session = cffi_requests.Session(impersonate="chrome124")
+            r = session.get(url, timeout=8)
+            if r.status_code == 404:
+                return {"ok": False, "msg": "商品頁面不存在或已被刪除"}
+            html = r.text
+        except Exception as e:
+            return {"ok": False, "msg": f"蝦皮請求逾時: {str(e)[:25]}"}
+
+        m_state = re.search(r'<script[^>]*>\s*(\{"initialState":.*?)\s*</script>', html, re.DOTALL)
+        if not m_state:
+            return {"ok": False, "msg": "無法解析蝦皮商品狀態 (未取得初始資料)"}
+
+        try:
+            data = json.loads(m_state.group(1))
+            cmap = data.get("initialState", {}).get("DOMAIN_PDP", {}).get("data", {}).get("PDP_BFF_DATA", {}).get("cachedMap", {})
+        except Exception:
+            cmap = {}
+
+        if not cmap:
+            in_stock = ("加入購物車" in html) and ("已售完" not in html)
+            title_m = re.search(r"<title>(.*?)</title>", html)
+            title = title_m.group(1) if title_m else "蝦皮商品"
+            return {
+                "ok": True,
+                "store": "shopee",
+                "asin": f"{shop_id}_{item_id}" if shop_id else url,
+                "title": title,
+                "price": "現貨檢視中",
+                "in_stock": in_stock,
+                "is_official": False,
+                "seller": "蝦皮購物",
+                "url": url
+            }
+
+        first_key = list(cmap.keys())[0]
+        entry = cmap[first_key]
+        item_data = entry.get("item") or {}
+        price_data = entry.get("product_price") or {}
+
+
+        title = item_data.get("title", "")
+        item_status = item_data.get("item_status", "normal")
+        normal_stock = item_data.get("normal_stock")
+        current_stock = item_data.get("current_stock")
+
+        price_val = price_data.get("price") or price_data.get("price_min") or 0
+        if price_val:
+            try:
+                if price_val > 100000:
+                    real_price = int(price_val / 100000)
+                else:
+                    real_price = int(price_val)
+                price_str = f"NT$ {real_price:,}"
+            except Exception:
+                price_str = f"NT$ {price_val}"
+        else:
+            price_str = "未標示"
+
+        if item_status in ("banned", "deleted"):
+            in_stock = False
+            status_desc = "已下架或封鎖"
+        else:
+            effective_stock = normal_stock if normal_stock is not None else current_stock
+            if effective_stock is not None:
+                in_stock = effective_stock > 0
+                status_desc = f"庫存剩餘 {effective_stock} 件" if in_stock else "缺貨中 / 已售完"
+            else:
+                in_stock = ("已售完" not in html)
+                status_desc = "有貨" if in_stock else "缺貨中"
+
+        return {
+            "ok": True,
+            "store": "shopee",
+            "asin": f"{shop_id}_{item_id}" if shop_id else url,
+            "title": title or "蝦皮商品",
+            "price": price_str,
+            "in_stock": in_stock,
+            "is_official": "funbox" in url.lower(),
+            "seller": "Funbox 蝦皮官方旗艦店" if "funbox" in url.lower() else "蝦皮賣家",
+            "url": url,
+            "status_text": status_desc
+        }
+
+
+# =========================================================================
+# 8. 通用調度中心 (依據 store 欄位派發)
+# =========================================================================
+
+def check_store_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    """多通路統一檢查調度器"""
+    store = item.get("store", "amazon_jp")
+    asin = item.get("asin", "")
+
+    if store == "amazon_jp":
+        return AmazonJPChecker.check_asin(asin)
+    elif store == "pchome":
+        return PChomeChecker.check_prod(asin)
+    elif store == "mm_shop":
+        return MMShopChecker.check_item(asin)
+    elif store in ("funbox_tw", "twj_toys"):
+        return CyberbizChecker.check_prod(asin, store_key=store)
+    elif store == "eslite":
+        return EsliteChecker.check_prod(asin)
+    elif store == "shopee":
+        return ShopeeChecker.check_item(asin)
+    else:
+        return AmazonJPChecker.check_asin(asin)
+
+
+def get_item_direct_url(item: Dict[str, Any]) -> str:
+    """取得該商品的官方直接購買連結"""
+    store = item.get("store", "amazon_jp")
+    asin = item.get("asin", "")
+    cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
+
+    if store == "amazon_jp":
+        return get_product_url(asin)
+    elif store == "pchome":
+        return f"https://24h.pchome.com.tw/prod/{asin}"
+    elif store == "mm_shop":
+        return f"https://mmtoyshop.com/item/{asin}"
+    elif store == "funbox_tw":
+        return f"https://shop.funbox.com.tw/products/{asin}"
+    elif store == "twj_toys":
+        return f"https://www.twj.tw/products/{asin}"
+    elif store == "eslite":
+        return f"https://www.eslite.com/product/{asin}"
+    elif store == "shopee":
+        if "_" in asin:
+            sp, it = asin.split("_", 1)
+            return f"https://shopee.tw/product/{sp}/{it}"
+        return asin if asin.startswith("http") else f"https://shopee.tw/{asin}"
+    return asin
+
+
+# =========================================================================
+# 9. 推播管理器 (Discord & LINE)
+# =========================================================================
+
 class NotificationManager:
     @staticmethod
-    def send_discord(webhook_url: str, item_name: str, asin: str, price: str, seller: str, url: str) -> Tuple[bool, str]:
+    def send_discord(webhook_url: str, item_name: str, asin: str, price: str, seller: str, url: str, store: str = "amazon_jp") -> Tuple[bool, str]:
         """發送 Discord Webhook 秒殺推播"""
         if not webhook_url or not webhook_url.startswith("http"):
             return False, "未設定 Discord Webhook"
 
-        product_url = get_product_url(asin)
+        cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
+        store_title = cfg.get("name", "線上商城")
+        flag = cfg.get("flag", "⚡")
+        btn_text = cfg.get("btn_text", "👉 點此直達購買")
+
         payload = {
-            "content": "🚨 **【戰鬥陀螺官方補貨通知】** Amazon Japan 官方自營開放購買/預購！",
+            "content": f"🚨 **【戰鬥陀螺補貨通知】** {flag} **{store_title}** 現貨開放購買！",
             "embeds": [
                 {
                     "title": f"⚡ {item_name}",
-                    "description": "檢測到 Amazon.co.jp 官方自營現貨！請立即點擊下方連結搶購。",
-                    "url": product_url,
+                    "description": f"檢測到 {store_title} 開放現貨/預購！請立即點擊下方連結直達搶購。",
+                    "url": url,
                     "color": 3066993,
                     "fields": [
                         {"name": "型號/名稱", "value": item_name, "inline": True},
-                        {"name": "ASIN", "value": asin, "inline": True},
-                        {"name": "官方價格", "value": price, "inline": True},
-                        {"name": "販售者", "value": "Amazon.co.jp (官方自營)", "inline": True},
+                        {"name": "商品代號", "value": asin, "inline": True},
+                        {"name": "即時價格", "value": price, "inline": True},
+                        {"name": "販售通路", "value": f"{flag} {seller or store_title}", "inline": True},
                         {
-                            "name": "⚡ 官方 1-Click 極速秒殺 (點擊直達)",
-                            "value": (
-                                f"🔥 **[【👉 點此直達官方商品頁 (點橘色「今すぐ買う」1-Click 秒殺)】]({product_url})**\n"
-                                f"*(💡秘訣：點開直接按橘色今すぐ買う按鈕下單)*"
-                            ),
+                            "name": f"⚡ 官方直達搶購 ({btn_text})",
+                            "value": f"🔥 **[【👉 點此直達商品頁搶購】]({url})**",
                             "inline": False
                         }
                     ],
-                    "footer": {"text": "Amazon Japan 戰鬥陀螺雲端監控器 • 官方直販秒殺系統"},
+                    "footer": {"text": f"{store_title} 戰鬥陀螺雲端監控器 • 極速秒殺系統"},
                     "timestamp": datetime.utcnow().isoformat()
                 }
             ]
@@ -221,7 +818,6 @@ class NotificationManager:
 
     @staticmethod
     def get_line_access_token(token_or_secret: str) -> str:
-        """若輸入為 Channel ID:Secret 則自動向 LINE 申請 Access Token"""
         token = token_or_secret.strip()
         if ":" in token or "," in token:
             parts = token.replace(",", ":").split(":")
@@ -241,13 +837,10 @@ class NotificationManager:
 
     @classmethod
     def send_line_broadcast(cls, token_or_str: str, message: str) -> Tuple[bool, str]:
-        """透過 LINE Messaging API Broadcast 推播給所有加好友的使用者"""
         if not token_or_str:
             return False, "未設定 LINE Token"
 
         token = cls.get_line_access_token(token_or_str)
-
-        # 優先嘗試 LINE Messaging API Broadcast
         try:
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
             payload = {"messages": [{"type": "text", "text": message}]}
@@ -257,7 +850,6 @@ class NotificationManager:
         except Exception:
             pass
 
-        # 回退至舊版 LINE Notify
         try:
             headers = {"Authorization": f"Bearer {token}"}
             r = requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": message}, timeout=8)
@@ -270,7 +862,6 @@ class NotificationManager:
 
     @classmethod
     def reply_line(cls, reply_token: str, token_or_str: str, message: str) -> bool:
-        """回覆 LINE 聊天室指令"""
         token = cls.get_line_access_token(token_or_str)
         headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
         payload = {

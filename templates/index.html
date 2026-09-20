@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>戰鬥陀螺 雲端極速監控系統</title>
+  <title>戰鬥陀螺 7 大賣場雲端極速監控系統</title>
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,20 +21,21 @@
       --text-muted: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 50px; }
-    .container { max-width: 800px; margin: 0 auto; }
+    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 60px; }
+    .container { max-width: 860px; margin: 0 auto; }
     
     /* Header */
     header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
     .logo-area { display: flex; align-items: center; gap: 10px; }
-    .logo-icon { font-size: 24px; color: #60a5fa; }
+    .logo-icon { font-size: 26px; color: #60a5fa; animation: spin-slow 12s linear infinite; }
+    @keyframes spin-slow { 100% { transform: rotate(360deg); } }
     .app-title { font-size: 16px; font-weight: bold; }
     .app-subtitle { font-size: 11px; color: var(--text-muted); }
     .header-actions { display: flex; align-items: center; gap: 8px; }
     .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
     .badge-running { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
     .badge-stopped { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .btn-settings-toggle { background: #334155; color: #cbd5e1; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-settings-toggle { background: #334155; color: #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; border: none; }
 
     /* Control Bar */
     .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
@@ -47,10 +48,26 @@
     .btn-check:active { background: #1d4ed8; }
 
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
     .stat-card { background: var(--card-bg); padding: 10px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
     .stat-val { font-size: 18px; font-weight: bold; color: #60a5fa; }
     .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Store Tabs Bar */
+    .tabs-wrapper { margin-bottom: 14px; position: relative; }
+    .tabs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .tabs-title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .store-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+    .store-tabs::-webkit-scrollbar { height: 4px; }
+    .store-tabs::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    
+    .tab-btn { flex: 0 0 auto; background: var(--card-bg); border: 1px solid var(--border); color: #cbd5e1; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; user-select: none; }
+    .tab-btn:hover { background: #273549; color: white; }
+    .tab-btn.active { background: linear-gradient(135deg, #1e3a8a, #2563eb); border-color: #60a5fa; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35); }
+    .tab-badge { background: #0f172a; color: #94a3b8; font-size: 11px; padding: 2px 7px; border-radius: 12px; font-weight: bold; }
+    .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.2); color: white; }
+    .tab-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
     /* Settings Panel */
     .settings-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none; }
@@ -71,6 +88,7 @@
     .form-group { margin-bottom: 12px; }
     .form-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block; }
     .form-input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 13px; }
+    .form-select { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 13px; }
     .input-with-btn { display: flex; gap: 8px; }
     .btn-test { background: #334155; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; white-space: nowrap; }
     .btn-save-settings { width: 100%; background: #2563eb; color: white; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 8px; margin-top: 8px; }
@@ -80,29 +98,35 @@
     .btn-add-item { background: #059669; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
 
     /* Item Card */
-    .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); position: relative; }
-    .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.05); }
-    .item-card.disabled { opacity: 0.6; }
-    .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-    .item-name { font-size: 14px; font-weight: 600; color: #f1f5f9; line-height: 1.4; flex: 1; padding-right: 8px; }
-    .item-asin { font-size: 11px; font-family: monospace; color: var(--text-muted); background: #0f172a; padding: 2px 6px; border-radius: 4px; }
+    .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); position: relative; transition: all 0.2s; }
+    .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.06); box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
+    .item-card.disabled { opacity: 0.55; }
+    .item-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .store-badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
+    .item-asin { font-size: 11px; font-family: monospace; color: var(--text-muted); background: #0f172a; padding: 2px 6px; border-radius: 4px; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item-name { font-size: 14px; font-weight: 600; color: #f1f5f9; line-height: 1.4; margin-bottom: 6px; }
     .item-note { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
     .item-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
     .item-status { font-size: 12px; font-weight: 600; }
     .item-price { font-size: 15px; font-weight: bold; color: #f59e0b; }
     
     .item-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-    .btn-buy { flex: 2; background: #ea580c; color: white; font-size: 12px; padding: 8px; text-decoration: none; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: bold; min-width: 130px; }
-    .btn-buy:active { background: #c2410c; }
+    .btn-buy { flex: 2; color: white; font-size: 12px; padding: 8px; text-decoration: none; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: bold; min-width: 140px; }
     .item-btn { background: #334155; color: #cbd5e1; font-size: 12px; padding: 8px 10px; border-radius: 8px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .item-btn.active { background: #0284c7; color: white; }
     .btn-edit { background: #475569; }
     .btn-delete { background: #991b1b; color: #fecaca; }
 
+    /* Empty State */
+    .empty-state { text-align: center; padding: 36px 16px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border); margin: 10px 0; }
+    .empty-icon { font-size: 36px; color: #475569; margin-bottom: 10px; }
+    .empty-text { font-size: 14px; color: #94a3b8; margin-bottom: 14px; }
+    .btn-empty-add { background: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+
     /* Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
     .modal-overlay.active { display: flex; }
-    .modal-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 450px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .modal-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 480px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
     .modal-title { font-size: 16px; font-weight: bold; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #60a5fa; }
     .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
     .btn-modal-cancel { flex: 1; background: #475569; color: white; padding: 10px; border-radius: 8px; font-size: 13px; }
@@ -117,8 +141,7 @@
     .log-ERROR { color: #f87171; font-weight: bold; }
     .log-INFO { color: #94a3b8; }
 
-    /* Footer Note */
-    .footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; }
+    .footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -128,8 +151,8 @@
       <div class="logo-area">
         <i class="fa-solid fa-hurricane logo-icon"></i>
         <div>
-          <div class="app-title">戰鬥陀螺 雲端極速監控</div>
-          <div class="app-subtitle">Amazon.co.jp 24H 官方秒殺</div>
+          <div class="app-title">戰鬥陀螺 7 大賣場極速監控</div>
+          <div class="app-subtitle">Amazon / PChome / M.M小舖 / 麗嬰 / 童無忌 / 誠品 / 蝦皮</div>
         </div>
       </div>
       <div class="header-actions">
@@ -149,7 +172,6 @@
         <button onclick="toggleSettingsPanel()" style="background: transparent; color: #94a3b8; font-size: 13px; padding: 0;">✕ 關閉</button>
       </div>
 
-      <!-- Notification Toggles -->
       <div class="switch-row">
         <div class="switch-label"><i class="fa-brands fa-discord" style="color: #5865F2;"></i> 啟用 Discord 推播通知</div>
         <label class="switch">
@@ -174,13 +196,11 @@
         </label>
       </div>
 
-      <!-- Interval Input -->
       <div class="form-group">
         <label class="form-label">檢查間隔 (秒，建議 3~8 秒):</label>
         <input type="number" id="settingInterval" class="form-input" min="2" max="300" value="5">
       </div>
 
-      <!-- Discord Webhook Input -->
       <div class="form-group">
         <label class="form-label">Discord Webhook 網址:</label>
         <div class="input-with-btn">
@@ -189,7 +209,6 @@
         </div>
       </div>
 
-      <!-- LINE Token Input -->
       <div class="form-group">
         <label class="form-label">LINE Token 或 Channel ID:Secret:</label>
         <div class="input-with-btn">
@@ -209,7 +228,7 @@
         <i class="fa-solid fa-play"></i> <span id="btnActionText">啟動雲端監控</span>
       </button>
       <button class="btn-check" onclick="checkAllNow()">
-        <i class="fa-solid fa-bolt"></i> 立即全檢 (秒查)
+        <i class="fa-solid fa-bolt"></i> 立即全檢 (跨賣場秒查)
       </button>
     </div>
 
@@ -217,11 +236,15 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div id="statTotal" class="stat-val">11</div>
-        <div class="stat-lbl">追蹤商品</div>
+        <div class="stat-lbl">全部商品</div>
+      </div>
+      <div class="stat-card">
+        <div id="statTabCount" class="stat-val" style="color: #38bdf8;">11</div>
+        <div class="stat-lbl">當前分頁</div>
       </div>
       <div class="stat-card">
         <div id="statInStock" class="stat-val" style="color: #34d399;">0</div>
-        <div class="stat-lbl">官方現貨</div>
+        <div class="stat-lbl">現貨有貨</div>
       </div>
       <div class="stat-card">
         <div id="statInterval" class="stat-val">5s</div>
@@ -229,20 +252,31 @@
       </div>
     </div>
 
+    <!-- Multi-Store Tabs Navigation Bar -->
+    <div class="tabs-wrapper">
+      <div class="tabs-header">
+        <div class="tabs-title"><i class="fa-solid fa-store"></i> 賣場分頁切換</div>
+      </div>
+      <div id="storeTabs" class="store-tabs">
+        <!-- Generated Dynamically -->
+      </div>
+    </div>
+
     <!-- Items List Header -->
     <div class="section-title">
-      <span><i class="fa-solid fa-list-check"></i> 監控陀螺清單 (<span id="activeCount">0</span> 啟用)</span>
+      <span id="tabHeading"><i class="fa-solid fa-list-check"></i> 🇯🇵 Amazon Japan 商品清單 (<span id="activeCount">0</span> 啟用)</span>
       <button class="btn-add-item" onclick="openAddModal()">
         <i class="fa-solid fa-plus"></i> 新增商品
       </button>
     </div>
+    
     <div id="itemsContainer">
       <!-- Dynamic Item Cards -->
     </div>
 
     <!-- Real-time Logs -->
     <div class="section-title">
-      <span><i class="fa-solid fa-terminal"></i> 即時日誌紀錄</span>
+      <span><i class="fa-solid fa-terminal"></i> 即時監控日誌</span>
       <button onclick="clearLogs()" style="background: transparent; color: #64748b; font-size: 11px; padding: 2px 6px;">清空日誌</button>
     </div>
     <div id="logBox" class="log-box">
@@ -250,7 +284,8 @@
     </div>
 
     <div class="footer-note">
-      Amazon Japan Beyblade X Monitor • 支援 LINE & Discord 雙向秒殺推播
+      戰鬥陀螺 7 大通路雲端秒殺系統 • 支援 LINE & Discord 雙向即時推播<br>
+      🇯🇵 Amazon JP • 🇹🇼 PChome 24h • 🏬 M.M小舖 • 🧸 麗嬰官網 • 🎯 童無忌 • 📚 誠品線上 • 🦐 蝦皮 Funbox
     </div>
   </div>
 
@@ -258,28 +293,35 @@
   <div id="itemModal" class="modal-overlay">
     <div class="modal-box">
       <div id="modalTitle" class="modal-title">
-        <i class="fa-solid fa-plus-circle"></i> 新增戰鬥陀螺監控品項
+        <i class="fa-solid fa-plus-circle"></i> 新增監控商品
       </div>
       <input type="hidden" id="modalItemIndex" value="-1">
       
       <div class="form-group">
-        <label class="form-label">商品型號 / 名稱 (必填):</label>
-        <input type="text" id="modalItemName" class="form-input" placeholder="例如：BX-53 全套組">
+        <label class="form-label">所屬賣場 (分頁):</label>
+        <select id="modalItemStore" class="form-select" onchange="onModalStoreChange()">
+          <!-- Populated from STORE_CONFIG -->
+        </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Amazon 網址 或 10碼 ASIN (必填):</label>
-        <input type="text" id="modalItemAsin" class="form-input" placeholder="例如：B0HJ783F18 或 商品網址">
+        <label id="modalItemAsinLabel" class="form-label">商品網址 或 編號 (必填):</label>
+        <input type="text" id="modalItemAsin" class="form-input" placeholder="請貼上商品網址或編號">
       </div>
 
       <div class="form-group">
-        <label class="form-label">備註 (選填):</label>
-        <input type="text" id="modalItemNote" class="form-input" placeholder="例如：10月預購主力款">
+        <label class="form-label">商品型號 / 名稱 (選填，留空將自動透過 API 抓取官方標題):</label>
+        <input type="text" id="modalItemName" class="form-input" placeholder="例如：BX-50 大會套組">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">自訂備註 (選填):</label>
+        <input type="text" id="modalItemNote" class="form-input" placeholder="例如：主力對戰盤 / 限量款">
       </div>
 
       <div class="modal-actions">
         <button class="btn-modal-cancel" onclick="closeModal()">取消</button>
-        <button class="btn-modal-confirm" onclick="confirmSaveItem()">確定儲存</button>
+        <button class="btn-modal-confirm" onclick="confirmSaveItem()">確定儲存並立即檢測</button>
       </div>
     </div>
   </div>
@@ -287,7 +329,8 @@
   <script>
     let isRunning = false;
     let itemsData = [];
-    let configData = {};
+    let storesConfig = {};
+    let currentStoreTab = 'amazon_jp';
 
     async function fetchStatus() {
       try {
@@ -296,7 +339,7 @@
         
         isRunning = data.is_monitoring;
         itemsData = data.items || [];
-        configData = data;
+        storesConfig = data.stores || {};
         
         // Update Status Badge & Button
         const badge = document.getElementById('statusBadge');
@@ -315,23 +358,23 @@
           btn.innerHTML = '<i class="fa-solid fa-play"></i> 啟動雲端監控';
         }
 
+        renderTabs(data.store_counts || {});
+        renderItems();
+        updateLogs(data.logs || []);
+
         // Stats
         document.getElementById('statTotal').innerText = itemsData.length;
         document.getElementById('statInterval').innerText = (data.interval_seconds || 5) + 's';
         
         let inStockCount = 0;
-        let activeCount = 0;
         itemsData.forEach(it => {
-          if (it.enabled !== false) activeCount++;
-          if (it.last_status && it.last_status.includes('官方現貨')) inStockCount++;
+          if (it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'))) {
+            inStockCount++;
+          }
         });
         document.getElementById('statInStock').innerText = inStockCount;
-        document.getElementById('activeCount').innerText = activeCount;
 
-        renderItems(itemsData);
-        updateLogs(data.logs || []);
-
-        // Sync Settings fields if not actively typing
+        // Settings inputs
         if (!document.getElementById('settingsPanel').classList.contains('user-editing')) {
           document.getElementById('settingEnableDiscord').checked = data.enable_discord !== false;
           document.getElementById('settingEnableLine').checked = data.enable_line !== false;
@@ -349,29 +392,117 @@
       }
     }
 
-    function renderItems(items) {
+    function renderTabs(counts) {
+      const container = document.getElementById('storeTabs');
+      container.innerHTML = '';
+
+      Object.keys(storesConfig).forEach(key => {
+        const cfg = storesConfig[key];
+        const btn = document.createElement('div');
+        const count = counts[key] || 0;
+        
+        // 檢查該賣場是否有現貨
+        const hasStock = itemsData.some(it => (it.store || 'amazon_jp') === key && it.last_status && it.last_status.includes('現貨'));
+
+        btn.className = `tab-btn ${key === currentStoreTab ? 'active' : ''}`;
+        btn.onclick = () => switchStoreTab(key);
+        btn.innerHTML = `
+          <span>${cfg.flag} ${cfg.short_name}</span>
+          ${hasStock ? '<span class="tab-dot"></span>' : ''}
+          <span class="tab-badge">${count}</span>
+        `;
+        container.appendChild(btn);
+      });
+
+      // 更新分頁抬頭
+      const curCfg = storesConfig[currentStoreTab] || { name: '商品清單', flag: '⚡' };
+      const curItems = itemsData.filter(it => (it.store || 'amazon_jp') === currentStoreTab);
+      const activeInTab = curItems.filter(it => it.enabled !== false).length;
+      document.getElementById('tabHeading').innerHTML = `<i class="fa-solid fa-list-check"></i> ${curCfg.flag} ${curCfg.name} (<span id="activeCount">${activeInTab}</span> 啟用)`;
+      document.getElementById('statTabCount').innerText = curItems.length;
+    }
+
+    function switchStoreTab(storeKey) {
+      currentStoreTab = storeKey;
+      renderTabs(getCurrentCounts());
+      renderItems();
+    }
+
+    function getCurrentCounts() {
+      const counts = {};
+      itemsData.forEach(it => {
+        const s = it.store || 'amazon_jp';
+        counts[s] = (counts[s] || 0) + 1;
+      });
+      return counts;
+    }
+
+    function renderItems() {
       const container = document.getElementById('itemsContainer');
       container.innerHTML = '';
 
-      items.forEach((it, idx) => {
+      const filtered = itemsData
+        .map((it, idx) => ({ ...it, originalIndex: idx }))
+        .filter(it => (it.store || 'amazon_jp') === currentStoreTab);
+
+      if (filtered.length === 0) {
+        const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+            <div class="empty-text">目前 ${curCfg.flag} <b>${curCfg.name}</b> 尚未新增任何監控商品</div>
+            <button class="btn-empty-add" onclick="openAddModal()">
+              <i class="fa-solid fa-plus"></i> 新增商品到此賣場
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(it => {
+        const idx = it.originalIndex;
+        const storeKey = it.store || 'amazon_jp';
+        const cfg = storesConfig[storeKey] || storesConfig['amazon_jp'] || {};
+        
         const card = document.createElement('div');
-        const isInStock = it.last_status && it.last_status.includes('官方現貨');
+        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'));
         const isEnabled = it.enabled !== false;
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
+        let buyUrl = it.url;
+        if (!buyUrl) {
+          if (storeKey === 'amazon_jp') buyUrl = `https://www.amazon.co.jp/dp/${it.asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
+          else if (storeKey === 'pchome') buyUrl = `https://24h.pchome.com.tw/prod/${it.asin}`;
+          else if (storeKey === 'mm_shop') buyUrl = `https://mmtoyshop.com/item/${it.asin}`;
+          else if (storeKey === 'funbox_tw') buyUrl = `https://shop.funbox.com.tw/products/${it.asin}`;
+          else if (storeKey === 'twj_toys') buyUrl = `https://www.twj.tw/products/${it.asin}`;
+          else if (storeKey === 'eslite') buyUrl = `https://www.eslite.com/product/${it.asin}`;
+          else if (storeKey === 'shopee') buyUrl = it.asin.startsWith('http') ? it.asin : `https://shopee.tw/product/${it.asin.replace('_', '/')}`;
+          else buyUrl = it.asin;
+        }
+
+        const btnText = cfg.btn_text || '👉 直達商品頁';
+        const btnBg = cfg.color || '#2563eb';
+
         card.innerHTML = `
-          <div class="item-header">
-            <div class="item-name">${escapeHtml(it.name)}</div>
-            <span class="item-asin">${escapeHtml(it.asin || '-')}</span>
+          <div class="item-top-bar">
+            <span class="store-badge" style="background: ${cfg.color}22; color: ${cfg.color}; border: 1px solid ${cfg.color}55;">
+              <i class="${cfg.icon || 'fa-solid fa-store'}"></i> ${cfg.name || '線上賣場'}
+            </span>
+            <span class="item-asin" title="${escapeHtml(it.asin || '-')}">${escapeHtml(it.asin || '-')}</span>
           </div>
+
+          <div class="item-name">${escapeHtml(it.name)}</div>
           ${it.note ? `<div class="item-note"><i class="fa-regular fa-bookmark"></i> ${escapeHtml(it.note)}</div>` : ''}
+
           <div class="item-meta">
             <div>
               <div class="item-status" style="color: ${isInStock ? '#34d399' : '#94a3b8'}">${escapeHtml(it.last_status || '待檢查')}</div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">賣家: ${escapeHtml(it.last_seller || '-')} | 時間: ${escapeHtml(it.last_time || '-')}</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}</div>
             </div>
             <div class="item-price">${escapeHtml(it.last_price || '-')}</div>
           </div>
+
           <div class="item-actions">
             <button class="item-btn ${isEnabled ? 'active' : ''}" onclick="toggleItem(${idx})">
               ${isEnabled ? '☑ 監控中' : '☐ 略過'}
@@ -382,8 +513,8 @@
             <button class="item-btn btn-delete" onclick="deleteItem(${idx})">
               <i class="fa-solid fa-trash"></i> 刪除
             </button>
-            <a href="https://www.amazon.co.jp/dp/${it.asin}?m=AN1VRQENFRJN5&th=1&psc=1" target="_blank" class="btn-buy">
-              <i class="fa-solid fa-cart-shopping"></i> 1-Click 官方直達
+            <a href="${buyUrl}" target="_blank" class="btn-buy" style="background: ${btnBg};">
+              <i class="fa-solid fa-bolt"></i> ${btnText}
             </a>
           </div>
         `;
@@ -469,13 +600,37 @@
       }
     }
 
-    // Item Add / Edit Modal Logic
+    function populateStoreSelect(selectedStore) {
+      const select = document.getElementById('modalItemStore');
+      select.innerHTML = '';
+      Object.keys(storesConfig).forEach(k => {
+        const cfg = storesConfig[k];
+        const opt = document.createElement('option');
+        opt.value = k;
+        opt.innerText = `${cfg.flag} ${cfg.name}`;
+        if (k === selectedStore) opt.selected = true;
+        select.appendChild(opt);
+      });
+      onModalStoreChange();
+    }
+
+    function onModalStoreChange() {
+      const storeKey = document.getElementById('modalItemStore').value;
+      const cfg = storesConfig[storeKey] || {};
+      const lbl = document.getElementById('modalItemAsinLabel');
+      const input = document.getElementById('modalItemAsin');
+
+      lbl.innerText = `${cfg.id_label || '商品編號或網址'} (必填):`;
+      input.placeholder = cfg.id_placeholder || '請貼上商品網址或編號';
+    }
+
     function openAddModal() {
-      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus-circle"></i> 新增戰鬥陀螺監控品項';
+      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus-circle"></i> 新增監控商品';
       document.getElementById('modalItemIndex').value = '-1';
       document.getElementById('modalItemName').value = '';
       document.getElementById('modalItemAsin').value = '';
       document.getElementById('modalItemNote').value = '';
+      populateStoreSelect(currentStoreTab);
       document.getElementById('itemModal').classList.add('active');
     }
 
@@ -487,6 +642,7 @@
       document.getElementById('modalItemName').value = item.name || '';
       document.getElementById('modalItemAsin').value = item.asin || '';
       document.getElementById('modalItemNote').value = item.note || '';
+      populateStoreSelect(item.store || 'amazon_jp');
       document.getElementById('itemModal').classList.add('active');
     }
 
@@ -496,16 +652,16 @@
 
     async function confirmSaveItem() {
       const idx = parseInt(document.getElementById('modalItemIndex').value);
+      const store = document.getElementById('modalItemStore').value;
       const name = document.getElementById('modalItemName').value.trim();
       const asin = document.getElementById('modalItemAsin').value.trim();
       const note = document.getElementById('modalItemNote').value.trim();
 
-      if (!name) { alert("請輸入商品型號或名稱！"); return; }
-      if (!asin) { alert("請輸入 Amazon 網址或 ASIN！"); return; }
+      if (!asin) { alert("請輸入商品編號或網址！"); return; }
 
       const isEdit = idx >= 0;
       const endpoint = isEdit ? '/api/edit_item' : '/api/add_item';
-      const payload = isEdit ? { index: idx, name, asin, note } : { name, asin, note };
+      const payload = isEdit ? { index: idx, store, name, asin, note } : { store, name, asin, note };
 
       try {
         const res = await fetch(endpoint, {
@@ -516,6 +672,7 @@
         const data = await res.json();
         if (data.ok) {
           closeModal();
+          currentStoreTab = store;
           fetchStatus();
         } else {
           alert("儲存失敗: " + (data.msg || "未知錯誤"));
