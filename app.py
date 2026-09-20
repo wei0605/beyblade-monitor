@@ -7,6 +7,7 @@
 import concurrent.futures
 import json
 import os
+import random
 import sys
 import threading
 import time
@@ -28,7 +29,8 @@ from monitor_engine import (
     AmazonJPChecker, PChomeChecker, MMShopChecker,
     CyberbizChecker, EsliteChecker, ShopeeChecker,
     check_store_item, get_item_direct_url,
-    STORE_CONFIG, NotificationManager, get_product_url, extract_asin
+    STORE_CONFIG, NotificationManager, get_product_url, extract_asin,
+    PLAYWRIGHT_AVAILABLE, cffi_requests
 )
 
 # 初始化目錄與檔案
@@ -110,6 +112,20 @@ class MonitorState:
         except (ValueError, TypeError):
             return 0.6
 
+    def get_amazon_jitter(self) -> bool:
+        """獲取 Amazon 是否啟用隨機延遲 Jitter (預設 True)"""
+        s_val = self.config.get("store_settings", {}).get("amazon_jp", {}).get("enable_jitter")
+        if s_val is not None:
+            return bool(s_val)
+        return bool(self.config.get("amazon_jitter", True))
+
+    def get_amazon_use_playwright(self) -> bool:
+        """獲取 Amazon 是否啟用 Playwright 真實瀏覽器內核防檢測 (預設 False，優先使用 curl_cffi TLS 偽裝)"""
+        s_val = self.config.get("store_settings", {}).get("amazon_jp", {}).get("use_playwright")
+        if s_val is not None:
+            return bool(s_val)
+        return bool(self.config.get("amazon_use_playwright", False))
+
     def save_config(self):
         try:
             with open(CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -153,13 +169,17 @@ def background_monitor_worker():
             continue
 
         amazon_delay = state.get_amazon_item_interval()
-        state.add_log(f"⚡ 開始檢查 {len(active_items)} 項商品 (跨 7 大賣場，Amazon每項間隔 {amazon_delay}s)...", "INFO")
+        amazon_jitter = state.get_amazon_jitter()
+        amazon_playwright = state.get_amazon_use_playwright()
+        jitter_tag = " + Jitter" if amazon_jitter else ""
+        engine_tag = "Playwright" if (amazon_playwright and PLAYWRIGHT_AVAILABLE) else "curl_cffi TLS"
+        state.add_log(f"⚡ 開始檢查 {len(active_items)} 項商品 (跨 7 大賣場，Amazon每項間隔 {amazon_delay}s{jitter_tag}，引擎: {engine_tag})...", "INFO")
         
         def worker(item_tuple):
             if state.stop_event.is_set():
                 return None
             idx, item = item_tuple
-            res = check_store_item(item, amazon_interval=amazon_delay)
+            res = check_store_item(item, amazon_interval=amazon_delay, amazon_jitter=amazon_jitter, use_playwright=amazon_playwright)
             return idx, item, res
 
         max_workers = min(len(active_items), 12)
@@ -172,7 +192,8 @@ def background_monitor_worker():
                 futures.append(executor.submit(worker, it))
                 store = it[1].get("store", "amazon_jp")
                 if store == "amazon_jp" and amazon_delay > 0:
-                    time.sleep(amazon_delay)
+                    stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
+                    time.sleep(stagger)
             for f in concurrent.futures.as_completed(futures):
                 if state.stop_event.is_set():
                     break
@@ -352,6 +373,10 @@ async def get_status():
         "is_monitoring": state.is_monitoring,
         "interval_seconds": state.config.get("interval_seconds", 5),
         "amazon_item_interval": state.get_amazon_item_interval(),
+        "amazon_jitter": state.get_amazon_jitter(),
+        "amazon_use_playwright": state.get_amazon_use_playwright(),
+        "curl_cffi_available": (cffi_requests is not None),
+        "playwright_available": PLAYWRIGHT_AVAILABLE,
         "only_amazon_seller": state.config.get("only_amazon_seller", True),
         "enable_discord": state.config.get("enable_discord", True),
         "enable_line": state.config.get("enable_line", True),
@@ -378,6 +403,14 @@ async def api_update_settings(req: Request):
             state.config.setdefault("store_settings", {}).setdefault("amazon_jp", {})["item_interval_seconds"] = val
         except (ValueError, TypeError):
             pass
+    if "amazon_jitter" in data:
+        val = bool(data["amazon_jitter"])
+        state.config["amazon_jitter"] = val
+        state.config.setdefault("store_settings", {}).setdefault("amazon_jp", {})["enable_jitter"] = val
+    if "amazon_use_playwright" in data:
+        val = bool(data["amazon_use_playwright"])
+        state.config["amazon_use_playwright"] = val
+        state.config.setdefault("store_settings", {}).setdefault("amazon_jp", {})["use_playwright"] = val
     if "only_amazon_seller" in data:
         state.config["only_amazon_seller"] = bool(data["only_amazon_seller"])
     if "enable_discord" in data:
@@ -400,6 +433,16 @@ async def api_update_settings(req: Request):
                     state.config["store_settings"][s_key]["enable_notifications"] = bool(s_val["enable_notifications"])
                 if "discord_webhook" in s_val:
                     state.config["store_settings"][s_key]["discord_webhook"] = str(s_val["discord_webhook"]).strip()
+                if "enable_jitter" in s_val:
+                    val = bool(s_val["enable_jitter"])
+                    state.config["store_settings"][s_key]["enable_jitter"] = val
+                    if s_key == "amazon_jp":
+                        state.config["amazon_jitter"] = val
+                if "use_playwright" in s_val:
+                    val = bool(s_val["use_playwright"])
+                    state.config["store_settings"][s_key]["use_playwright"] = val
+                    if s_key == "amazon_jp":
+                        state.config["amazon_use_playwright"] = val
                 if "item_interval_seconds" in s_val:
                     try:
                         ival = max(0.1, float(s_val["item_interval_seconds"]))
@@ -658,12 +701,16 @@ async def api_check_now(background_tasks: BackgroundTasks):
             return
 
         amazon_delay = state.get_amazon_item_interval()
-        state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品，Amazon每項間隔 {amazon_delay}s)...", "INFO")
+        amazon_jitter = state.get_amazon_jitter()
+        amazon_playwright = state.get_amazon_use_playwright()
+        jitter_tag = " + Jitter" if amazon_jitter else ""
+        engine_tag = "Playwright" if (amazon_playwright and PLAYWRIGHT_AVAILABLE) else "curl_cffi TLS"
+        state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品，Amazon每項間隔 {amazon_delay}s{jitter_tag}，引擎: {engine_tag})...", "INFO")
         t0 = time.time()
 
         def worker(item_tuple):
             idx, item = item_tuple
-            res = check_store_item(item, amazon_interval=amazon_delay)
+            res = check_store_item(item, amazon_interval=amazon_delay, amazon_jitter=amazon_jitter, use_playwright=amazon_playwright)
             return idx, item, res
 
         max_workers = min(len(active_items), 12)
@@ -673,7 +720,8 @@ async def api_check_now(background_tasks: BackgroundTasks):
                 futures.append(executor.submit(worker, it))
                 store = it[1].get("store", "amazon_jp")
                 if store == "amazon_jp" and amazon_delay > 0:
-                    time.sleep(amazon_delay)
+                    stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
+                    time.sleep(stagger)
             for f in concurrent.futures.as_completed(futures):
                 result = f.result()
                 if result:

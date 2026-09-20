@@ -261,6 +261,42 @@
         </span>
       </div>
 
+      <div class="switch-row" style="margin-top: 4px;">
+        <div class="switch-label">
+          <i class="fa-solid fa-shuffle" style="color: #38bdf8;"></i> Amazon 隨機延遲 (Jitter 抖動防風控)
+          <div style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 2px;">
+            在基礎間隔上隨機附加 +0.08~0.25s 波動，破除固定週期特徵，防止亞馬遜 WAF 識別為爬蟲。
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingAmazonJitter" checked onchange="onGeneralAmazonJitterChange()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-row" style="margin-top: 8px;">
+        <div class="switch-label">
+          <i class="fa-solid fa-window-maximize" style="color: #a855f7;"></i> Amazon Playwright 真實內核防檢測
+          <div style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 2px;">
+            啟用真實 Chromium 配合 playwright-stealth 隱身插件。預設關閉（預設採用 C 語言極速 Chrome 124 TLS 偽裝引擎）。
+            <span id="playwrightSupportBadge" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 4px; font-weight: bold; background: #334155; color: #cbd5e1;">檢測中</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingAmazonPlaywright" onchange="onGeneralAmazonPlaywrightChange()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; margin: 10px 0 16px 0; font-size: 11px; line-height: 1.6; color: #cbd5e1;">
+        <div style="font-weight: bold; color: #f59e0b; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-shield-virus"></i> Amazon JP 智慧防風控體系 (已生效)
+        </div>
+        <div>🛡️ <b>真實 Client Hints & Headers 輪換</b>：自動在 Chrome 128 / Edge 127 / Firefox 129 / Safari 間隨機輪替。</div>
+        <div id="tlsBadgeRow">🔒 <b>TLS 指紋防護</b>：<span id="tlsBadgeText" style="color: #34d399;">載入中...</span></div>
+        <div>⏳ <b>智慧冷卻機制</b>：遭遇 503 或驗證碼自動觸發 20 秒退避保護，避免 IP 遭風控封禁。</div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">全域預設 Discord Webhook 網址 (各賣場未自訂時使用):</label>
         <div class="input-with-btn">
@@ -478,6 +514,36 @@
           document.getElementById('settingOnlyAmazon').checked = data.only_amazon_seller !== false;
           document.getElementById('settingInterval').value = data.interval_seconds || 5;
           document.getElementById('settingAmazonInterval').value = data.amazon_item_interval !== undefined ? data.amazon_item_interval : 0.6;
+
+          if (document.getElementById('settingAmazonJitter')) {
+            document.getElementById('settingAmazonJitter').checked = (data.amazon_jitter !== false);
+          }
+          if (document.getElementById('settingAmazonPlaywright')) {
+            document.getElementById('settingAmazonPlaywright').checked = (data.amazon_use_playwright === true);
+          }
+
+          const tlsBadge = document.getElementById('tlsBadgeText');
+          if (tlsBadge) {
+            if (data.curl_cffi_available) {
+              tlsBadge.innerHTML = '<span style="color: #34d399; font-weight: bold;">🟢 Chrome 124 TLS JA3/JA4 偽裝生效中 (curl_cffi)</span>';
+            } else {
+              tlsBadge.innerHTML = '<span style="color: #fbbf24;">🟡 傳統連線池模式</span>';
+            }
+          }
+
+          const pwBadge = document.getElementById('playwrightSupportBadge');
+          if (pwBadge) {
+            if (data.playwright_available) {
+              pwBadge.style.background = '#065f46';
+              pwBadge.style.color = '#a7f3d0';
+              pwBadge.innerText = '系統已就緒';
+            } else {
+              pwBadge.style.background = '#334155';
+              pwBadge.style.color = '#94a3b8';
+              pwBadge.innerText = '未就緒 (自動降級至TLS偽裝)';
+            }
+          }
+
           if (!document.getElementById('settingDiscordUrl').value) {
             document.getElementById('settingDiscordUrl').value = data.discord_webhook || '';
           }
@@ -663,6 +729,20 @@
               <span style="color: #94a3b8; font-size: 11px;">秒</span>
             </div>
           </div>
+          <div style="margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: #0f172a; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155;">
+            <span style="color: #cbd5e1;"><i class="fa-solid fa-shuffle" style="color: #38bdf8;"></i> 隨機延遲 Jitter:</span>
+            <label class="switch" style="transform: scale(0.85);">
+              <input type="checkbox" id="store_jitter_${k}" ${sSet.enable_jitter !== false ? 'checked' : ''} onchange="onStoreJitterChange('${k}')">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div style="margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: #0f172a; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155;">
+            <span style="color: #cbd5e1;"><i class="fa-solid fa-window-maximize" style="color: #a855f7;"></i> Playwright 引擎:</span>
+            <label class="switch" style="transform: scale(0.85);">
+              <input type="checkbox" id="store_playwright_${k}" ${sSet.use_playwright === true ? 'checked' : ''} onchange="onStorePlaywrightChange('${k}')">
+              <span class="slider"></span>
+            </label>
+          </div>
           ` : ''}
         `;
         container.appendChild(card);
@@ -681,6 +761,46 @@
       const chk = document.getElementById(`store_notify_${k}`);
       if (!storeSettingsData[k]) storeSettingsData[k] = {};
       storeSettingsData[k].enable_notifications = chk.checked;
+    }
+
+    function onStoreJitterChange(k) {
+      isEditingSettings = true;
+      const chk = document.getElementById(`store_jitter_${k}`);
+      if (!storeSettingsData[k]) storeSettingsData[k] = {};
+      storeSettingsData[k].enable_jitter = chk.checked;
+      if (k === 'amazon_jp') {
+        const genChk = document.getElementById('settingAmazonJitter');
+        if (genChk) genChk.checked = chk.checked;
+      }
+    }
+
+    function onStorePlaywrightChange(k) {
+      isEditingSettings = true;
+      const chk = document.getElementById(`store_playwright_${k}`);
+      if (!storeSettingsData[k]) storeSettingsData[k] = {};
+      storeSettingsData[k].use_playwright = chk.checked;
+      if (k === 'amazon_jp') {
+        const genChk = document.getElementById('settingAmazonPlaywright');
+        if (genChk) genChk.checked = chk.checked;
+      }
+    }
+
+    function onGeneralAmazonJitterChange() {
+      isEditingSettings = true;
+      const chk = document.getElementById('settingAmazonJitter');
+      const storeChk = document.getElementById('store_jitter_amazon_jp');
+      if (storeChk) storeChk.checked = chk.checked;
+      if (!storeSettingsData['amazon_jp']) storeSettingsData['amazon_jp'] = {};
+      storeSettingsData['amazon_jp'].enable_jitter = chk.checked;
+    }
+
+    function onGeneralAmazonPlaywrightChange() {
+      isEditingSettings = true;
+      const chk = document.getElementById('settingAmazonPlaywright');
+      const storeChk = document.getElementById('store_playwright_amazon_jp');
+      if (storeChk) storeChk.checked = chk.checked;
+      if (!storeSettingsData['amazon_jp']) storeSettingsData['amazon_jp'] = {};
+      storeSettingsData['amazon_jp'].use_playwright = chk.checked;
     }
 
     function switchStoreTab(storeKey) {
@@ -805,17 +925,25 @@
 
     async function saveSettings() {
       const amazonInterval = parseFloat(document.getElementById('settingAmazonInterval').value) || 0.6;
+      const amazonJitter = document.getElementById('settingAmazonJitter') ? document.getElementById('settingAmazonJitter').checked : true;
+      const amazonPlaywright = document.getElementById('settingAmazonPlaywright') ? document.getElementById('settingAmazonPlaywright').checked : false;
+
       const store_settings = {};
       Object.keys(storesConfig).forEach(k => {
         const monChk = document.getElementById(`store_monitor_${k}`);
         const notChk = document.getElementById(`store_notify_${k}`);
         const hook = document.getElementById(`store_webhook_${k}`);
         const ivalInput = document.getElementById(`store_interval_${k}`);
+        const jitChk = document.getElementById(`store_jitter_${k}`);
+        const pwChk = document.getElementById(`store_playwright_${k}`);
+
         store_settings[k] = {
           enable_monitoring: monChk ? monChk.checked : true,
           enable_notifications: notChk ? notChk.checked : true,
           discord_webhook: hook ? hook.value.trim() : "",
-          item_interval_seconds: ivalInput ? (parseFloat(ivalInput.value) || 0.6) : (k === 'amazon_jp' ? amazonInterval : 0.6)
+          item_interval_seconds: ivalInput ? (parseFloat(ivalInput.value) || 0.6) : (k === 'amazon_jp' ? amazonInterval : 0.6),
+          enable_jitter: jitChk ? jitChk.checked : (k === 'amazon_jp' ? amazonJitter : true),
+          use_playwright: pwChk ? pwChk.checked : (k === 'amazon_jp' ? amazonPlaywright : false)
         };
       });
 
@@ -825,6 +953,8 @@
         only_amazon_seller: document.getElementById('settingOnlyAmazon').checked,
         interval_seconds: parseInt(document.getElementById('settingInterval').value) || 5,
         amazon_item_interval: amazonInterval,
+        amazon_jitter: amazonJitter,
+        amazon_use_playwright: amazonPlaywright,
         discord_webhook: document.getElementById('settingDiscordUrl').value.trim(),
         line_token: document.getElementById('settingLineToken').value.trim(),
         store_settings: store_settings

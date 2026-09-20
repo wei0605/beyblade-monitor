@@ -19,12 +19,20 @@ import threading
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
 
+import random
 import requests
 
 try:
     from curl_cffi import requests as cffi_requests
 except ImportError:
     cffi_requests = None
+
+try:
+    from playwright.sync_api import sync_playwright
+    from playwright_stealth import stealth_sync
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
@@ -133,11 +141,14 @@ def get_shared_session():
 
 
 # =========================================================================
-# 1. Amazon Japan Checker (維持現有極速 BuyBox 檢測)
-# =========================================================================
-
+# 1. Amazon Japan Checker (多層防風控極速架構)
+# 包含：
+# - 真實現代瀏覽器 User-Agent 與 Client Hints (sec-ch-ua) 完整輪換池
+# - 合理請求間隔 + 隨機浮動延遲 (Jitter) 與自動 503 冷卻保護
+# - curl_cffi Chrome 124 TLS 偽裝 (繞過 CloudFront/Akamai TLS 指紋檢測)
+# - Playwright + playwright-stealth 真實無頭瀏覽器備援引擎
 def get_product_url(asin: str) -> str:
-    """生成鎖定官方自營的 1-Click 極速購買商品頁網址"""
+    """生成官方自營 1-Click 快速購買商品網址"""
     return f"https://www.amazon.co.jp/dp/{asin}?m=AN1VRQENFRJN5&th=1&psc=1"
 
 
@@ -154,136 +165,309 @@ def extract_asin(text: str) -> str:
     return text.upper()
 
 
-class AmazonJPChecker:
-    _last_req_time: float = 0.0
+AMAZON_STEALTH_PROFILES = [
+    {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "sec_ch_ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        "sec_ch_ua_platform": '"Windows"',
+        "impersonate": "chrome124",
+    },
+    {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+        "sec_ch_ua": '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
+        "sec_ch_ua_platform": '"Windows"',
+        "impersonate": "chrome120",
+    },
+    {
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "sec_ch_ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        "sec_ch_ua_platform": '"macOS"',
+        "impersonate": "chrome124",
+    },
+    {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0",
+        "sec_ch_ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"',
+        "sec_ch_ua_platform": '"Windows"',
+        "impersonate": "edge101",
+    },
+    {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0",
+        "sec_ch_ua": '"Not)A;Brand";v="99", "Microsoft Edge";v="127", "Chromium";v="127"',
+        "sec_ch_ua_platform": '"Windows"',
+        "impersonate": "edge101",
+    },
+    {
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
+        "sec_ch_ua": None,
+        "sec_ch_ua_platform": None,
+        "impersonate": "safari15_5",
+    },
+    {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0",
+        "sec_ch_ua": None,
+        "sec_ch_ua_platform": None,
+        "impersonate": "firefox120",
+    },
+]
+
+def get_amazon_stealth_headers(profile: dict = None) -> Tuple[dict, str]:
+    """獲取真實瀏覽器輪換 Headers 與對應 Client Hints，帶日幣偏好 Cookie"""
+    if not profile:
+        profile = random.choice(AMAZON_STEALTH_PROFILES)
+    headers = {
+        "User-Agent": profile["user_agent"],
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Cookie": "i18n-prefs=JPY; lc-acbjp=ja_JP",
+        "DNT": "1",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Priority": "u=0, i",
+    }
+    if profile.get("sec_ch_ua"):
+        headers["sec-ch-ua"] = profile["sec_ch_ua"]
+        headers["sec-ch-ua-mobile"] = "?0"
+        headers["sec-ch-ua-platform"] = profile["sec_ch_ua_platform"]
+
+    return headers, profile.get("impersonate", "chrome124")
+
+
+def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = None) -> Dict[str, Any]:
+    """統一 Amazon 商品頁面 HTML 解析器 (BuyBox、官方賣家、庫存、價格)"""
+    if not url:
+        url = get_product_url(asin)
+
+    if status_code == 404 or "申し訳ございません。お探しのページが見つかりませんでした" in html:
+        return {"ok": False, "msg": "頁面不存在 (404 未上架)"}
+    elif status_code == 503:
+        return {"ok": False, "msg": "Amazon 頻率限制 (503，已觸發自動冷卻)"}
+    elif "/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html:
+        return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證，已觸發自動冷卻)"}
+    elif status_code != 200 and not ("<html" in html.lower()):
+        return {"ok": False, "msg": f"HTTP {status_code}"}
+
+    title_m = re.search(r'id="productTitle"[^>]*>(.*?)</span>', html, re.DOTALL)
+    title = " ".join(title_m.group(1).split()) if title_m else ""
+
+    has_cart = ('id="add-to-cart-button"' in html) or ('name="submit.add-to-cart"' in html)
+    has_buy_now = ('id="buy-now-button"' in html) or ('name="submit.buy-now"' in html)
+    has_preorder = ('preorder' in html.lower()) or ('予約注文' in html)
+
+    no_featured_offer = (
+        "おすすめ出品はありません" in html or
+        "その他の出品者" in html or
+        "没有精选优惠" in html
+    ) and not (has_cart or has_buy_now or has_preorder)
+
+    has_third_party_profile = 'id="sellerProfileTriggerId"' in html
+
+    merchant_m = re.search(r'id="(?:merchantInfo|merchant-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
+    merchant_text = " ".join(re.sub(r'<[^>]+>', ' ', merchant_m.group(1)).split()) if merchant_m else ""
+
+    fulfiller_m = re.search(r'id="(?:fulfillerInfo|fulfiller-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
+    fulfiller_text = " ".join(re.sub(r'<[^>]+>', ' ', fulfiller_m.group(1)).split()) if fulfiller_m else ""
+
+    is_amazon_sold = (
+        ("amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text) and
+        not has_third_party_profile
+    )
+    is_amazon_fulfilled = "amazon" in fulfiller_text.lower()
+
+    price = ""
+    m_price = re.search(r'class="a-price\s*[^"]*".*?<span class="a-offscreen">\s*([^\s<]+)\s*</span>', html, re.DOTALL)
+    if m_price:
+        price = m_price.group(1).strip()
+    else:
+        m_price2 = re.search(r'id="(?:priceblock_ourprice|priceblock_dealprice|price_inside_buybox)"[^>]*>\s*([^\s<]+)\s*<', html, re.DOTALL)
+        if m_price2:
+            price = m_price2.group(1).strip()
+        else:
+            m_price3 = re.search(r'￥\s*([\d,]+)', html[:200000])
+            if m_price3:
+                price = f"￥{m_price3.group(1)}"
+
+    in_stock = False
+    is_official = False
+    seller_name = "第三方賣家"
+
+    if (has_cart or has_buy_now or has_preorder) and not no_featured_offer:
+        if is_amazon_sold:
+            in_stock = True
+            is_official = True
+            seller_name = "Amazon.co.jp (官方自營)"
+        else:
+            in_stock = True
+            is_official = False
+            if merchant_text:
+                seller_name = merchant_text[:25]
+            if is_amazon_fulfilled:
+                seller_name += " (Amazon 配送)"
+    else:
+        in_stock = False
+        seller_name = "暫無官方現貨" if is_amazon_sold else "缺貨中"
+
+    if not price:
+        price = "官方缺貨中" if not in_stock else "價格載入中"
+
+    return {
+        "ok": True,
+        "store": "amazon_jp",
+        "asin": asin,
+        "title": title,
+        "price": price,
+        "in_stock": in_stock,
+        "is_official": is_official,
+        "is_preorder": has_preorder,
+        "seller": seller_name,
+        "url": url,
+        "raw_merchant": merchant_text
+    }
+
+
+class PlaywrightAmazonChecker:
+    """真實無頭瀏覽器防檢測備援引擎 (Playwright + playwright-stealth)"""
     _lock = threading.Lock()
 
     @classmethod
-    def throttle(cls, interval: float = 0.6):
-        """保證任意兩次 Amazon 請求之間至少間隔 interval 秒，防 503 / 頻率限制"""
-        if interval <= 0:
-            return
+    def is_available(cls) -> bool:
+        if not PLAYWRIGHT_AVAILABLE:
+            return False
+        try:
+            with sync_playwright() as p:
+                exe = p.chromium.executable_path
+                return bool(exe and os.path.exists(exe))
+        except Exception:
+            return False
+
+    @classmethod
+    def check_asin(cls, asin: str) -> Dict[str, Any]:
+        if not PLAYWRIGHT_AVAILABLE:
+            return {"ok": False, "msg": "未安裝 Playwright 套件"}
+        asin = extract_asin(asin)
+        if not asin:
+            return {"ok": False, "msg": "無效 ASIN"}
+        url = get_product_url(asin)
+
+        with cls._lock:
+            try:
+                with sync_playwright() as p:
+                    profile = random.choice(AMAZON_STEALTH_PROFILES)
+                    browser = p.chromium.launch(
+                        headless=True,
+                        args=[
+                            "--disable-blink-features=AutomationControlled",
+                            "--no-sandbox",
+                            "--disable-setuid-sandbox",
+                            "--disable-infobars"
+                        ]
+                    )
+                    context = browser.new_context(
+                        viewport={"width": 1280, "height": 800},
+                        locale="ja-JP",
+                        timezone_id="Asia/Tokyo",
+                        user_agent=profile["user_agent"]
+                    )
+                    page = context.new_page()
+                    stealth_sync(page)
+                    page.goto(url, wait_until="domcontentloaded", timeout=12000)
+                    html = page.content()
+                    browser.close()
+                    return parse_amazon_html(html, asin, url=url)
+            except Exception as e:
+                return {"ok": False, "msg": f"Playwright 檢測失敗: {str(e)[:30]}"}
+
+
+class AmazonJPChecker:
+    """Amazon Japan 核心檢測器 (真實 Headers 輪換 + Jitter 隨機延遲 + Chrome TLS 偽裝)"""
+    _last_req_time: float = 0.0
+    _lock = threading.Lock()
+    _cooloff_until: float = 0.0
+
+    @classmethod
+    def throttle(cls, interval: float = 0.6, enable_jitter: bool = True, jitter_min: float = 0.1, jitter_max: float = 0.35):
+        """保證請求間隔 + Jitter 隨機延遲，遇到風控自動冷卻"""
         with cls._lock:
             now = time.time()
+            if now < cls._cooloff_until:
+                wait_cool = cls._cooloff_until - now
+                time.sleep(wait_cool)
+                now = time.time()
+
+            delay = interval
+            if enable_jitter and jitter_max > 0:
+                jitter = random.uniform(jitter_min, jitter_max)
+                delay += jitter
+
             elapsed = now - cls._last_req_time
-            if elapsed < interval:
-                time.sleep(interval - elapsed)
+            if elapsed < delay:
+                time.sleep(delay - elapsed)
             cls._last_req_time = time.time()
 
     @classmethod
-    def check_asin(cls, asin: str, interval: float = 0.6) -> Dict[str, Any]:
-        """極速檢測 Amazon.co.jp 特定 ASIN 庫存與官方自營狀態 (支援自訂商品檢查間隔)"""
+    def trigger_cooloff(cls, seconds: float = 20.0):
+        with cls._lock:
+            cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
+
+    @classmethod
+    def check_asin(cls, asin: str, interval: float = 0.6, enable_jitter: bool = True, use_playwright: bool = False) -> Dict[str, Any]:
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援真實 Headers輪換、Jitter延遲與 TLS 偽裝)"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
 
-        cls.throttle(interval)
+        # 若使用者指定啟用 Playwright 且環境支援，直接走真實瀏覽器
+        if use_playwright and PlaywrightAmazonChecker.is_available():
+            cls.throttle(interval, enable_jitter=enable_jitter)
+            return PlaywrightAmazonChecker.check_asin(asin)
 
+        cls.throttle(interval, enable_jitter=enable_jitter)
         url = get_product_url(asin)
-        session = get_shared_session()
-        headers = {
-            "Accept-Language": "ja-JP,ja;q=0.9",
-            "Cookie": "i18n-prefs=JPY; lc-acbjp=ja_JP",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-        }
+        headers, imp = get_amazon_stealth_headers()
 
-        try:
-            r = session.get(url, headers=headers, timeout=4)
-            status_code = r.status_code
-            html = r.text
-        except Exception as e:
-            return {"ok": False, "msg": f"網路超時: {str(e)[:25]}"}
+        html = None
+        status_code = 200
+
+        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (繞過 CloudFront/Akamai TLS 檢測)
+        if cffi_requests:
+            try:
+                session = cffi_requests.Session(impersonate=imp)
+                r = session.get(url, headers=headers, timeout=5)
+                status_code = r.status_code
+                html = r.text
+            except Exception:
+                html = None
+
+        # 第二優先：requests 連線池 (帶真實 Headers 輪換)
+        if not html:
+            try:
+                session = get_shared_session()
+                r = session.get(url, headers=headers, timeout=5)
+                status_code = r.status_code
+                html = r.text
+            except Exception as e:
+                return {"ok": False, "msg": f"網路超時: {str(e)[:25]}"}
 
         if not html:
             return {"ok": False, "msg": "無法獲取頁面內容"}
 
+        # 檢測 CAPTCHA 或 503 頻率限制
         if "/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html:
-            return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證)"}
+            cls.trigger_cooloff(20.0)
+            if PlaywrightAmazonChecker.is_available():
+                return PlaywrightAmazonChecker.check_asin(asin)
+            return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證，已自動避讓冷卻 20s)"}
 
-        if status_code == 404 or "申し訳ございません。お探しのページが見つかりませんでした" in html:
-            return {"ok": False, "msg": "頁面不存在 (404 未上架)"}
-        elif status_code == 503:
-            return {"ok": False, "msg": "Amazon 頻率限制 (503)"}
-        elif status_code != 200 and not ("<html" in html.lower()):
-            return {"ok": False, "msg": f"HTTP {status_code}"}
+        if status_code == 503:
+            cls.trigger_cooloff(20.0)
+            if PlaywrightAmazonChecker.is_available():
+                return PlaywrightAmazonChecker.check_asin(asin)
+            return {"ok": False, "msg": "Amazon 頻率限制 (503，已自動避讓冷卻 20s)"}
 
-        title_m = re.search(r'id="productTitle"[^>]*>(.*?)</span>', html, re.DOTALL)
-        title = " ".join(title_m.group(1).split()) if title_m else ""
-
-        has_cart = ('id="add-to-cart-button"' in html) or ('name="submit.add-to-cart"' in html)
-        has_buy_now = ('id="buy-now-button"' in html) or ('name="submit.buy-now"' in html)
-        has_preorder = ('preorder' in html.lower()) or ('予約注文' in html)
-
-        no_featured_offer = (
-            "おすすめ出品はありません" in html or
-            "その他の出品者" in html or
-            "没有精选优惠" in html
-        ) and not (has_cart or has_buy_now or has_preorder)
-
-        has_third_party_profile = 'id="sellerProfileTriggerId"' in html
-
-        merchant_m = re.search(r'id="(?:merchantInfo|merchant-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
-        merchant_text = " ".join(re.sub(r'<[^>]+>', ' ', merchant_m.group(1)).split()) if merchant_m else ""
-
-        fulfiller_m = re.search(r'id="(?:fulfillerInfo|fulfiller-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
-        fulfiller_text = " ".join(re.sub(r'<[^>]+>', ' ', fulfiller_m.group(1)).split()) if fulfiller_m else ""
-
-        is_amazon_sold = (
-            ("amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text) and
-            not has_third_party_profile
-        )
-        is_amazon_fulfilled = "amazon" in fulfiller_text.lower()
-
-        price = ""
-        m_price = re.search(r'class="a-price\s*[^"]*".*?<span class="a-offscreen">\s*([^\s<]+)\s*</span>', html, re.DOTALL)
-        if m_price:
-            price = m_price.group(1).strip()
-        else:
-            m_price2 = re.search(r'id="(?:priceblock_ourprice|priceblock_dealprice|price_inside_buybox)"[^>]*>\s*([^\s<]+)\s*<', html, re.DOTALL)
-            if m_price2:
-                price = m_price2.group(1).strip()
-            else:
-                m_price3 = re.search(r'￥\s*([\d,]+)', html[:200000])
-                if m_price3:
-                    price = f"￥{m_price3.group(1)}"
-
-        in_stock = False
-        is_official = False
-        seller_name = "第三方賣家"
-
-        if (has_cart or has_buy_now or has_preorder) and not no_featured_offer:
-            if is_amazon_sold:
-                in_stock = True
-                is_official = True
-                seller_name = "Amazon.co.jp (官方自營)"
-            else:
-                in_stock = True
-                is_official = False
-                if merchant_text:
-                    seller_name = merchant_text[:25]
-                if is_amazon_fulfilled:
-                    seller_name += " (Amazon 配送)"
-        else:
-            in_stock = False
-            seller_name = "暫無官方現貨" if is_amazon_sold else "缺貨中"
-
-        if not price:
-            price = "官方缺貨中" if not in_stock else "價格載入中"
-
-        return {
-            "ok": True,
-            "store": "amazon_jp",
-            "asin": asin,
-            "title": title,
-            "price": price,
-            "in_stock": in_stock,
-            "is_official": is_official,
-            "is_preorder": has_preorder,
-            "seller": seller_name,
-            "url": url,
-            "raw_merchant": merchant_text
-        }
+        return parse_amazon_html(html, asin, status_code=status_code, url=url)
 
 
 # =========================================================================
@@ -738,13 +922,13 @@ class ShopeeChecker:
 # 8. 通用調度中心 (依據 store 欄位派發)
 # =========================================================================
 
-def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6) -> Dict[str, Any]:
-    """多通路統一檢查調度器"""
+def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_jitter: bool = True, use_playwright: bool = False) -> Dict[str, Any]:
+    """多通路統一檢查調度器 (支援 Amazon 隨機 Jitter 與 Playwright 切換)"""
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
 
     if store == "amazon_jp":
-        return AmazonJPChecker.check_asin(asin, interval=amazon_interval)
+        return AmazonJPChecker.check_asin(asin, interval=amazon_interval, enable_jitter=amazon_jitter, use_playwright=use_playwright)
     elif store == "pchome":
         return PChomeChecker.check_prod(asin)
     elif store == "mm_shop":
@@ -756,7 +940,7 @@ def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6) -> Dict
     elif store == "shopee":
         return ShopeeChecker.check_item(asin)
     else:
-        return AmazonJPChecker.check_asin(asin, interval=amazon_interval)
+        return AmazonJPChecker.check_asin(asin, interval=amazon_interval, enable_jitter=amazon_jitter, use_playwright=use_playwright)
 
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:

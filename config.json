@@ -14,7 +14,9 @@
       "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
-      "item_interval_seconds": 0.6
+      "item_interval_seconds": 0.6,
+      "enable_jitter": true,
+      "use_playwright": false
     },
     "pchome": {
       "enable_monitoring": true,
@@ -193,5 +195,7 @@
     }
   ],
   "enable_discord": true,
-  "enable_line": true
+  "enable_line": true,
+  "amazon_jitter": true,
+  "amazon_use_playwright": false
 }
