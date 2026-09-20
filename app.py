@@ -16,7 +16,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from monitor_engine import AmazonJPChecker, NotificationManager, get_product_url
+from monitor_engine import AmazonJPChecker, NotificationManager, get_product_url, extract_asin
 
 # 初始化目錄與檔案
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +48,8 @@ class MonitorState:
             "interval_seconds": 5,
             "concurrent_mode": True,
             "only_amazon_seller": True,
+            "enable_discord": True,
+            "enable_line": True,
             "discord_webhook": "",
             "line_token": "",
             "items": []
@@ -174,27 +176,29 @@ def trigger_notifications(name: str, asin: str, price: str, seller: str, url: st
     product_url = get_product_url(asin)
 
     # 1. Discord 推播
-    discord_url = state.config.get("discord_webhook", "").strip()
-    if discord_url:
-        def _send_d():
-            ok, msg = NotificationManager.send_discord(discord_url, name, asin, price, seller, product_url)
-            state.add_log(f"Discord: {msg}", "SUCCESS" if ok else "ERROR")
-        threading.Thread(target=_send_d, daemon=True).start()
+    if state.config.get("enable_discord", True):
+        discord_url = state.config.get("discord_webhook", "").strip()
+        if discord_url:
+            def _send_d():
+                ok, msg = NotificationManager.send_discord(discord_url, name, asin, price, seller, product_url)
+                state.add_log(f"Discord: {msg}", "SUCCESS" if ok else "ERROR")
+            threading.Thread(target=_send_d, daemon=True).start()
 
     # 2. LINE 官方帳號 Broadcast
-    line_token = state.config.get("line_token", "").strip()
-    if line_token:
-        def _send_l():
-            msg_body = (
-                f"\n🚨【戰鬥陀螺官方補貨通知】\n"
-                f"商品: {name}\n"
-                f"官方價格: {price}\n"
-                f"販售賣家: {seller}\n"
-                f"🔥 1-Click 直達秒殺:\n{product_url}"
-            )
-            ok, msg = NotificationManager.send_line_broadcast(line_token, msg_body)
-            state.add_log(f"LINE: {msg}", "SUCCESS" if ok else "ERROR")
-        threading.Thread(target=_send_l, daemon=True).start()
+    if state.config.get("enable_line", True):
+        line_token = state.config.get("line_token", "").strip()
+        if line_token:
+            def _send_l():
+                msg_body = (
+                    f"\n🚨【戰鬥陀螺官方補貨通知】\n"
+                    f"商品: {name}\n"
+                    f"官方價格: {price}\n"
+                    f"販售賣家: {seller}\n"
+                    f"🔥 1-Click 直達秒殺:\n{product_url}"
+                )
+                ok, msg = NotificationManager.send_line_broadcast(line_token, msg_body)
+                state.add_log(f"LINE: {msg}", "SUCCESS" if ok else "ERROR")
+            threading.Thread(target=_send_l, daemon=True).start()
 
 
 def start_monitor():
@@ -239,13 +243,145 @@ async def health_check():
 
 @app.get("/api/status")
 async def get_status():
-    """獲取最新即時狀態與日誌"""
+    """獲取最新即時狀態、商品清單與日誌"""
     return {
         "is_monitoring": state.is_monitoring,
         "interval_seconds": state.config.get("interval_seconds", 5),
+        "only_amazon_seller": state.config.get("only_amazon_seller", True),
+        "enable_discord": state.config.get("enable_discord", True),
+        "enable_line": state.config.get("enable_line", True),
+        "discord_webhook": state.config.get("discord_webhook", ""),
+        "line_token": state.config.get("line_token", ""),
         "items": state.config.get("items", []),
         "logs": state.logs
     }
+
+
+@app.post("/api/settings")
+async def api_update_settings(req: Request):
+    """更新全域推播與監控設定"""
+    data = await req.json()
+    if "interval_seconds" in data:
+        state.config["interval_seconds"] = max(2, int(data["interval_seconds"]))
+    if "only_amazon_seller" in data:
+        state.config["only_amazon_seller"] = bool(data["only_amazon_seller"])
+    if "enable_discord" in data:
+        state.config["enable_discord"] = bool(data["enable_discord"])
+    if "enable_line" in data:
+        state.config["enable_line"] = bool(data["enable_line"])
+    if "discord_webhook" in data:
+        state.config["discord_webhook"] = str(data["discord_webhook"]).strip()
+    if "line_token" in data:
+        state.config["line_token"] = str(data["line_token"]).strip()
+    state.save_config()
+    state.add_log("⚙️ 雲端推播與系統設定已儲存！", "SUCCESS")
+    return {"ok": True, "config": state.config}
+
+
+@app.post("/api/add_item")
+async def api_add_item(req: Request, background_tasks: BackgroundTasks):
+    """新增監控商品"""
+    data = await req.json()
+    name = str(data.get("name", "")).strip()
+    raw_asin = str(data.get("asin", "")).strip()
+    note = str(data.get("note", "")).strip()
+    if not name:
+        return JSONResponse({"ok": False, "msg": "請輸入商品名稱或型號！"}, status_code=400)
+
+    asin = extract_asin(raw_asin)
+    new_item = {
+        "enabled": True,
+        "name": name,
+        "asin": asin,
+        "note": note,
+        "last_status": "待檢查",
+        "last_price": "-",
+        "last_seller": "-",
+        "last_time": "-"
+    }
+    state.config.setdefault("items", []).append(new_item)
+    new_idx = len(state.config["items"]) - 1
+    state.save_config()
+    state.add_log(f"➕ 已新增追蹤商品: {name} ({asin})", "SUCCESS")
+
+    if asin:
+        def _check_one():
+            res = AmazonJPChecker.check_asin(asin)
+            handle_result(new_idx, new_item, res, is_manual=True)
+        background_tasks.add_task(_check_one)
+
+    return {"ok": True, "item": new_item}
+
+
+@app.post("/api/edit_item")
+async def api_edit_item(req: Request, background_tasks: BackgroundTasks):
+    """編輯現有商品"""
+    data = await req.json()
+    idx = int(data.get("index", -1))
+    items = state.config.get("items", [])
+    if not (0 <= idx < len(items)):
+        return JSONResponse({"ok": False, "msg": "無效商品編號！"}, status_code=400)
+
+    name = str(data.get("name", "")).strip()
+    raw_asin = str(data.get("asin", "")).strip()
+    note = str(data.get("note", "")).strip()
+    if not name:
+        return JSONResponse({"ok": False, "msg": "請輸入商品名稱或型號！"}, status_code=400)
+
+    asin = extract_asin(raw_asin)
+    item = items[idx]
+    item["name"] = name
+    item["asin"] = asin
+    item["note"] = note
+    state.save_config()
+    state.add_log(f"✏️ 已更新商品資料: {name} ({asin})", "INFO")
+
+    if asin:
+        def _check_one():
+            res = AmazonJPChecker.check_asin(asin)
+            handle_result(idx, item, res, is_manual=True)
+        background_tasks.add_task(_check_one)
+
+    return {"ok": True, "item": item}
+
+
+@app.post("/api/delete_item")
+async def api_delete_item(index: int = Query(...)):
+    """刪除指定商品"""
+    items = state.config.get("items", [])
+    if 0 <= index < len(items):
+        deleted = items.pop(index)
+        state.save_config()
+        state.add_log(f"🗑️ 已刪除商品: {deleted.get('name')}", "INFO")
+        return {"ok": True, "msg": "已刪除"}
+    return JSONResponse({"ok": False, "msg": "無效商品索引"}, status_code=400)
+
+
+@app.post("/api/test_discord")
+async def api_test_discord(req: Request):
+    """從 Web 介面測試 Discord 推播"""
+    data = await req.json()
+    webhook_url = data.get("webhook_url", "").strip() or state.config.get("discord_webhook", "").strip()
+    if not webhook_url:
+        return JSONResponse({"ok": False, "msg": "請填寫 Discord Webhook 網址！"}, status_code=400)
+
+    prod_url = get_product_url("B0H861Y9Y3")
+    ok, msg = NotificationManager.send_discord(webhook_url, "【測試】UX-21 赫爾茲地獄 (雲端測試)", "B0H861Y9Y3", "￥4,500", "Amazon.co.jp (官方自營)", prod_url)
+    return {"ok": ok, "msg": msg}
+
+
+@app.post("/api/test_line")
+async def api_test_line(req: Request):
+    """從 Web 介面測試 LINE 推播"""
+    data = await req.json()
+    line_token = data.get("line_token", "").strip() or state.config.get("line_token", "").strip()
+    if not line_token:
+        return JSONResponse({"ok": False, "msg": "請填寫 LINE Token 或 Channel ID:Secret！"}, status_code=400)
+
+    prod_url = get_product_url("B0H861Y9Y3")
+    msg_body = f"【測試】戰鬥陀螺官方補貨通知測試！\n🔥 直達官方 1-Click 秒殺商品頁:\n{prod_url}"
+    ok, msg = NotificationManager.send_line_broadcast(line_token, msg_body)
+    return {"ok": ok, "msg": msg}
 
 
 @app.post("/api/start")

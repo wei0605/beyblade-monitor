@@ -119,5 +119,7 @@
       "last_seller": "第三方賣家",
       "last_time": "22:11:12"
     }
-  ]
+  ],
+  "enable_discord": true,
+  "enable_line": true
 }
