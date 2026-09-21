@@ -964,7 +964,7 @@
                   <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">官方: </span>${escapeHtml(it.official_price || (it.last_seller && it.last_seller.includes('官方') ? it.last_price : '官方缺貨'))}
                 </div>
                 <div style="font-size: 12px; font-weight: 600; color: ${it.third_party_price && it.third_party_price !== '-' ? '#fbbf24' : '#64748b'}; white-space: nowrap;">
-                  <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">第三方最低: </span>${escapeHtml(it.third_party_price || '-')}
+                  <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">第三方最低(含運): </span>${escapeHtml(it.third_party_price || '-')}
                 </div>
               </div>
             ` : `

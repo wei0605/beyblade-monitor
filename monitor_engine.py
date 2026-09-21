@@ -412,40 +412,57 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     else:
         official_price = "官方缺貨"
 
-    # 第三方最低價提取 (從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取)
-    tp_ints = []
+    # 第三方最低總價提取 (本體價格 + 運費，從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取)
+    tp_totals = []
     if in_stock and not is_official and price and price != "-":
         m = re.search(r"[\d,]+", price)
         if m:
             val = int(m.group(0).replace(",", ""))
             if val >= 500:
-                tp_ints.append(val)
+                # 提取 BuyBox 運費
+                bb_ship = 0
+                if buybox:
+                    csa_el = buybox.select_one("[data-csa-c-delivery-price]")
+                    if csa_el and csa_el.get("data-csa-c-delivery-price"):
+                        m_csa = re.search(r"[\d,]+", csa_el.get("data-csa-c-delivery-price"))
+                        if m_csa:
+                            bb_ship = int(m_csa.group(0).replace(",", ""))
+                    if bb_ship == 0:
+                        deliv_block = buybox.select_one("#delivery-message, #mir-layout-DELIVERY_BLOCK")
+                        if deliv_block:
+                            d_txt = deliv_block.get_text(" ", strip=True)
+                            if not any(f in d_txt for f in ["無料", "配送料無料", "無料配送", "通常配送無料"]):
+                                m_s = re.search(r'(?:配送料|送料)[^\d]{0,10}[￥¥]?\s*([\d,]+)', d_txt)
+                                if m_s:
+                                    bb_ship = int(m_s.group(1).replace(",", ""))
+                tp_totals.append(val + bb_ship)
 
     for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display"):
-        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-size-small.a-color-price"):
-            t = p_el.get_text(strip=True)
-            m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
-            if m:
-                v = int(m.group(1).replace(",", ""))
-                if v >= 500:
-                    tp_ints.append(v)
         txt = box.get_text(" ", strip=True)
-        # 排除運費 (例如 + ￥340 配送料) 與點數
-        cleaned_txt = re.sub(r'\+\s*[￥¥]?\s*[\d,]+\s*(?:配送料|送料)', '', txt)
-        cleaned_txt = re.sub(r'[\d,]+\s*(?:pt|ポイント)', '', cleaned_txt)
-        for m in re.finditer(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", cleaned_txt):
-            v = int(m.group(1).replace(",", ""))
-            if v >= 500:
-                tp_ints.append(v)
+        # 匹配本體價格 + 運費 (例如 ￥9,660 + ￥340 配送料)
+        m_with_ship = re.search(r'(?:JP)?\s*[￥¥]\s*([\d,]+)\s*\+\s*[￥¥]?\s*([\d,]+)\s*(?:配送料|送料)', txt)
+        if m_with_ship:
+            b_val = int(m_with_ship.group(1).replace(",", ""))
+            s_val = int(m_with_ship.group(2).replace(",", ""))
+            if b_val >= 500:
+                tp_totals.append(b_val + s_val)
+        else:
+            for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-size-small.a-color-price"):
+                t = p_el.get_text(strip=True)
+                m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
+                if m:
+                    v = int(m.group(1).replace(",", ""))
+                    if v >= 500:
+                        tp_totals.append(v)
 
     # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額
     if is_official and in_stock and price:
         m_off = re.search(r"[\d,]+", price)
         if m_off:
             off_val = int(m_off.group(0).replace(",", ""))
-            tp_ints = [p for p in tp_ints if p > off_val]
+            tp_totals = [p for p in tp_totals if p > off_val]
 
-    third_party_cheapest = f"￥{min(tp_ints):,}" if tp_ints else "-"
+    third_party_cheapest = f"￥{min(tp_totals):,}" if tp_totals else "-"
 
     return {
         "ok": True,
@@ -659,7 +676,7 @@ class AmazonJPChecker:
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
 
-        # 深入從 AOD (All Offers Display) 抽屜抓取所有第三方賣家更便宜的潛在報價 (如新手賣家/自出貨)
+        # 深入從 AOD (All Offers Display) 抽屜抓取所有第三方賣家含運總價更便宜的潛在報價 (如新手賣家/自出貨)
         try:
             aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain/?asin={asin}"
             s_to_use = session if ('session' in locals() and session) else None
@@ -667,15 +684,17 @@ class AmazonJPChecker:
                 r_aod = s_to_use.get(aod_url, headers=headers, timeout=6)
                 if r_aod.status_code == 200:
                     aod_soup = BeautifulSoup(r_aod.text, "html.parser")
-                    aod_ints = []
+                    aod_totals = []
                     for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
                         # 排除官方自營賣家
                         s_el = of.select_one("#aod-offer-soldBy, .aod-sold-by, #sellerProfileTriggerId")
                         s_text = s_el.get_text(" ", strip=True).lower() if s_el else ""
                         is_amazon = any(k in s_text for k in ["amazon.co.jp", "アマゾン"])
+                        if is_amazon:
+                            continue
                         
-                        # 提取價格
-                        found_p = None
+                        # 提取本體價格
+                        base_price = None
                         for p_sel in [".a-price-whole", ".apex-pricetopay-accessibility-label", ".aok-offscreen", ".a-price .a-offscreen", ".a-color-price"]:
                             pel = of.select_one(p_sel)
                             if pel:
@@ -683,24 +702,45 @@ class AmazonJPChecker:
                                 if m:
                                     v = int(m.group(0).replace(",", ""))
                                     if v >= 500:
-                                        found_p = v
+                                        base_price = v
                                         break
-                        if found_p and not is_amazon:
-                            aod_ints.append(found_p)
+                        if not base_price:
+                            continue
 
-                    if aod_ints:
+                        # 提取運費
+                        ship_fee = 0
+                        csa_el = of.select_one("[data-csa-c-delivery-price]")
+                        if csa_el and csa_el.get("data-csa-c-delivery-price"):
+                            m_csa = re.search(r"[\d,]+", csa_el.get("data-csa-c-delivery-price"))
+                            if m_csa:
+                                ship_fee = int(m_csa.group(0).replace(",", ""))
+                        
+                        if ship_fee == 0:
+                            deliv_block = of.select_one("#delivery-message, #mir-layout-DELIVERY_BLOCK, .aod-ship-charge")
+                            d_txt = deliv_block.get_text(" ", strip=True) if deliv_block else of.get_text(" ", strip=True)
+                            if any(f in d_txt for f in ["無料", "配送料無料", "無料配送", "通常配送無料"]):
+                                ship_fee = 0
+                            else:
+                                m_s = re.search(r'(?:配送料|送料)[^\d]{0,10}[￥¥]?\s*([\d,]+)', d_txt)
+                                if m_s:
+                                    ship_fee = int(m_s.group(1).replace(",", ""))
+
+                        total_price = base_price + ship_fee
+                        aod_totals.append(total_price)
+
+                    if aod_totals:
                         # 若官方有貨，排除官方自營價格
                         if res.get("is_official") and res.get("price"):
                             m_off = re.search(r"[\d,]+", res["price"])
                             if m_off:
                                 off_val = int(m_off.group(0).replace(",", ""))
-                                aod_ints = [p for p in aod_ints if p > off_val]
+                                aod_totals = [p for p in aod_totals if p > off_val]
                         
-                        if aod_ints:
+                        if aod_totals:
                             cur_tp = res.get("third_party_price", "-")
                             cur_val = int(re.sub(r'[^\d]', '', cur_tp)) if (cur_tp and cur_tp != "-") else 99999999
-                            min_aod = min(aod_ints)
-                            if min_aod < cur_val:
+                            min_aod = min(aod_totals)
+                            if min_aod < cur_val or cur_tp == "-":
                                 res["third_party_price"] = f"￥{min_aod:,}"
         except Exception:
             pass
