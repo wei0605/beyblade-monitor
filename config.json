@@ -204,5 +204,5 @@
   "enable_line": true,
   "amazon_jitter": true,
   "amazon_use_playwright": false,
-  "proxy_url": ""
+  "proxy_url": "http://smart-Paul1928:Qaz990501@proxy.smartproxy.net:3120"
 }

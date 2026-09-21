@@ -966,26 +966,40 @@ class ShopeeChecker:
 # =========================================================================
 
 def test_proxy_connection(proxy_url: str) -> Tuple[bool, str]:
-    """測試住宅代理 (Residential Proxy) 連線與取得對外 IP"""
+    """測試住宅代理 (Residential Proxy) 連線與取得對外 IP (支援自動補全 http:// 與多端點重試)"""
     if not proxy_url or not proxy_url.strip():
         return False, "未填寫代理網址"
     proxy_url = proxy_url.strip()
+    if not (proxy_url.startswith("http://") or proxy_url.startswith("https://") or proxy_url.startswith("socks5://")):
+        proxy_url = f"http://{proxy_url}"
+
     proxies = {"http": proxy_url, "https": proxy_url}
-    try:
-        if cffi_requests:
-            session = cffi_requests.Session(impersonate="chrome124", proxies=proxies)
-            r = session.get("https://httpbin.org/ip", timeout=10)
+    ip_services = [
+        "https://api.ipify.org?format=json",
+        "https://httpbin.org/ip"
+    ]
+
+    last_err = ""
+    for test_url in ip_services:
+        try:
+            if cffi_requests:
+                session = cffi_requests.Session(impersonate="chrome124", proxies=proxies)
+                r = session.get(test_url, timeout=15)
+                if r.status_code == 200:
+                    data = r.json()
+                    ip = data.get("ip") or data.get("origin") or "未知"
+                    return True, f"✅ 代理連線成功！出口住宅 IP: {ip}"
+            
+            r = requests.get(test_url, proxies=proxies, timeout=15)
             if r.status_code == 200:
-                ip = r.json().get("origin", "未知")
+                data = r.json()
+                ip = data.get("ip") or data.get("origin") or "未知"
                 return True, f"✅ 代理連線成功！出口住宅 IP: {ip}"
-        
-        r = requests.get("https://httpbin.org/ip", proxies=proxies, timeout=10)
-        if r.status_code == 200:
-            ip = r.json().get("origin", "未知")
-            return True, f"✅ 代理連線成功！出口住宅 IP: {ip}"
-        return False, f"HTTP {r.status_code}"
-    except Exception as e:
-        return False, f"代理連線失敗: {str(e)[:40]}"
+        except Exception as e:
+            last_err = str(e)
+            continue
+
+    return False, f"代理連線超時: {last_err[:50]}"
 
 
 def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_jitter: bool = True, use_playwright: bool = False, proxy: Optional[str] = None, only_amazon_seller: bool = True) -> Dict[str, Any]:
