@@ -314,7 +314,7 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
                 status_text = "🟢 官方現貨/預購" if not is_preorder else "🔵 官方開放預購"
                 is_alert_worthy = True
             else:
-                status_text = "🟡 第三方賣家現貨"
+                status_text = f"🟡 第三方現貨: {price}" if price and price != "-" else "🟡 第三方現貨 (非官方)"
                 if not state.config.get("only_amazon_seller", True):
                     is_alert_worthy = True
         else:
@@ -324,12 +324,15 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
         if res.get("status_text"):
             status_text = res["status_text"]
         elif res.get("no_featured_offer", False):
-            status_text = "⚪ 暫無官方現貨 (僅第三方轉賣)"
+            status_text = "⚪ 官方缺貨中 (僅轉賣選項)"
         else:
             status_text = "⚪ 缺貨中 / 暫無庫存"
 
+    # 正規化價格顯示 (杜絕出現「官方缺貨中」混淆文字)
+    clean_price = price if price and price not in ("官方缺貨中", "價格載入中") else ("-" if not in_stock else price)
+
     item["last_status"] = status_text
-    item["last_price"] = price
+    item["last_price"] = clean_price
     item["last_seller"] = seller
     item["last_time"] = now_str
     state.save_config()

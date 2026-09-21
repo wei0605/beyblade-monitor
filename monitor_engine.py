@@ -213,8 +213,10 @@ AMAZON_STEALTH_PROFILES = [
     },
 ]
 
+AMAZON_DEFAULT_ZIPCODE = "103-0003"
+
 def get_amazon_stealth_headers(profile: dict = None) -> Tuple[dict, str]:
-    """獲取真實瀏覽器輪換 Headers 與對應 Client Hints，帶日幣偏好 Cookie"""
+    """獲取真實瀏覽器輪換 Headers 與對應 Client Hints，帶日幣偏好與日本境內郵遞區號 Cookie (103-0003)"""
     if not profile:
         profile = random.choice(AMAZON_STEALTH_PROFILES)
     headers = {
@@ -222,7 +224,7 @@ def get_amazon_stealth_headers(profile: dict = None) -> Tuple[dict, str]:
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
         "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
         "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Cookie": "i18n-prefs=JPY; lc-acbjp=ja_JP",
+        "Cookie": f"i18n-prefs=JPY; lc-acbjp=ja_JP; glow-zipcode={AMAZON_DEFAULT_ZIPCODE}",
         "DNT": "1",
         "Upgrade-Insecure-Requests": "1",
         "Sec-Fetch-Dest": "document",
@@ -240,7 +242,7 @@ def get_amazon_stealth_headers(profile: dict = None) -> Tuple[dict, str]:
 
 
 def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "") -> Dict[str, Any]:
-    """統一 Amazon 商品頁面 HTML 解析器 (精準 BuyBox、官方賣家、庫存、價格)"""
+    """統一 Amazon 商品頁面 HTML 解析器 (精準 BuyBox、官方自營 vs 第三方賣家、庫存、價格)"""
     if not url:
         url = get_product_url(asin)
 
@@ -253,12 +255,17 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     elif status_code != 200 and not ("<html" in html.lower()):
         return {"ok": False, "msg": f"HTTP {status_code}"}
 
-    title_m = re.search(r'id="productTitle"[^>]*>(.*?)</span>', html, re.DOTALL)
-    title = " ".join(title_m.group(1).split()) if title_m else ""
+    soup = BeautifulSoup(html, "html.parser")
+    title_el = soup.select_one("#productTitle")
+    title = title_el.get_text(strip=True) if title_el else ""
 
-    has_cart = ('id="add-to-cart-button"' in html) or ('name="submit.add-to-cart"' in html)
-    has_buy_now = ('id="buy-now-button"' in html) or ('name="submit.buy-now"' in html)
-    has_preorder = ('preorder' in html.lower()) or ('予約注文' in html)
+    has_cart = bool(soup.select_one("#add-to-cart-button, [name='submit.add-to-cart']"))
+    has_buy_now = bool(soup.select_one("#buy-now-button, [name='submit.buy-now']"))
+    has_preorder = bool(soup.select_one("#preorder-button, [name='submit.preorder']")) or ("予約注文" in html)
+
+    avail_el = soup.select_one("#availability")
+    avail_text = avail_el.get_text(strip=True) if avail_el else ""
+    is_sold_out = any(k in avail_text for k in ["現在在庫切れ", "一時的に在庫切れ", "在庫切れです", "この商品は現在お取り扱いできません"])
 
     no_featured_offer = (
         "おすすめ出品はありません" in html or
@@ -266,61 +273,30 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         "没有精选优惠" in html
     ) and not (has_cart or has_buy_now or has_preorder)
 
-    has_third_party_profile = 'id="sellerProfileTriggerId"' in html
-
-    merchant_m = re.search(r'id="(?:merchantInfo|merchant-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
-    merchant_text = " ".join(re.sub(r'<[^>]+>', ' ', merchant_m.group(1)).split()) if merchant_m else ""
-
-    fulfiller_m = re.search(r'id="(?:fulfillerInfo|fulfiller-info)"[^>]*>(.*?)</div>', html, re.DOTALL)
-    fulfiller_text = " ".join(re.sub(r'<[^>]+>', ' ', fulfiller_m.group(1)).split()) if fulfiller_m else ""
-
-    is_amazon_sold = (
-        ("amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text) and
-        not has_third_party_profile
-    )
-    is_amazon_fulfilled = "amazon" in fulfiller_text.lower()
-
-    # 精準解析價格 (優先 Buybox / Apex 主價格區塊，嚴格排除特價劃線參考價與推薦卡片)
+    # 1. 精準解析價格 (優先 Buybox / Apex 主價格區塊，嚴格排除特價劃線參考價與推薦卡片)
     price = ""
-    try:
-        soup = BeautifulSoup(html, "html.parser")
-        
-        # 1. 優先從主要購買區塊 (BuyBox) 提取
-        buybox = soup.select_one("#buybox, #desktop_buybox, #tabular-buybox")
-        if buybox:
-            for p_elem in buybox.select(".priceToPay .a-offscreen, #price_inside_buybox, #newBuyBoxPrice, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
+    buybox = soup.select_one("#buybox, #desktop_buybox, #tabular-buybox")
+    if buybox:
+        for p_elem in buybox.select(".priceToPay .a-offscreen, #price_inside_buybox, #newBuyBoxPrice, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
+            t = p_elem.get_text(strip=True)
+            if "￥" in t or (t.replace(",", "").replace(".", "").isdigit()):
+                price = t if ("￥" in t or "$" in t) else f"￥{t}"
+                break
+
+    if not price:
+        apex = soup.select_one("#corePriceDisplay_desktop_feature_div, #apex_desktop, #corePrice_feature_div")
+        if apex:
+            for p_elem in apex.select(".priceToPay .a-offscreen, .apexPriceToPay .a-offscreen, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
                 t = p_elem.get_text(strip=True)
                 if t and ("￥" in t or t.replace(",", "").isdigit()):
-                    price = t if "￥" in t else f"￥{t}"
+                    price = t if ("￥" in t or "$" in t) else f"￥{t}"
                     break
+            if not price:
+                whole = apex.select_one(".a-price-whole")
+                if whole and whole.get_text(strip=True):
+                    price = f"￥{whole.get_text(strip=True)}"
 
-        # 2. 其次從中央價格展示區 (Apex / CorePrice) 提取
-        if not price:
-            apex = soup.select_one("#corePriceDisplay_desktop_feature_div, #apex_desktop, #corePrice_feature_div")
-            if apex:
-                for p_elem in apex.select(".priceToPay .a-offscreen, .apexPriceToPay .a-offscreen, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
-                    t = p_elem.get_text(strip=True)
-                    if t and ("￥" in t or t.replace(",", "").isdigit()):
-                        price = t if "￥" in t else f"￥{t}"
-                        break
-                if not price:
-                    whole = apex.select_one(".a-price-whole")
-                    if whole and whole.get_text(strip=True):
-                        price = f"￥{whole.get_text(strip=True)}"
-
-        # 3. 補充檢查 tabular buybox 的賣家資訊
-        if not merchant_text and buybox:
-            for tr in buybox.select("#tabular-buybox tr, .tabular-buybox-container tr"):
-                tr_text = tr.get_text()
-                if "販売元" in tr_text or "Sold by" in tr_text:
-                    merchant_text = tr_text.replace("販売元", "").replace("Sold by", "").strip()
-                    if "amazon" in merchant_text.lower() or "アマゾン" in merchant_text:
-                        is_amazon_sold = True
-                        break
-    except Exception:
-        pass
-
-    # 備援快速正則 (僅針對中央價格區塊，絕不跨全域 HTML)
+    # 備援快速正則
     if not price:
         m_core = re.search(r'id="corePriceDisplay_desktop_feature_div"[^>]*>.*?(?:<span class="a-offscreen">\s*([^\s<]+)\s*</span>|￥\s*([\d,]+))', html, re.DOTALL)
         if m_core:
@@ -332,28 +308,78 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
             if m_bb:
                 price = m_bb.group(1).strip()
 
-    in_stock = False
+    # 2. 精準賣家與配送解析 (聚焦 BuyBox，嚴格排除全網頁無關推薦元素)
+    seller_name = ""
+    ships_from = ""
     is_official = False
-    seller_name = "第三方賣家"
+    is_amazon_fulfilled = False
 
-    if (has_cart or has_buy_now or has_preorder) and not no_featured_offer:
-        if is_amazon_sold:
-            in_stock = True
+    if buybox:
+        bb_seller = buybox.select_one("#sellerProfileTriggerId")
+        if bb_seller and bb_seller.get_text(strip=True):
+            seller_name = bb_seller.get_text(strip=True)
+
+        for tr in buybox.select("tr, .tabular-buybox-row, div[class*='tabular']"):
+            row_txt = tr.get_text(" ", strip=True)
+            if "販売元" in row_txt or "Sold by" in row_txt:
+                s_link = tr.select_one("a, #sellerProfileTriggerId")
+                if s_link and s_link.get_text(strip=True):
+                    seller_name = s_link.get_text(strip=True)
+                else:
+                    parts = row_txt.split("販売元") if "販売元" in row_txt else row_txt.split("Sold by")
+                    if len(parts) > 1 and parts[1].strip():
+                        seller_name = parts[1].strip()
+            if "出荷元" in row_txt or "Ships from" in row_txt:
+                if "amazon" in row_txt.lower() or "アマゾン" in row_txt:
+                    is_amazon_fulfilled = True
+                    ships_from = "Amazon"
+                else:
+                    parts = row_txt.split("出荷元") if "出荷元" in row_txt else row_txt.split("Ships from")
+                    if len(parts) > 1 and parts[1].strip():
+                        ships_from = parts[1].strip()
+
+    merchant_info_el = soup.select_one("#merchant-info")
+    merchant_text = merchant_info_el.get_text(" ", strip=True) if merchant_info_el else ""
+    if merchant_text:
+        if ("amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text) and not seller_name:
+            if "が販売" in merchant_text or "販売、発送" in merchant_text or "Amazon.co.jp が発送" not in merchant_text:
+                seller_name = "Amazon.co.jp"
+                is_official = True
+        s_match = re.search(r'([^\s]+)\s*が販売', merchant_text)
+        if s_match and not is_official and not seller_name:
+            seller_name = s_match.group(1).strip()
+
+    if seller_name:
+        s_lower = seller_name.strip().lower()
+        if s_lower in ("amazon.co.jp", "アマゾン", "amazon") or "amazon.co.jp" in s_lower:
             is_official = True
             seller_name = "Amazon.co.jp (官方自營)"
         else:
-            in_stock = True
             is_official = False
-            if merchant_text:
-                seller_name = merchant_text[:25]
             if is_amazon_fulfilled:
-                seller_name += " (Amazon 配送)"
-    else:
-        in_stock = False
-        seller_name = "暫無官方現貨" if is_amazon_sold else "缺貨中"
+                seller_name = f"{seller_name} (第三方, Amazon 配送)"
+            else:
+                seller_name = f"{seller_name} (第三方賣家)"
+    elif "amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text:
+        is_official = True
+        seller_name = "Amazon.co.jp (官方自營)"
+    elif merchant_text:
+        is_official = False
+        seller_name = f"{merchant_text[:20]} (第三方賣家)"
 
-    if not price:
-        price = "官方缺貨中" if not in_stock else "價格載入中"
+    # 3. 庫存判定 (嚴格以是否有現貨購買按鈕與未標示完售為準)
+    in_stock = (has_cart or has_buy_now or has_preorder) and not is_sold_out and not no_featured_offer
+
+    if not in_stock:
+        if not price:
+            price = "-"
+        if not seller_name:
+            seller_name = "-"
+    else:
+        if not seller_name:
+            seller_name = "Amazon.co.jp (官方自營)" if is_official else "第三方賣家"
+        if not price:
+            price = "價格載入中"
 
     return {
         "ok": True,
@@ -366,7 +392,8 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         "is_preorder": has_preorder,
         "seller": seller_name,
         "url": url,
-        "raw_merchant": merchant_text
+        "raw_merchant": merchant_text,
+        "no_featured_offer": no_featured_offer
     }
 
 
@@ -454,9 +481,52 @@ class AmazonJPChecker:
         with cls._lock:
             cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
 
+    _session_lock = threading.Lock()
+    _cffi_session = None
+    _session_proxy = None
+
+    @classmethod
+    def get_cffi_session(cls, proxy: Optional[str] = None, imp: str = "chrome124"):
+        """獲取已注入日本境內郵遞區號 (103-0003) 的持久化連線池 Session"""
+        if not cffi_requests:
+            return None
+        with cls._session_lock:
+            if cls._cffi_session is None or cls._session_proxy != proxy:
+                proxies = {"http": proxy, "https": proxy} if proxy else None
+                try:
+                    s = cffi_requests.Session(impersonate=imp, proxies=proxies)
+                    headers, _ = get_amazon_stealth_headers()
+                    try:
+                        addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
+                        s.post(
+                            addr_url,
+                            headers=headers,
+                            json={
+                                "locationType": "LOCATION_INPUT",
+                                "zipCode": AMAZON_DEFAULT_ZIPCODE,
+                                "storeContext": "generic",
+                                "deviceType": "web",
+                                "pageType": "Gateway",
+                                "actionSource": "glow"
+                            },
+                            timeout=8
+                        )
+                    except Exception:
+                        pass
+                    cls._cffi_session = s
+                    cls._session_proxy = proxy
+                except Exception:
+                    cls._cffi_session = None
+            return cls._cffi_session
+
+    @classmethod
+    def reset_cffi_session(cls):
+        with cls._session_lock:
+            cls._cffi_session = None
+
     @classmethod
     def check_asin(cls, asin: str, interval: float = 0.6, enable_jitter: bool = True, use_playwright: bool = False, proxy: Optional[str] = None, official_only: bool = False) -> Dict[str, Any]:
-        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援真實 Headers輪換、Jitter延遲、TLS 偽裝與住宅代理)"""
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援真實 Headers輪換、Jitter延遲、TLS 偽裝、103-0003日本地址與住宅代理)"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
@@ -474,21 +544,23 @@ class AmazonJPChecker:
         status_code = 200
         proxies = {"http": proxy, "https": proxy} if proxy else None
 
-        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (支援住宅代理)
+        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (支援持久化連線池與日本境內郵遞區號 103-0003)
         if cffi_requests:
             try:
-                session = cffi_requests.Session(impersonate=imp, proxies=proxies)
-                r = session.get(url, headers=headers, timeout=8)
-                status_code = r.status_code
-                html = r.text
+                session = cls.get_cffi_session(proxy=proxy, imp=imp)
+                if session:
+                    r = session.get(url, headers=headers, timeout=12)
+                    status_code = r.status_code
+                    html = r.text
             except Exception:
+                cls.reset_cffi_session()
                 html = None
 
         # 第二優先：requests 連線池 (帶真實 Headers 輪換與住宅代理)
         if not html:
             try:
                 session = get_shared_session()
-                r = session.get(url, headers=headers, proxies=proxies, timeout=8)
+                r = session.get(url, headers=headers, proxies=proxies, timeout=10)
                 status_code = r.status_code
                 html = r.text
             except Exception as e:
@@ -571,7 +643,8 @@ class PChomeChecker:
         except Exception:
             pass
 
-        seller = "PChome 24h 購物"
+        is_funbox = any(k in (title or "").lower() for k in ["funbox", "麗嬰", "麗嬰國際"])
+        seller = "funbox 麗嬰國際 (PChome)" if is_funbox else "PChome 24h 購物"
         if not in_stock:
             status_text = "⚪ 缺貨中 / 暫無庫存"
         else:

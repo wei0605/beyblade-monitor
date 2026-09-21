@@ -62,8 +62,8 @@
       "asin": "B0FH4FD9NB",
       "note": "鯊魚利刃牌組套裝",
       "last_status": "⚪ 缺貨中 / 暫無庫存",
-      "last_price": "官方缺貨中",
-      "last_seller": "缺貨中",
+      "last_price": "-",
+      "last_seller": "-",
       "last_time": "21:13:43",
       "store": "amazon_jp"
     },
@@ -73,8 +73,8 @@
       "asin": "B0HJ783F18",
       "note": "官方公布 ASIN/網址後請點編輯填入",
       "last_status": "⚪ 缺貨中 / 暫無庫存",
-      "last_price": "官方缺貨中",
-      "last_seller": "缺貨中",
+      "last_price": "-",
+      "last_seller": "-",
       "last_time": "21:13:43",
       "store": "amazon_jp"
     },
@@ -84,7 +84,7 @@
       "asin": "B0HJ75X3PN",
       "note": "官方公布 ASIN/網址後請點編輯填入",
       "last_status": "🟡 第三方賣家現貨",
-      "last_price": "價格載入中",
+      "last_price": "-",
       "last_seller": "第三方賣家",
       "last_time": "21:13:43",
       "store": "amazon_jp"
@@ -95,7 +95,7 @@
       "asin": "B0G1QZR681",
       "note": "測試商品用",
       "last_status": "🟡 第三方賣家現貨",
-      "last_price": "價格載入中",
+      "last_price": "-",
       "last_seller": "第三方賣家",
       "last_time": "21:13:43",
       "store": "amazon_jp"
@@ -128,7 +128,7 @@
       "asin": "B0G1QZR681",
       "note": "",
       "last_status": "🟡 第三方賣家現貨",
-      "last_price": "價格載入中",
+      "last_price": "-",
       "last_seller": "第三方賣家",
       "last_time": "21:13:43",
       "store": "amazon_jp"
@@ -139,7 +139,7 @@
       "asin": "B0GS4F6977",
       "note": "",
       "last_status": "🟡 第三方賣家現貨",
-      "last_price": "價格載入中",
+      "last_price": "-",
       "last_seller": "第三方賣家",
       "last_time": "21:13:43",
       "store": "amazon_jp"
@@ -150,7 +150,7 @@
       "asin": "B0GG8QM8YS",
       "note": "",
       "last_status": "🟡 第三方賣家現貨",
-      "last_price": "價格載入中",
+      "last_price": "-",
       "last_seller": "第三方賣家",
       "last_time": "21:13:44",
       "store": "amazon_jp"
@@ -161,8 +161,8 @@
       "asin": "B0D91K2WMS",
       "note": "",
       "last_status": "⚪ 缺貨中 / 暫無庫存",
-      "last_price": "官方缺貨中",
-      "last_seller": "缺貨中",
+      "last_price": "-",
+      "last_seller": "-",
       "last_time": "21:13:45",
       "store": "amazon_jp"
     },
@@ -172,21 +172,10 @@
       "asin": "B0F12RK1F4",
       "note": "",
       "last_status": "⚪ 缺貨中 / 暫無庫存",
-      "last_price": "官方缺貨中",
-      "last_seller": "缺貨中",
+      "last_price": "-",
+      "last_seller": "-",
       "last_time": "21:13:45",
       "store": "amazon_jp"
-    },
-    {
-      "enabled": true,
-      "store": "pchome",
-      "name": "Beyblade X 戰鬥陀螺 BX-50 太陽 大會包Vol.11",
-      "asin": "DEASSW-A900KGOV3",
-      "note": "PChome 24h 官方現貨",
-      "last_status": "🟢 現貨有貨 (剩餘 3 件)",
-      "last_price": "NT$ 1,199",
-      "last_seller": "PChome 24h 購物",
-      "last_time": "21:24:50"
     },
     {
       "enabled": true,
