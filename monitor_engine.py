@@ -21,6 +21,7 @@ from typing import Dict, Any, Tuple, Optional
 
 import random
 import requests
+from bs4 import BeautifulSoup
 
 try:
     from curl_cffi import requests as cffi_requests
@@ -147,9 +148,11 @@ def get_shared_session():
 # - 合理請求間隔 + 隨機浮動延遲 (Jitter) 與自動 503 冷卻保護
 # - curl_cffi Chrome 124 TLS 偽裝 (繞過 CloudFront/Akamai TLS 指紋檢測)
 # - Playwright + playwright-stealth 真實無頭瀏覽器備援引擎
-def get_product_url(asin: str) -> str:
-    """生成官方自營 1-Click 快速購買商品網址"""
-    return f"https://www.amazon.co.jp/dp/{asin}?m=AN1VRQENFRJN5&th=1&psc=1"
+def get_product_url(asin: str, official_only: bool = False) -> str:
+    """生成 Amazon 購買商品網址 (支援官方直達與標準頁面)"""
+    if official_only:
+        return f"https://www.amazon.co.jp/dp/{asin}?m=AN1VRQENFRJN5&th=1&psc=1"
+    return f"https://www.amazon.co.jp/dp/{asin}?th=1&psc=1"
 
 
 def extract_asin(text: str) -> str:
@@ -236,8 +239,8 @@ def get_amazon_stealth_headers(profile: dict = None) -> Tuple[dict, str]:
     return headers, profile.get("impersonate", "chrome124")
 
 
-def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = None) -> Dict[str, Any]:
-    """統一 Amazon 商品頁面 HTML 解析器 (BuyBox、官方賣家、庫存、價格)"""
+def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "") -> Dict[str, Any]:
+    """統一 Amazon 商品頁面 HTML 解析器 (精準 BuyBox、官方賣家、庫存、價格)"""
     if not url:
         url = get_product_url(asin)
 
@@ -277,18 +280,57 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = N
     )
     is_amazon_fulfilled = "amazon" in fulfiller_text.lower()
 
+    # 精準解析價格 (優先 Buybox / Apex 主價格區塊，嚴格排除特價劃線參考價與推薦卡片)
     price = ""
-    m_price = re.search(r'class="a-price\s*[^"]*".*?<span class="a-offscreen">\s*([^\s<]+)\s*</span>', html, re.DOTALL)
-    if m_price:
-        price = m_price.group(1).strip()
-    else:
-        m_price2 = re.search(r'id="(?:priceblock_ourprice|priceblock_dealprice|price_inside_buybox)"[^>]*>\s*([^\s<]+)\s*<', html, re.DOTALL)
-        if m_price2:
-            price = m_price2.group(1).strip()
+    try:
+        soup = BeautifulSoup(html, "html.parser")
+        
+        # 1. 優先從主要購買區塊 (BuyBox) 提取
+        buybox = soup.select_one("#buybox, #desktop_buybox, #tabular-buybox")
+        if buybox:
+            for p_elem in buybox.select(".priceToPay .a-offscreen, #price_inside_buybox, #newBuyBoxPrice, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
+                t = p_elem.get_text(strip=True)
+                if t and ("￥" in t or t.replace(",", "").isdigit()):
+                    price = t if "￥" in t else f"￥{t}"
+                    break
+
+        # 2. 其次從中央價格展示區 (Apex / CorePrice) 提取
+        if not price:
+            apex = soup.select_one("#corePriceDisplay_desktop_feature_div, #apex_desktop, #corePrice_feature_div")
+            if apex:
+                for p_elem in apex.select(".priceToPay .a-offscreen, .apexPriceToPay .a-offscreen, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
+                    t = p_elem.get_text(strip=True)
+                    if t and ("￥" in t or t.replace(",", "").isdigit()):
+                        price = t if "￥" in t else f"￥{t}"
+                        break
+                if not price:
+                    whole = apex.select_one(".a-price-whole")
+                    if whole and whole.get_text(strip=True):
+                        price = f"￥{whole.get_text(strip=True)}"
+
+        # 3. 補充檢查 tabular buybox 的賣家資訊
+        if not merchant_text and buybox:
+            for tr in buybox.select("#tabular-buybox tr, .tabular-buybox-container tr"):
+                tr_text = tr.get_text()
+                if "販売元" in tr_text or "Sold by" in tr_text:
+                    merchant_text = tr_text.replace("販売元", "").replace("Sold by", "").strip()
+                    if "amazon" in merchant_text.lower() or "アマゾン" in merchant_text:
+                        is_amazon_sold = True
+                        break
+    except Exception:
+        pass
+
+    # 備援快速正則 (僅針對中央價格區塊，絕不跨全域 HTML)
+    if not price:
+        m_core = re.search(r'id="corePriceDisplay_desktop_feature_div"[^>]*>.*?(?:<span class="a-offscreen">\s*([^\s<]+)\s*</span>|￥\s*([\d,]+))', html, re.DOTALL)
+        if m_core:
+            p_val = m_core.group(1) or m_core.group(2)
+            if p_val:
+                price = p_val if "￥" in p_val else f"￥{p_val}"
         else:
-            m_price3 = re.search(r'￥\s*([\d,]+)', html[:200000])
-            if m_price3:
-                price = f"￥{m_price3.group(1)}"
+            m_bb = re.search(r'id="price_inside_buybox"[^>]*>\s*([^\s<]+)\s*<', html)
+            if m_bb:
+                price = m_bb.group(1).strip()
 
     in_stock = False
     is_official = False
@@ -413,8 +455,8 @@ class AmazonJPChecker:
             cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
 
     @classmethod
-    def check_asin(cls, asin: str, interval: float = 0.6, enable_jitter: bool = True, use_playwright: bool = False) -> Dict[str, Any]:
-        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援真實 Headers輪換、Jitter延遲與 TLS 偽裝)"""
+    def check_asin(cls, asin: str, interval: float = 0.6, enable_jitter: bool = True, use_playwright: bool = False, proxy: Optional[str] = None, official_only: bool = False) -> Dict[str, Any]:
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援真實 Headers輪換、Jitter延遲、TLS 偽裝與住宅代理)"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
@@ -425,27 +467,28 @@ class AmazonJPChecker:
             return PlaywrightAmazonChecker.check_asin(asin)
 
         cls.throttle(interval, enable_jitter=enable_jitter)
-        url = get_product_url(asin)
+        url = get_product_url(asin, official_only=official_only)
         headers, imp = get_amazon_stealth_headers()
 
         html = None
         status_code = 200
+        proxies = {"http": proxy, "https": proxy} if proxy else None
 
-        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (繞過 CloudFront/Akamai TLS 檢測)
+        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (支援住宅代理)
         if cffi_requests:
             try:
-                session = cffi_requests.Session(impersonate=imp)
-                r = session.get(url, headers=headers, timeout=5)
+                session = cffi_requests.Session(impersonate=imp, proxies=proxies)
+                r = session.get(url, headers=headers, timeout=8)
                 status_code = r.status_code
                 html = r.text
             except Exception:
                 html = None
 
-        # 第二優先：requests 連線池 (帶真實 Headers 輪換)
+        # 第二優先：requests 連線池 (帶真實 Headers 輪換與住宅代理)
         if not html:
             try:
                 session = get_shared_session()
-                r = session.get(url, headers=headers, timeout=5)
+                r = session.get(url, headers=headers, proxies=proxies, timeout=8)
                 status_code = r.status_code
                 html = r.text
             except Exception as e:
@@ -459,13 +502,13 @@ class AmazonJPChecker:
             cls.trigger_cooloff(20.0)
             if PlaywrightAmazonChecker.is_available():
                 return PlaywrightAmazonChecker.check_asin(asin)
-            return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證，已自動避讓冷卻 20s)"}
+            return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證，已自動避讓冷卻 20s，建議設定住宅代理)"}
 
         if status_code == 503:
             cls.trigger_cooloff(20.0)
             if PlaywrightAmazonChecker.is_available():
                 return PlaywrightAmazonChecker.check_asin(asin)
-            return {"ok": False, "msg": "Amazon 頻率限制 (503，已自動避讓冷卻 20s)"}
+            return {"ok": False, "msg": "Amazon 頻率限制 (503，已自動避讓冷卻 20s，建議設定住宅代理)"}
 
         return parse_amazon_html(html, asin, status_code=status_code, url=url)
 
@@ -922,13 +965,43 @@ class ShopeeChecker:
 # 8. 通用調度中心 (依據 store 欄位派發)
 # =========================================================================
 
-def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_jitter: bool = True, use_playwright: bool = False) -> Dict[str, Any]:
-    """多通路統一檢查調度器 (支援 Amazon 隨機 Jitter 與 Playwright 切換)"""
+def test_proxy_connection(proxy_url: str) -> Tuple[bool, str]:
+    """測試住宅代理 (Residential Proxy) 連線與取得對外 IP"""
+    if not proxy_url or not proxy_url.strip():
+        return False, "未填寫代理網址"
+    proxy_url = proxy_url.strip()
+    proxies = {"http": proxy_url, "https": proxy_url}
+    try:
+        if cffi_requests:
+            session = cffi_requests.Session(impersonate="chrome124", proxies=proxies)
+            r = session.get("https://httpbin.org/ip", timeout=10)
+            if r.status_code == 200:
+                ip = r.json().get("origin", "未知")
+                return True, f"✅ 代理連線成功！出口住宅 IP: {ip}"
+        
+        r = requests.get("https://httpbin.org/ip", proxies=proxies, timeout=10)
+        if r.status_code == 200:
+            ip = r.json().get("origin", "未知")
+            return True, f"✅ 代理連線成功！出口住宅 IP: {ip}"
+        return False, f"HTTP {r.status_code}"
+    except Exception as e:
+        return False, f"代理連線失敗: {str(e)[:40]}"
+
+
+def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_jitter: bool = True, use_playwright: bool = False, proxy: Optional[str] = None, only_amazon_seller: bool = True) -> Dict[str, Any]:
+    """多通路統一檢查調度器 (支援 Amazon 隨機 Jitter 與住宅代理)"""
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
 
     if store == "amazon_jp":
-        return AmazonJPChecker.check_asin(asin, interval=amazon_interval, enable_jitter=amazon_jitter, use_playwright=use_playwright)
+        return AmazonJPChecker.check_asin(
+            asin,
+            interval=amazon_interval,
+            enable_jitter=amazon_jitter,
+            use_playwright=use_playwright,
+            proxy=proxy,
+            official_only=only_amazon_seller
+        )
     elif store == "pchome":
         return PChomeChecker.check_prod(asin)
     elif store == "mm_shop":
@@ -940,7 +1013,14 @@ def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_
     elif store == "shopee":
         return ShopeeChecker.check_item(asin)
     else:
-        return AmazonJPChecker.check_asin(asin, interval=amazon_interval, enable_jitter=amazon_jitter, use_playwright=use_playwright)
+        return AmazonJPChecker.check_asin(
+            asin,
+            interval=amazon_interval,
+            enable_jitter=amazon_jitter,
+            use_playwright=use_playwright,
+            proxy=proxy,
+            official_only=only_amazon_seller
+        )
 
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:

@@ -3,8 +3,8 @@ services:
     name: beyblade-restock-monitor
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
-    plan: free
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 25
+    plan: starter
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION

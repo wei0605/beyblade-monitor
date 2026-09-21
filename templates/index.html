@@ -108,6 +108,9 @@
     }
     .btn-store-notify:hover { background: #475569; color: white; }
     .btn-store-notify.turn-on { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #34d399; }
+    .btn-store-check { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: 1px solid #38bdf8; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4); }
+    .btn-store-check:hover { background: #0284c7; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(2, 132, 199, 0.6); }
+    .btn-store-check:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-store-notify.turn-off { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
 
     /* Settings Panel */
@@ -204,7 +207,10 @@
         <i class="fa-solid fa-hurricane logo-icon"></i>
         <div>
           <div class="app-title">戰鬥陀螺 7 大賣場極速監控</div>
-          <div class="app-subtitle">Amazon / PChome / M.M小舖 / 麗嬰 / 童無忌 / 誠品 / 蝦皮</div>
+          <div class="app-subtitle" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <span>Amazon / PChome / M.M小舖 / 麗嬰 / 童無忌 / 誠品 / 蝦皮</span>
+            <span id="gmt8Clock" style="color: #38bdf8; font-family: monospace; font-size: 11px;">(GMT+8 台灣時間)</span>
+          </div>
         </div>
       </div>
       <div class="header-actions">
@@ -313,6 +319,17 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label class="form-label"><i class="fa-solid fa-network-wired" style="color: #38bdf8;"></i> 住宅代理 (Residential Proxy) 設定 (徹底解決 Amazon 擋 IP):</label>
+        <div class="input-with-btn">
+          <input type="text" id="settingProxyUrl" class="form-input" placeholder="http://username:password@gate.smartproxy.com:7000">
+          <button class="btn-test" onclick="testProxy()"><i class="fa-solid fa-plug"></i> 測試代理</button>
+        </div>
+        <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block; line-height: 1.4;">
+          支援 HTTP/SOCKS5 住宅真實家用寬頻 IP。填入後 Amazon JP 請求將自動透過該代理轉發，留空則使用雲端直連。
+        </span>
+      </div>
+
       <!-- 7 大賣場獨立 Discord Webhook 與推播開關 -->
       <div class="store-settings-block">
         <div class="store-settings-title">
@@ -387,6 +404,12 @@
         </div>
         <button id="btnToggleStoreNotify" class="btn-store-notify" onclick="toggleActiveStoreNotify()">
           <i class="fa-solid fa-toggle-on"></i> 切換推播
+        </button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+        <button id="btnCheckThisStore" class="btn-store-check" onclick="checkCurrentStoreNow()">
+          <i class="fa-solid fa-bolt" style="color: #facc15;"></i> <span id="btnCheckThisStoreText">立即檢查此賣場</span>
         </button>
       </div>
     </div>
@@ -506,6 +529,10 @@
           }
         });
         document.getElementById('statInStock').innerText = inStockCount;
+        if (data.current_time_gmt8) {
+          const clock = document.getElementById('gmt8Clock');
+          if (clock) clock.innerText = `🇹🇼 GMT+8: ${data.current_time_gmt8.split(' ')[1]}`;
+        }
 
         // Settings inputs (only if user is not actively editing)
         if (!isEditingSettings) {
@@ -549,6 +576,9 @@
           }
           if (!document.getElementById('settingLineToken').value) {
             document.getElementById('settingLineToken').value = data.line_token || '';
+          }
+          if (document.getElementById('settingProxyUrl')) {
+            document.getElementById('settingProxyUrl').value = data.proxy_url || '';
           }
           renderStoreSettingsCards();
         }
@@ -636,6 +666,12 @@
         notBtnEl.className = 'btn-store-notify turn-on';
         notBtnEl.innerHTML = '<i class="fa-solid fa-bell"></i> 開啟推播';
       }
+
+      // 3. 獨立賣場檢查按鈕文字
+      const chkBtnText = document.getElementById('btnCheckThisStoreText');
+      if (chkBtnText) {
+        chkBtnText.innerText = `立即檢查 ${curCfg.short_name}`;
+      }
     }
 
     async function toggleActiveStoreMonitor() {
@@ -669,6 +705,44 @@
         }
       } catch (e) {
         alert("操作失敗: " + e);
+      }
+    }
+
+    async function checkCurrentStoreNow() {
+      const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', short_name: '賣場' };
+      const btn = document.getElementById('btnCheckThisStore');
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch(`/api/check_store_now?store=${currentStoreTab}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          fetchStatus();
+        } else {
+          alert("檢查失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("請求失敗: " + e);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function testProxy() {
+      const pUrl = document.getElementById('settingProxyUrl').value.trim();
+      if (!pUrl) {
+        alert("請先輸入住宅代理網址！\n格式範例：http://帳號:密碼@代理伺服器:連接埠");
+        return;
+      }
+      try {
+        const res = await fetch('/api/test_proxy', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ proxy_url: pUrl })
+        });
+        const data = await res.json();
+        alert(data.msg);
+      } catch (e) {
+        alert("測試請求失敗: " + e);
       }
     }
 
@@ -736,14 +810,15 @@
               <span class="slider"></span>
             </label>
           </div>
-          <div style="margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: #0f172a; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155;">
-            <span style="color: #cbd5e1;"><i class="fa-solid fa-window-maximize" style="color: #a855f7;"></i> Playwright 引擎:</span>
-            <label class="switch" style="transform: scale(0.85);">
-              <input type="checkbox" id="store_playwright_${k}" ${sSet.use_playwright === true ? 'checked' : ''} onchange="onStorePlaywrightChange('${k}')">
-              <span class="slider"></span>
-            </label>
+          ` : `
+          <div style="margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: #1e293b; padding: 4px 10px; border-radius: 6px; border: 1px solid #334155;">
+            <span style="color: #cbd5e1;"><i class="fa-solid fa-stopwatch" style="color: #38bdf8;"></i> 賣場獨立輪詢週期:</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <input type="number" id="store_interval_${k}" class="store-hook-input" style="width: 55px; padding: 2px 6px; text-align: center;" step="0.5" min="1" max="300" value="${escapeHtml(sSet.item_interval_seconds !== undefined ? sSet.item_interval_seconds : 3.0)}" onfocus="isEditingSettings = true;">
+              <span style="color: #94a3b8; font-size: 11px;">秒</span>
+            </div>
           </div>
-          ` : ''}
+          `}
         `;
         container.appendChild(card);
       });
@@ -955,6 +1030,7 @@
         amazon_item_interval: amazonInterval,
         amazon_jitter: amazonJitter,
         amazon_use_playwright: amazonPlaywright,
+        proxy_url: document.getElementById('settingProxyUrl') ? document.getElementById('settingProxyUrl').value.trim() : "",
         discord_webhook: document.getElementById('settingDiscordUrl').value.trim(),
         line_token: document.getElementById('settingLineToken').value.trim(),
         store_settings: store_settings

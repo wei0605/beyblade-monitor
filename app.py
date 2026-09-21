@@ -5,14 +5,20 @@
 """
 
 import concurrent.futures
+import gc
 import json
 import os
 import random
 import sys
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any
+
+TZ_GMT8 = timezone(timedelta(hours=8))
+
+def get_now_gmt8() -> datetime:
+    return datetime.now(TZ_GMT8)
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -30,7 +36,7 @@ from monitor_engine import (
     CyberbizChecker, EsliteChecker, ShopeeChecker,
     check_store_item, get_item_direct_url,
     STORE_CONFIG, NotificationManager, get_product_url, extract_asin,
-    PLAYWRIGHT_AVAILABLE, cffi_requests
+    PLAYWRIGHT_AVAILABLE, cffi_requests, test_proxy_connection
 )
 
 # 初始化目錄與檔案
@@ -69,27 +75,42 @@ class MonitorState:
         cfg.setdefault("enable_line", True)
         cfg.setdefault("discord_webhook", "")
         cfg.setdefault("line_token", "")
+        cfg.setdefault("proxy_url", "")
         cfg.setdefault("items", [])
         cfg.setdefault("store_settings", {})
+
+        # 預設 5 大賣場專屬 Webhook
+        preset_hooks = {
+            "pchome": "https://ptb.discord.com/api/webhooks/1551281208799793233/0mXgFbPr6LgHNVtlILCYmDbw6lGyNfgvyS6EeCcWS5pjcGVl5RGksuOVbI3QeTXryKc7",
+            "mm_shop": "https://ptb.discord.com/api/webhooks/1551281302509068400/OarsOGYXf_G7RqY2tA5FgB8x4e6iGW0ngnkCbxwVrdI9ougiI7VL3vq_6m9Rdp-EDsl3",
+            "funbox_tw": "https://ptb.discord.com/api/webhooks/1551281372901937313/LMmnfrhoDdtO5WFK_Ppzo3hyrMBM-prQiiBIM4G2Bu5DzH9kAzvv7HhnjWWJ-ZJ8Lens",
+            "twj_toys": "https://ptb.discord.com/api/webhooks/1551281418661920822/0E1F8TSdfg2oekkcfm8OTwnCp9f5PVFYFpMfMjSgP6EZhiqSZjGojAnIAfqk6Ato2BA9",
+            "shopee": "https://ptb.discord.com/api/webhooks/1551281517194514544/ISz6kbL3ODvED505ByVNPHNOvq6pThpH7F_u2v1_L4_LqjhCWCt7phi2p_9yPox2hRiK"
+        }
 
         # 確保現有項目相容性：未標記 store 者預設為 amazon_jp
         for it in cfg.get("items", []):
             if "store" not in it:
                 it["store"] = "amazon_jp"
 
-        # 確保 7 大賣場皆有獨立推播設定 (預設啟用，若 amazon_jp 且全域有 webhook 則繼承)
+        # 確保 7 大賣場皆有獨立推播與頻率設定
         for s_key in STORE_CONFIG.keys():
             if s_key not in cfg["store_settings"]:
-                default_wh = cfg.get("discord_webhook", "") if s_key == "amazon_jp" else ""
+                default_wh = preset_hooks.get(s_key, "")
+                if s_key == "amazon_jp" and not default_wh:
+                    default_wh = cfg.get("discord_webhook", "")
                 cfg["store_settings"][s_key] = {
                     "enable_monitoring": True,
                     "enable_notifications": True,
-                    "discord_webhook": default_wh
+                    "discord_webhook": default_wh,
+                    "item_interval_seconds": 0.6 if s_key == "amazon_jp" else 3.0
                 }
             else:
                 cfg["store_settings"][s_key].setdefault("enable_monitoring", True)
                 cfg["store_settings"][s_key].setdefault("enable_notifications", True)
-                cfg["store_settings"][s_key].setdefault("discord_webhook", "")
+                if not cfg["store_settings"][s_key].get("discord_webhook"):
+                    cfg["store_settings"][s_key]["discord_webhook"] = preset_hooks.get(s_key, "")
+                cfg["store_settings"][s_key].setdefault("item_interval_seconds", 0.6 if s_key == "amazon_jp" else 3.0)
 
         return cfg
 
@@ -126,6 +147,10 @@ class MonitorState:
             return bool(s_val)
         return bool(self.config.get("amazon_use_playwright", False))
 
+    def get_proxy_url(self) -> str:
+        """獲取全域或 Amazon 專用住宅代理 (Residential Proxy)"""
+        return self.config.get("proxy_url", "").strip()
+
     def save_config(self):
         try:
             with open(CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -134,7 +159,7 @@ class MonitorState:
             pass
 
     def add_log(self, msg: str, level: str = "INFO"):
-        ts = datetime.now().strftime("%H:%M:%S")
+        ts = get_now_gmt8().strftime("%H:%M:%S")
         self.logs.append({"time": ts, "msg": msg, "level": level})
         if len(self.logs) > self.max_logs:
             self.logs = self.logs[-self.max_logs:]
@@ -150,70 +175,101 @@ class MonitorState:
 state = MonitorState()
 
 
-def background_monitor_worker():
-    """雲端 24H 背景監控輪詢核心 (多平台並發 + Amazon 專屬 0.6s 間隔節流)"""
-    state.add_log("=== 雲端 24H 多賣場背景監控已啟動 ===", "SUCCESS")
-    while not state.stop_event.is_set():
-        items = state.config.get("items", [])
-        active_items = []
-        for i, it in enumerate(items):
-            if not it.get("enabled", True) or not it.get("asin"):
-                continue
-            store = it.get("store", "amazon_jp")
-            if not state.is_store_monitored(store):
-                continue
-            active_items.append((i, it))
+def check_items_for_store(store_key: str, is_manual: bool = False):
+    """專門為單一賣場執行的極速檢查函式 (各賣場完全隔離、獨立抓價、互不干擾)"""
+    if store_key not in STORE_CONFIG:
+        return
+    s_cfg = STORE_CONFIG[store_key]
+    s_name = s_cfg["short_name"]
 
-        if not active_items:
-            time.sleep(3)
+    items = state.config.get("items", [])
+    store_items = []
+    for idx, it in enumerate(items):
+        if not it.get("enabled", True) or not it.get("asin"):
             continue
+        if it.get("store", "amazon_jp") == store_key:
+            store_items.append((idx, it))
 
-        amazon_delay = state.get_amazon_item_interval()
-        amazon_jitter = state.get_amazon_jitter()
-        amazon_playwright = state.get_amazon_use_playwright()
-        jitter_tag = " + Jitter" if amazon_jitter else ""
-        engine_tag = "Playwright" if (amazon_playwright and PLAYWRIGHT_AVAILABLE) else "curl_cffi TLS"
-        state.add_log(f"⚡ 開始檢查 {len(active_items)} 項商品 (跨 7 大賣場，Amazon每項間隔 {amazon_delay}s{jitter_tag}，引擎: {engine_tag})...", "INFO")
-        
-        def worker(item_tuple):
+    if not store_items:
+        if is_manual:
+            state.add_log(f"提示: [{s_name}] 目前無啟用監控的商品", "INFO")
+        return
+
+    amazon_delay = state.get_amazon_item_interval()
+    amazon_jitter = state.get_amazon_jitter()
+    proxy = state.get_proxy_url()
+    only_official = state.config.get("only_amazon_seller", True)
+
+    proxy_tag = " (住宅代理)" if (proxy and store_key == "amazon_jp") else ""
+    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品{proxy_tag}...", "INFO")
+    t0 = time.time()
+
+    def worker(item_tuple):
+        if state.stop_event.is_set():
+            return None
+        idx, item = item_tuple
+        res = check_store_item(
+            item,
+            amazon_interval=amazon_delay,
+            amazon_jitter=amazon_jitter,
+            proxy=proxy,
+            only_amazon_seller=only_official
+        )
+        return idx, item, res
+
+    max_workers = min(len(store_items), 4)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        for it in store_items:
             if state.stop_event.is_set():
-                return None
-            idx, item = item_tuple
-            res = check_store_item(item, amazon_interval=amazon_delay, amazon_jitter=amazon_jitter, use_playwright=amazon_playwright)
-            return idx, item, res
+                break
+            futures.append(executor.submit(worker, it))
+            if store_key == "amazon_jp" and amazon_delay > 0:
+                stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
+                time.sleep(stagger)
 
-        max_workers = min(len(active_items), 12)
-        t0 = time.time()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for it in active_items:
-                if state.stop_event.is_set():
-                    break
-                futures.append(executor.submit(worker, it))
-                store = it[1].get("store", "amazon_jp")
-                if store == "amazon_jp" and amazon_delay > 0:
-                    stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
-                    time.sleep(stagger)
-            for f in concurrent.futures.as_completed(futures):
-                if state.stop_event.is_set():
-                    break
-                result = f.result()
-                if result:
-                    idx, item, res = result
-                    handle_result(idx, item, res)
+        for f in concurrent.futures.as_completed(futures):
+            if state.stop_event.is_set():
+                break
+            result = f.result()
+            if result:
+                idx, item, res = result
+                handle_result(idx, item, res, is_manual=is_manual)
 
-        dt = time.time() - t0
-        state.add_log(f"⚡ 本輪同時檢查完成 (耗時 {dt:.2f} 秒)", "INFO")
+    dt = time.time() - t0
+    state.add_log(f"⚡ [{s_name}] 檢查完成 (耗時 {dt:.2f} 秒)", "SUCCESS" if is_manual else "INFO")
+    gc.collect()
 
-        interval = max(3, state.config.get("interval_seconds", 5))
-        for _ in range(int(interval * 10)):
+
+def background_monitor_worker():
+    """雲端 24H 多賣場獨立排程輪詢核心 (各賣場完全獨立運作、獨立頻率、互不干擾)"""
+    state.add_log("=== 雲端 24H 各賣場獨立背景監控已啟動 ===", "SUCCESS")
+    last_store_check: Dict[str, float] = {}
+
+    while not state.stop_event.is_set():
+        now = time.time()
+        for s_key in STORE_CONFIG.keys():
+            if state.stop_event.is_set():
+                break
+            if not state.is_store_monitored(s_key):
+                continue
+
+            s_set = state.config.get("store_settings", {}).get(s_key, {})
+            store_interval = float(s_set.get("item_interval_seconds", state.config.get("interval_seconds", 5)))
+            store_interval = max(2.0, store_interval)
+
+            last_time = last_store_check.get(s_key, 0.0)
+            if now - last_time >= store_interval:
+                last_store_check[s_key] = now
+                check_items_for_store(s_key, is_manual=False)
+
+        for _ in range(5):
             if state.stop_event.is_set():
                 break
             time.sleep(0.1)
 
-
 def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
-    now_str = datetime.now().strftime("%H:%M:%S")
+    now_str = get_now_gmt8().strftime("%H:%M:%S")
     name = item.get("name")
     asin = item.get("asin")
     store = item.get("store", "amazon_jp")
@@ -356,7 +412,7 @@ async def health_check():
         "status": "healthy",
         "monitoring": state.is_monitoring,
         "items_count": len(state.config.get("items", [])),
-        "timestamp": datetime.now().isoformat()
+        "timestamp_gmt8": get_now_gmt8().isoformat()
     }
 
 
@@ -371,12 +427,14 @@ async def get_status():
 
     return {
         "is_monitoring": state.is_monitoring,
+        "current_time_gmt8": get_now_gmt8().strftime("%Y-%m-%d %H:%M:%S"),
         "interval_seconds": state.config.get("interval_seconds", 5),
         "amazon_item_interval": state.get_amazon_item_interval(),
         "amazon_jitter": state.get_amazon_jitter(),
         "amazon_use_playwright": state.get_amazon_use_playwright(),
+        "proxy_url": state.get_proxy_url(),
         "curl_cffi_available": (cffi_requests is not None),
-        "playwright_available": PLAYWRIGHT_AVAILABLE,
+        "playwright_available": False,
         "only_amazon_seller": state.config.get("only_amazon_seller", True),
         "enable_discord": state.config.get("enable_discord", True),
         "enable_line": state.config.get("enable_line", True),
@@ -421,6 +479,8 @@ async def api_update_settings(req: Request):
         state.config["discord_webhook"] = str(data["discord_webhook"]).strip()
     if "line_token" in data:
         state.config["line_token"] = str(data["line_token"]).strip()
+    if "proxy_url" in data:
+        state.config["proxy_url"] = str(data["proxy_url"]).strip()
 
     # 各賣場獨立設定 (獨立通知開關 & 獨立 Discord Webhook & 商品間隔)
     if "store_settings" in data and isinstance(data["store_settings"], dict):
@@ -682,58 +742,38 @@ async def api_toggle_item(index: int = Query(...)):
     return {"ok": False, "msg": "無效索引"}
 
 
+@app.post("/api/check_store_now")
+async def api_check_store_now(background_tasks: BackgroundTasks, store: str = Query(...)):
+    """單獨立即檢查特定賣場的所有商品 (例如只查 PChome 或只查 Amazon)"""
+    if store not in STORE_CONFIG:
+        return JSONResponse({"ok": False, "msg": "無效賣場"}, status_code=400)
+
+    s_name = STORE_CONFIG[store]["name"]
+    background_tasks.add_task(check_items_for_store, store, True)
+    return {"ok": True, "msg": f"已開始檢查 {s_name} 商品"}
+
+
 @app.post("/api/check_now")
 async def api_check_now(background_tasks: BackgroundTasks):
-    """立即多線程並發全檢 (跨 7 大賣場秒級檢查)"""
-    def _do_check():
-        items = state.config.get("items", [])
-        active_items = []
-        for i, it in enumerate(items):
-            if not it.get("enabled", True) or not it.get("asin"):
-                continue
-            store = it.get("store", "amazon_jp")
-            if not state.is_store_monitored(store):
-                continue
-            active_items.append((i, it))
+    """立即檢查所有已開啟監控之賣場商品"""
+    def _do_all():
+        for s_key in STORE_CONFIG.keys():
+            if state.is_store_monitored(s_key):
+                check_items_for_store(s_key, is_manual=True)
+    background_tasks.add_task(_do_all)
+    return {"ok": True, "msg": "已開始全賣場極速檢查"}
 
-        if not active_items:
-            state.add_log("提示: 目前沒有任何已開啟監控的賣場商品可檢查！", "WARNING")
-            return
 
-        amazon_delay = state.get_amazon_item_interval()
-        amazon_jitter = state.get_amazon_jitter()
-        amazon_playwright = state.get_amazon_use_playwright()
-        jitter_tag = " + Jitter" if amazon_jitter else ""
-        engine_tag = "Playwright" if (amazon_playwright and PLAYWRIGHT_AVAILABLE) else "curl_cffi TLS"
-        state.add_log(f"⚡ 立即並發全檢 ({len(active_items)} 項商品，Amazon每項間隔 {amazon_delay}s{jitter_tag}，引擎: {engine_tag})...", "INFO")
-        t0 = time.time()
+@app.post("/api/test_proxy")
+async def api_test_proxy(req: Request):
+    """測試住宅代理 (Residential Proxy) 連線與取得對外 IP"""
+    data = await req.json()
+    proxy_url = data.get("proxy_url", "").strip() or state.get_proxy_url()
+    if not proxy_url:
+        return JSONResponse({"ok": False, "msg": "請輸入住宅代理網址！(格式: http://user:pass@host:port)"}, status_code=400)
 
-        def worker(item_tuple):
-            idx, item = item_tuple
-            res = check_store_item(item, amazon_interval=amazon_delay, amazon_jitter=amazon_jitter, use_playwright=amazon_playwright)
-            return idx, item, res
-
-        max_workers = min(len(active_items), 12)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for it in active_items:
-                futures.append(executor.submit(worker, it))
-                store = it[1].get("store", "amazon_jp")
-                if store == "amazon_jp" and amazon_delay > 0:
-                    stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
-                    time.sleep(stagger)
-            for f in concurrent.futures.as_completed(futures):
-                result = f.result()
-                if result:
-                    idx, item, res = result
-                    handle_result(idx, item, res, is_manual=True)
-
-        dt = time.time() - t0
-        state.add_log(f"⚡ 全部 {len(active_items)} 項商品檢查完成 (共耗時 {dt:.2f} 秒)！", "SUCCESS")
-
-    background_tasks.add_task(_do_check)
-    return {"ok": True, "msg": "已開始極速並發全檢"}
-
+    ok, msg = test_proxy_connection(proxy_url)
+    return {"ok": ok, "msg": msg}
 
 # ================== LINE 聊天室雙向遙控 Webhook ==================
 
