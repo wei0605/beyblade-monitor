@@ -316,7 +316,7 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
                 status_text = "🟢 官方現貨/預購" if not is_preorder else "🔵 官方開放預購"
                 is_alert_worthy = True
             else:
-                status_text = f"🟡 第三方現貨: {price}" if price and price != "-" else "🟡 第三方現貨 (非官方)"
+                status_text = f"🟡 第三方優質賣家: {price}" if price and price != "-" else "🟡 第三方優質賣家"
                 # 使用者明確要求：推播只要推播官方補貨的通知就好 金額也顯示官方金額就好
                 is_alert_worthy = False
         else:

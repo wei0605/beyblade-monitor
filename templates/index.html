@@ -922,8 +922,9 @@
         const cfg = storesConfig[storeKey] || storesConfig['amazon_jp'] || {};
         
         const card = document.createElement('div');
-        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'));
+        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家'));
         const isEnabled = it.enabled !== false;
+        const statusColor = (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家'))) ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8');
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
         let buyUrl = it.url;
@@ -954,7 +955,7 @@
 
           <div class="item-meta">
             <div>
-              <div class="item-status" style="color: ${isInStock ? '#34d399' : '#94a3b8'}">${escapeHtml(it.last_status || '待檢查')}</div>
+              <div class="item-status" style="color: ${statusColor}">${escapeHtml(it.last_status || '待檢查')}</div>
               <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}</div>
             </div>
             ${storeKey === 'amazon_jp' ? `
