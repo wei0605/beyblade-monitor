@@ -291,8 +291,12 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     if buybox:
         for p_elem in buybox.select(".priceToPay .a-offscreen, #price_inside_buybox, #newBuyBoxPrice, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
             t = p_elem.get_text(strip=True)
-            if "￥" in t or (t.replace(",", "").replace(".", "").isdigit()):
-                price = t if ("￥" in t or "$" in t) else f"￥{t}"
+            m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
+            if m:
+                price = f"￥{m.group(1)}"
+                break
+            elif t.replace(",", "").isdigit():
+                price = f"￥{t}"
                 break
 
     if not price:
@@ -300,25 +304,31 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         if apex:
             for p_elem in apex.select(".priceToPay .a-offscreen, .apexPriceToPay .a-offscreen, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
                 t = p_elem.get_text(strip=True)
-                if t and ("￥" in t or t.replace(",", "").isdigit()):
-                    price = t if ("￥" in t or "$" in t) else f"￥{t}"
+                m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
+                if m:
+                    price = f"￥{m.group(1)}"
+                    break
+                elif t and t.replace(",", "").isdigit():
+                    price = f"￥{t}"
                     break
             if not price:
                 whole = apex.select_one(".a-price-whole")
                 if whole and whole.get_text(strip=True):
-                    price = f"￥{whole.get_text(strip=True)}"
+                    w_txt = whole.get_text(strip=True).replace(",", "")
+                    if w_txt.isdigit():
+                        price = f"￥{whole.get_text(strip=True)}"
 
     # 備援快速正則 (僅針對中央價格區塊)
     if not price:
-        m_core = re.search(r'id="corePriceDisplay_desktop_feature_div"[^>]*>.*?(?:<span class="a-offscreen">\s*([^\s<]+)\s*</span>|￥\s*([\d,]+))', html, re.DOTALL)
+        m_core = re.search(r'id="corePriceDisplay_desktop_feature_div"[^>]*>.*?(?:[￥¥]\s*([\d,]+))', html, re.DOTALL)
         if m_core:
-            p_val = m_core.group(1) or m_core.group(2)
-            if p_val:
-                price = p_val if "￥" in p_val else f"￥{p_val}"
+            price = f"￥{m_core.group(1)}"
         else:
             m_bb = re.search(r'id="price_inside_buybox"[^>]*>\s*([^\s<]+)\s*<', html)
             if m_bb:
-                price = m_bb.group(1).strip()
+                m_sub = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", m_bb.group(1))
+                if m_sub:
+                    price = f"￥{m_sub.group(1)}"
 
     # 3. 庫存判定 (無有效價格或無購買按鈕，絕不可能判定為有貨，杜絕「價格載入中」偽狀態)
     has_buy_button = (has_cart or has_buy_now or has_preorder)
@@ -408,7 +418,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         m = re.search(r"[\d,]+", price)
         if m:
             val = int(m.group(0).replace(",", ""))
-            if val > 0:
+            if val >= 500:
                 tp_ints.append(val)
 
     for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display"):
@@ -416,10 +426,17 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
             t = p_el.get_text(strip=True)
             m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
             if m:
-                tp_ints.append(int(m.group(1).replace(",", "")))
+                v = int(m.group(1).replace(",", ""))
+                if v >= 500:
+                    tp_ints.append(v)
         txt = box.get_text(" ", strip=True)
-        for m in re.finditer(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", txt):
-            tp_ints.append(int(m.group(1).replace(",", "")))
+        # 排除運費 (例如 + ￥340 配送料) 與點數
+        cleaned_txt = re.sub(r'\+\s*[￥¥]?\s*[\d,]+\s*(?:配送料|送料)', '', txt)
+        cleaned_txt = re.sub(r'[\d,]+\s*(?:pt|ポイント)', '', cleaned_txt)
+        for m in re.finditer(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", cleaned_txt):
+            v = int(m.group(1).replace(",", ""))
+            if v >= 500:
+                tp_ints.append(v)
 
     # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額
     if is_official and in_stock and price:
@@ -538,7 +555,7 @@ class AmazonJPChecker:
 
     @classmethod
     def get_cffi_session(cls, proxy: Optional[str] = None, imp: str = "chrome124"):
-        """獲取已注入日本境內郵遞區號 (103-0003) 的持久化連線池 Session"""
+        """獲取已注入日本境內郵遞區號 (103-0003) 與 JPY 日幣的持久化連線池 Session"""
         if not cffi_requests:
             return None
         with cls._session_lock:
@@ -548,20 +565,27 @@ class AmazonJPChecker:
                     s = cffi_requests.Session(impersonate=imp, proxies=proxies)
                     headers, _ = get_amazon_stealth_headers()
                     try:
+                        # 1. 先訪問首頁建立 session-id 與基礎 Cookie
+                        s.get("https://www.amazon.co.jp/", headers=headers, timeout=10)
+                        # 2. 注入日本境內郵遞區號 103-0003 (東京都中央區日本橋)
                         addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
                         s.post(
                             addr_url,
-                            headers=headers,
-                            json={
+                            headers={**headers, "Content-Type": "application/x-www-form-urlencoded"},
+                            data={
                                 "locationType": "LOCATION_INPUT",
                                 "zipCode": AMAZON_DEFAULT_ZIPCODE,
                                 "storeContext": "generic",
                                 "deviceType": "web",
-                                "pageType": "Gateway",
+                                "pageType": "Detail",
                                 "actionSource": "glow"
                             },
                             timeout=8
                         )
+                        # 3. 嚴格鎖定幣別為日圓 JPY 與日語 ja_JP
+                        s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
+                        s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
+                        s.cookies.set("glow-zipcode", AMAZON_DEFAULT_ZIPCODE, domain=".amazon.co.jp")
                     except Exception:
                         pass
                     cls._cffi_session = s
@@ -635,32 +659,51 @@ class AmazonJPChecker:
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
 
-        # 若非官方自營有貨，額外從 AOD (All Offers Display) 抽屜抓取所有第三方賣家更便宜的潛在報價 (如新手賣家/自出貨)
-        if not res.get("is_official", False):
-            try:
-                aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain/?asin={asin}"
-                s_to_use = session if ('session' in locals() and session) else None
-                if s_to_use:
-                    r_aod = s_to_use.get(aod_url, headers=headers, timeout=5)
-                    if r_aod.status_code == 200:
-                        aod_soup = BeautifulSoup(r_aod.text, "html.parser")
-                        aod_ints = []
-                        for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
-                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .a-color-price"):
-                                t = p_el.get_text(strip=True)
-                                m = re.search(r"[\d,]+", t)
+        # 深入從 AOD (All Offers Display) 抽屜抓取所有第三方賣家更便宜的潛在報價 (如新手賣家/自出貨)
+        try:
+            aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain/?asin={asin}"
+            s_to_use = session if ('session' in locals() and session) else None
+            if s_to_use:
+                r_aod = s_to_use.get(aod_url, headers=headers, timeout=6)
+                if r_aod.status_code == 200:
+                    aod_soup = BeautifulSoup(r_aod.text, "html.parser")
+                    aod_ints = []
+                    for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
+                        # 排除官方自營賣家
+                        s_el = of.select_one("#aod-offer-soldBy, .aod-sold-by, #sellerProfileTriggerId")
+                        s_text = s_el.get_text(" ", strip=True).lower() if s_el else ""
+                        is_amazon = any(k in s_text for k in ["amazon.co.jp", "アマゾン"])
+                        
+                        # 提取價格
+                        found_p = None
+                        for p_sel in [".a-price-whole", ".apex-pricetopay-accessibility-label", ".aok-offscreen", ".a-price .a-offscreen", ".a-color-price"]:
+                            pel = of.select_one(p_sel)
+                            if pel:
+                                m = re.search(r"[\d,]+", pel.get_text(strip=True))
                                 if m:
-                                    val = int(m.group(0).replace(",", ""))
-                                    if val > 500:
-                                        aod_ints.append(val)
+                                    v = int(m.group(0).replace(",", ""))
+                                    if v >= 500:
+                                        found_p = v
+                                        break
+                        if found_p and not is_amazon:
+                            aod_ints.append(found_p)
+
+                    if aod_ints:
+                        # 若官方有貨，排除官方自營價格
+                        if res.get("is_official") and res.get("price"):
+                            m_off = re.search(r"[\d,]+", res["price"])
+                            if m_off:
+                                off_val = int(m_off.group(0).replace(",", ""))
+                                aod_ints = [p for p in aod_ints if p > off_val]
+                        
                         if aod_ints:
                             cur_tp = res.get("third_party_price", "-")
                             cur_val = int(re.sub(r'[^\d]', '', cur_tp)) if (cur_tp and cur_tp != "-") else 99999999
                             min_aod = min(aod_ints)
                             if min_aod < cur_val:
                                 res["third_party_price"] = f"￥{min_aod:,}"
-            except Exception:
-                pass
+        except Exception:
+            pass
 
         return res
 
