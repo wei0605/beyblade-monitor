@@ -633,7 +633,36 @@ class AmazonJPChecker:
                 return PlaywrightAmazonChecker.check_asin(asin)
             return {"ok": False, "msg": "Amazon 頻率限制 (503，已自動避讓冷卻 20s，建議設定住宅代理)"}
 
-        return parse_amazon_html(html, asin, status_code=status_code, url=url)
+        res = parse_amazon_html(html, asin, status_code=status_code, url=url)
+
+        # 若非官方自營有貨，額外從 AOD (All Offers Display) 抽屜抓取所有第三方賣家更便宜的潛在報價 (如新手賣家/自出貨)
+        if not res.get("is_official", False):
+            try:
+                aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain/?asin={asin}"
+                s_to_use = session if ('session' in locals() and session) else None
+                if s_to_use:
+                    r_aod = s_to_use.get(aod_url, headers=headers, timeout=5)
+                    if r_aod.status_code == 200:
+                        aod_soup = BeautifulSoup(r_aod.text, "html.parser")
+                        aod_ints = []
+                        for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
+                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .a-color-price"):
+                                t = p_el.get_text(strip=True)
+                                m = re.search(r"[\d,]+", t)
+                                if m:
+                                    val = int(m.group(0).replace(",", ""))
+                                    if val > 500:
+                                        aod_ints.append(val)
+                        if aod_ints:
+                            cur_tp = res.get("third_party_price", "-")
+                            cur_val = int(re.sub(r'[^\d]', '', cur_tp)) if (cur_tp and cur_tp != "-") else 99999999
+                            min_aod = min(aod_ints)
+                            if min_aod < cur_val:
+                                res["third_party_price"] = f"￥{min_aod:,}"
+            except Exception:
+                pass
+
+        return res
 
 
 # =========================================================================
