@@ -303,6 +303,8 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     in_stock = res.get("in_stock", False)
     is_official = res.get("is_official", True)
     is_preorder = res.get("is_preorder", False)
+    official_price = res.get("official_price", "-")
+    third_party_price = res.get("third_party_price", "-")
     url = res.get("url") or get_item_direct_url(item)
 
     status_text = ""
@@ -315,8 +317,8 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
                 is_alert_worthy = True
             else:
                 status_text = f"🟡 第三方現貨: {price}" if price and price != "-" else "🟡 第三方現貨 (非官方)"
-                if not state.config.get("only_amazon_seller", True):
-                    is_alert_worthy = True
+                # 使用者明確要求：推播只要推播官方補貨的通知就好 金額也顯示官方金額就好
+                is_alert_worthy = False
         else:
             status_text = res.get("status_text") or "🟢 平台現貨開放！"
             is_alert_worthy = True
@@ -335,6 +337,8 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     item["last_price"] = clean_price
     item["last_seller"] = seller
     item["last_time"] = now_str
+    item["official_price"] = official_price
+    item["third_party_price"] = third_party_price
     state.save_config()
 
     prev_was_in_stock = state.in_stock_state.get(item_key, False)
@@ -344,11 +348,14 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
 
     if is_alert_worthy:
         flag = store_cfg.get("flag", "⚡")
-        state.add_log(f"🔥【補貨】{flag} [{store_short}] {name} 價格: {price}！", "SUCCESS")
+        display_price = official_price if (store == "amazon_jp" and official_price and official_price != "官方缺貨") else price
+        state.add_log(f"🔥【官方補貨】{flag} [{store_short}] {name} 官方自營價: {display_price}！", "SUCCESS")
 
     if should_trigger:
         if store_notify_enabled:
-            trigger_notifications(item, name, asin, price, seller, url)
+            notify_price = official_price if (store == "amazon_jp" and official_price and official_price != "官方缺貨") else price
+            notify_url = get_item_direct_url(item)
+            trigger_notifications(item, name, asin, notify_price, seller, notify_url)
         else:
             state.add_log(f"🔕 [{store_short}] 已關閉推播通知，已略過本次推播", "INFO")
 

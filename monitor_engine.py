@@ -209,7 +209,7 @@ AMAZON_STEALTH_PROFILES = [
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0",
         "sec_ch_ua": None,
         "sec_ch_ua_platform": None,
-        "impersonate": "firefox120",
+        "impersonate": "firefox",
     },
 ]
 
@@ -396,12 +396,48 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         price = "-"
         seller_name = "-"
 
+    # 5. 官方自營價 vs 第三方最低價提取
+    if in_stock and is_official:
+        official_price = price
+    else:
+        official_price = "官方缺貨"
+
+    # 第三方最低價提取 (從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取)
+    tp_ints = []
+    if in_stock and not is_official and price and price != "-":
+        m = re.search(r"[\d,]+", price)
+        if m:
+            val = int(m.group(0).replace(",", ""))
+            if val > 0:
+                tp_ints.append(val)
+
+    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display"):
+        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-size-small.a-color-price"):
+            t = p_el.get_text(strip=True)
+            m = re.search(r"￥\s*([\d,]+)", t)
+            if m:
+                tp_ints.append(int(m.group(1).replace(",", "")))
+        txt = box.get_text(" ", strip=True)
+        for m in re.finditer(r"￥\s*([\d,]+)", txt):
+            tp_ints.append(int(m.group(1).replace(",", "")))
+
+    # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額
+    if is_official and in_stock and price:
+        m_off = re.search(r"[\d,]+", price)
+        if m_off:
+            off_val = int(m_off.group(0).replace(",", ""))
+            tp_ints = [p for p in tp_ints if p > off_val]
+
+    third_party_cheapest = f"￥{min(tp_ints):,}" if tp_ints else "-"
+
     return {
         "ok": True,
         "store": "amazon_jp",
         "asin": asin,
         "title": title,
         "price": price,
+        "official_price": official_price,
+        "third_party_price": third_party_cheapest,
         "in_stock": in_stock,
         "is_official": is_official,
         "is_preorder": has_preorder,
@@ -1102,7 +1138,7 @@ def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_
             enable_jitter=amazon_jitter,
             use_playwright=use_playwright,
             proxy=proxy,
-            official_only=only_amazon_seller
+            official_only=False
         )
     elif store == "pchome":
         return PChomeChecker.check_prod(asin)
@@ -1121,18 +1157,18 @@ def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_
             enable_jitter=amazon_jitter,
             use_playwright=use_playwright,
             proxy=proxy,
-            official_only=only_amazon_seller
+            official_only=False
         )
 
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:
-    """取得該商品的官方直接購買連結"""
+    """取得該商品的官方直接購買連結 (Amazon 帶有 m=AN1VRQENFRJN5 官方直達)"""
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
     cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
 
     if store == "amazon_jp":
-        return get_product_url(asin)
+        return get_product_url(asin, official_only=True)
     elif store == "pchome":
         return f"https://24h.pchome.com.tw/prod/{asin}"
     elif store == "mm_shop":
