@@ -414,11 +414,11 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display"):
         for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-size-small.a-color-price"):
             t = p_el.get_text(strip=True)
-            m = re.search(r"￥\s*([\d,]+)", t)
+            m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
             if m:
                 tp_ints.append(int(m.group(1).replace(",", "")))
         txt = box.get_text(" ", strip=True)
-        for m in re.finditer(r"￥\s*([\d,]+)", txt):
+        for m in re.finditer(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", txt):
             tp_ints.append(int(m.group(1).replace(",", "")))
 
     # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額
