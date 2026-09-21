@@ -186,7 +186,7 @@
       "last_status": "🟢 現貨有貨 (剩餘 3 件)",
       "last_price": "NT$ 1,199",
       "last_seller": "PChome 24h 購物",
-      "last_time": "21:13:35"
+      "last_time": "21:24:50"
     },
     {
       "enabled": true,
@@ -194,10 +194,10 @@
       "name": "UX-11 衝擊龍神 豪華組",
       "asin": "shopee6a3bdb48bde45",
       "note": "M.M小舖 預購/現貨款",
-      "last_status": "待檢查",
-      "last_price": "-",
-      "last_seller": "-",
-      "last_time": "-"
+      "last_status": "⚪ 缺貨中 / 暫無庫存",
+      "last_price": "NT$ 550",
+      "last_seller": "M.M小舖",
+      "last_time": "21:24:49"
     }
   ],
   "enable_discord": true,

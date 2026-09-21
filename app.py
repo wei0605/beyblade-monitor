@@ -52,7 +52,8 @@ class MonitorState:
     def __init__(self):
         self.is_monitoring = True
         self.stop_event = threading.Event()
-        self.monitor_thread = None
+        self.store_threads: Dict[str, threading.Thread] = {}
+        self._save_lock = threading.Lock()
         self.logs: List[Dict[str, str]] = []
         self.max_logs = 80
         self.config: Dict[str, Any] = self.load_config()
@@ -152,11 +153,12 @@ class MonitorState:
         return self.config.get("proxy_url", "").strip()
 
     def save_config(self):
-        try:
-            with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-                json.dump(self.config, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        with self._save_lock:
+            try:
+                with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                    json.dump(self.config, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
 
     def add_log(self, msg: str, level: str = "INFO"):
         ts = get_now_gmt8().strftime("%H:%M:%S")
@@ -241,29 +243,38 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     gc.collect()
 
 
-def background_monitor_worker():
-    """雲端 24H 多賣場獨立排程輪詢核心 (各賣場完全獨立運作、獨立頻率、互不干擾)"""
-    state.add_log("=== 雲端 24H 各賣場獨立背景監控已啟動 ===", "SUCCESS")
-    last_store_check: Dict[str, float] = {}
+def store_monitor_worker(store_key: str):
+    """單一賣場專屬 24H 獨立輪詢線程 (各賣場跑各自獨立的輪詢週期，彼此完全並行、互不等待)
+    例如：PChome 跑每 3 秒週期，Amazon 跑專屬 0.6s 間隔週期，彼此完全非同步，絕無卡頓。
+    """
+    s_cfg = STORE_CONFIG.get(store_key, {})
+    s_name = s_cfg.get("short_name", store_key)
+
+    # 錯開各賣場初次啟動時間 (依序錯開 0.25s)，避免一開機瞬間全部賣場同毫秒出發
+    keys_list = list(STORE_CONFIG.keys())
+    offset = keys_list.index(store_key) * 0.25 if store_key in keys_list else 0.0
+    time.sleep(offset)
 
     while not state.stop_event.is_set():
-        now = time.time()
-        for s_key in STORE_CONFIG.keys():
-            if state.stop_event.is_set():
-                break
-            if not state.is_store_monitored(s_key):
-                continue
+        # 如果該賣場未被啟用監控，每秒檢查一次開關狀態
+        if not state.is_store_monitored(store_key):
+            for _ in range(10):
+                if state.stop_event.is_set():
+                    break
+                time.sleep(0.1)
+            continue
 
-            s_set = state.config.get("store_settings", {}).get(s_key, {})
-            store_interval = float(s_set.get("item_interval_seconds", state.config.get("interval_seconds", 5)))
-            store_interval = max(2.0, store_interval)
+        # 執行該賣場的專屬商品抓價與補貨檢查 (獨立執行，絕不阻塞其他賣場)
+        check_items_for_store(store_key, is_manual=False)
 
-            last_time = last_store_check.get(s_key, 0.0)
-            if now - last_time >= store_interval:
-                last_store_check[s_key] = now
-                check_items_for_store(s_key, is_manual=False)
+        # 取得該賣場專屬的輪詢週期 (秒)
+        s_set = state.config.get("store_settings", {}).get(store_key, {})
+        store_interval = float(s_set.get("item_interval_seconds", state.config.get("interval_seconds", 5)))
+        store_interval = max(2.0, store_interval)
 
-        for _ in range(5):
+        # 依該賣場自訂間隔休眠，切片為 0.1s 以保證隨時響應 stop_event
+        sleep_slices = int(store_interval * 10)
+        for _ in range(sleep_slices):
             if state.stop_event.is_set():
                 break
             time.sleep(0.1)
@@ -379,17 +390,21 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
 
 
 def start_monitor():
-    if not state.is_monitoring or state.monitor_thread is None or not state.monitor_thread.is_alive():
-        state.is_monitoring = True
-        state.stop_event.clear()
-        state.monitor_thread = threading.Thread(target=background_monitor_worker, daemon=True)
-        state.monitor_thread.start()
+    state.is_monitoring = True
+    state.stop_event.clear()
+    state.add_log("=== 雲端 24H 各賣場獨立並行監控已啟動 (7 大賣場獨立線程，互不等待) ===", "SUCCESS")
+    for s_key in STORE_CONFIG.keys():
+        t = state.store_threads.get(s_key)
+        if t is None or not t.is_alive():
+            t = threading.Thread(target=store_monitor_worker, args=(s_key,), daemon=True, name=f"Worker-{s_key}")
+            state.store_threads[s_key] = t
+            t.start()
 
 
 def stop_monitor():
     state.is_monitoring = False
     state.stop_event.set()
-    state.add_log("=== 雲端監控線程已停止 ===", "INFO")
+    state.add_log("=== 雲端各賣場獨立監控線程已停止 ===", "INFO")
 
 
 @app.on_event("startup")
