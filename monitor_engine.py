@@ -368,6 +368,12 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
             cand = soup.select('[offer-display-feature-name="desktop-fulfiller-info"]')[-1].get_text(" ", strip=True)
             raw_fulfiller = cand.replace("出荷元", "").strip()
 
+        def is_amazon_name(s: str) -> bool:
+            if not s:
+                return False
+            s_low = s.lower().strip()
+            return s_low in ("amazon.co.jp", "amazon", "アマゾン", "amazon japan") or s_low.startswith("amazon.co.jp")
+
         # B. 傳統表格 Tabular BuyBox
         if buybox:
             for row in buybox.select("tr, .tabular-buybox-row, div[class*='tabular']"):
@@ -377,38 +383,54 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
                     if s_link and s_link.get_text(strip=True):
                         raw_seller = s_link.get_text(strip=True)
                     else:
-                        parts = row_txt.split("販売元") if "販売元" in row_txt else row_txt.split("Sold by")
+                        parts = re.split(r'販売元|Sold by', row_txt)
                         if len(parts) > 1 and parts[1].strip():
                             raw_seller = parts[1].strip()
                 if ("出荷元" in row_txt or "Ships from" in row_txt) and not raw_fulfiller:
-                    parts = row_txt.split("出荷元") if "出荷元" in row_txt else row_txt.split("Ships from")
+                    parts = re.split(r'出荷元|Ships from', row_txt)
                     if len(parts) > 1 and parts[1].strip():
                         raw_fulfiller = parts[1].strip()
 
-        # C. 傳統 #merchant-info
-        if not raw_seller:
-            m_info = soup.select_one("#merchant-info")
-            if m_info:
-                m_txt = m_info.get_text(" ", strip=True)
-                s_match = re.search(r'([^\s]+)\s*が販売', m_txt)
-                if s_match:
-                    raw_seller = s_match.group(1).strip()
-                elif "amazon.co.jp" in m_txt.lower() or "アマゾン" in m_txt:
+        # C. 傳統 #merchant-info (嚴格區分賣家與寄送者，避免國際/英文頁面誤判)
+        m_info = soup.select_one("#merchant-info")
+        if m_info:
+            # 先檢查是否有第三方賣家專屬連結
+            seller_link = m_info.select_one("a[href*='seller'], a[href*='shops'], a#sellerProfileTriggerId, a")
+            if seller_link and seller_link.get_text(strip=True):
+                if not raw_seller:
+                    raw_seller = seller_link.get_text(strip=True)
+
+            m_txt = m_info.get_text(" ", strip=True)
+
+            # 先判斷是否為官方自營專屬文案 (必須是 Amazon「販売」或「sold by Amazon」，且不可帶有第三方連結)
+            if any(k in m_txt for k in ["Amazon.co.jp が販売", "アマゾンが販売", "Amazon.co.jpが販売", "アマゾン が販売", "販売、発送します"]) or "sold by amazon" in m_txt.lower():
+                if not seller_link:
                     raw_seller = "Amazon.co.jp"
-                if ("amazon.co.jp が発送" in m_txt or "amazon が発送" in m_txt.lower() or "アマゾンが発送" in m_txt) and not raw_fulfiller:
-                    raw_fulfiller = "Amazon"
+
+            if not raw_seller:
+                # 日文: 提取 が販売 之前的店名
+                s_match = re.search(r'(?:この商品は、|この出品は、)?\s*([^\s,、]+)\s*が販売', m_txt)
+                if s_match:
+                    cand_s = s_match.group(1).strip()
+                    raw_seller = "Amazon.co.jp" if is_amazon_name(cand_s) else cand_s
+                # 英文: sold by XXX
+                s_match_en = re.search(r'sold by\s+([^.,\n]+)', m_txt, re.I)
+                if s_match_en and not raw_seller:
+                    cand_s = s_match_en.group(1).strip()
+                    raw_seller = "Amazon.co.jp" if is_amazon_name(cand_s) else cand_s
+
+            # 檢查運送
+            if not raw_fulfiller:
+                if any(k in m_txt for k in ["Amazon.co.jp が発送", "amazon が発送", "アマゾンが発送", "Amazon.co.jpが発送", "販売、発送します"]):
+                    raw_fulfiller = "Amazon.co.jp"
+                elif "ships from amazon" in m_txt.lower() or "fulfilled by amazon" in m_txt.lower() or "ships from and sold by amazon" in m_txt.lower():
+                    raw_fulfiller = "Amazon.co.jp"
 
         # D. 檢查 BuyBox 內的 sellerProfileTriggerId 連結
         if not raw_seller and buybox:
             bb_seller = buybox.select_one("#sellerProfileTriggerId")
             if bb_seller and bb_seller.get_text(strip=True):
                 raw_seller = bb_seller.get_text(strip=True)
-
-        def is_amazon_name(s: str) -> bool:
-            if not s:
-                return False
-            s_low = s.lower().strip()
-            return any(k in s_low for k in ["amazon.co.jp", "アマゾン", "amazon"])
 
         is_seller_amazon = is_amazon_name(raw_seller)
         is_fulfiller_amazon = is_amazon_name(raw_fulfiller)
