@@ -126,8 +126,12 @@ STORE_CONFIG = {
 }
 
 
-def get_shared_session():
-    """共用 HTTP 連線池，最大化連線重用"""
+_shared_session_initialized = False
+_shared_session_lock = threading.Lock()
+
+def get_shared_session(proxy: Optional[str] = None):
+    """共用 HTTP 連線池，最大化連線重用並確保具備日本境內郵遞區號 (103-0003) 與日幣憑證"""
+    global _shared_session_initialized
     if not hasattr(get_shared_session, "_session"):
         s = requests.Session()
         adapter = requests.adapters.HTTPAdapter(
@@ -138,7 +142,35 @@ def get_shared_session():
         s.mount("https://", adapter)
         s.mount("http://", adapter)
         get_shared_session._session = s
-    return get_shared_session._session
+
+    s = get_shared_session._session
+    if not _shared_session_initialized:
+        with _shared_session_lock:
+            if not _shared_session_initialized:
+                try:
+                    headers, _ = get_amazon_stealth_headers()
+                    addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
+                    proxies = {"http": proxy, "https": proxy} if proxy else None
+                    s.post(
+                        addr_url,
+                        headers={**headers, "Content-Type": "application/x-www-form-urlencoded", "x-requested-with": "XMLHttpRequest"},
+                        data={
+                            "locationType": "LOCATION_INPUT",
+                            "zipCode": AMAZON_DEFAULT_ZIPCODE,
+                            "storeContext": "generic",
+                            "deviceType": "web",
+                            "pageType": "Detail",
+                            "actionSource": "glow"
+                        },
+                        proxies=proxies,
+                        timeout=8
+                    )
+                    s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
+                    s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
+                    _shared_session_initialized = True
+                except Exception:
+                    pass
+    return s
 
 
 # =========================================================================
@@ -274,7 +306,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     title = title_el.get_text(strip=True) if title_el else ""
 
     # Buybox 購買容器
-    buybox = soup.select_one("#buybox, #desktop_buybox, #tabular-buybox")
+    buybox = soup.select_one("#buybox, #desktop_buybox, #desktop_qualifiedBuyBox, #tabular-buybox, #qualifiedBuybox, div[id*='buyBox'], div[id*='buybox']")
 
     # 1. 嚴格檢查購買按鈕 (限定於 Buybox 內，絕不跨全網頁掃描文字，徹底防止贊助廣告腳本詞彙干擾)
     has_cart = False
@@ -353,45 +385,83 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     raw_fulfiller = ""
 
     if in_stock:
+        def is_amazon_name(s: str) -> bool:
+            if not s:
+                return False
+            s_low = s.lower().strip()
+            s_clean = re.sub(r'^(由|由\s*|from\s*)', '', s_low)
+            s_clean = re.sub(r'(\s*が発送|\s*が販売|\s*配送|\s*発送|\s*发货|\s*發貨)$', '', s_clean).strip()
+            return s_clean in ("amazon.co.jp", "amazon", "アマゾン", "amazon japan", "amazon.com", "亚马逊", "亞馬遜") or s_clean.startswith("amazon.co.jp")
+
         # A. 現代 Amazon BuyBox ODF (Offer Display Feature)
         m_feat = soup.select_one('[offer-display-feature-name="desktop-merchant-info"] [data-csa-c-slot-id="odf-feature-text-desktop-merchant-info"], [offer-display-feature-name="desktop-merchant-info"] .offer-display-feature-text, [offer-display-feature-name="desktop-merchant-info"] a')
         if m_feat and m_feat.get_text(strip=True):
             raw_seller = m_feat.get_text(strip=True)
         elif soup.select('[offer-display-feature-name="desktop-merchant-info"]'):
             cand = soup.select('[offer-display-feature-name="desktop-merchant-info"]')[-1].get_text(" ", strip=True)
-            raw_seller = cand.replace("販売元", "").strip()
+            for k in ["販売元", "Sold by", "卖家", "賣家", "销售商", "銷售商"]:
+                cand = cand.replace(k, "")
+            raw_seller = cand.strip()
 
         f_feat = soup.select_one('[offer-display-feature-name="desktop-fulfiller-info"] [data-csa-c-slot-id="odf-feature-text-desktop-fulfiller-info"], [offer-display-feature-name="desktop-fulfiller-info"] .offer-display-feature-text')
         if f_feat and f_feat.get_text(strip=True):
             raw_fulfiller = f_feat.get_text(strip=True)
         elif soup.select('[offer-display-feature-name="desktop-fulfiller-info"]'):
             cand = soup.select('[offer-display-feature-name="desktop-fulfiller-info"]')[-1].get_text(" ", strip=True)
-            raw_fulfiller = cand.replace("出荷元", "").strip()
+            for k in ["出荷元", "Ships from", "发货人", "發貨人", "出货元", "出貨元"]:
+                cand = cand.replace(k, "")
+            raw_fulfiller = cand.strip()
 
-        def is_amazon_name(s: str) -> bool:
-            if not s:
-                return False
-            s_low = s.lower().strip()
-            return s_low in ("amazon.co.jp", "amazon", "アマゾン", "amazon japan") or s_low.startswith("amazon.co.jp")
+        # B. 傳統表格 Tabular BuyBox (支援日文、繁簡中文、英文及「发货人 / 卖家」合併行)
+        bb_container = buybox or soup.select_one("#tabular-buybox, #desktop_qualifiedBuyBox, #buybox, div[id*='buyBox'], div[id*='buybox']")
+        if bb_container:
+            combined_pattern = r'(?:发货人\s*[/／]\s*卖家|發貨人\s*[/／]\s*賣家|出荷元\s*[/／・]\s*販売元|Ships\s+from\s*[/／]\s*Sold\s+by)'
+            seller_pattern = r'(?:販売元|Sold\s+by|卖家|賣家|销售商|銷售商|出品者)'
+            fulfiller_pattern = r'(?:出荷元|Ships\s+from|发货人|發貨人|出货元|出貨元)'
 
-        # B. 傳統表格 Tabular BuyBox
-        if buybox:
-            for row in buybox.select("tr, .tabular-buybox-row, div[class*='tabular']"):
+            for row in bb_container.select("tr, .tabular-buybox-row, div[class*='tabular']"):
                 row_txt = row.get_text(" ", strip=True)
-                if ("販売元" in row_txt or "Sold by" in row_txt) and not raw_seller:
+                left_col = row.select_one(".tabular-buybox-column-left, td:first-child, .tabular-buybox-label, th")
+                right_col = row.select_one(".tabular-buybox-column-right, td:last-child, .tabular-buybox-value, td:nth-child(2)")
+                left_txt = left_col.get_text(" ", strip=True) if left_col else ""
+                right_txt = right_col.get_text(" ", strip=True) if right_col else ""
+
+                # 檢查合一標籤 (例如：发货人 / 卖家 Amazon.co.jp)
+                if re.search(combined_pattern, left_txt or row_txt, re.IGNORECASE):
+                    val = right_txt
+                    if not val:
+                        parts = re.split(combined_pattern, row_txt, flags=re.IGNORECASE)
+                        if len(parts) > 1 and parts[1].strip():
+                            val = parts[1].strip()
+                    if val:
+                        if not raw_seller:
+                            raw_seller = val
+                        if not raw_fulfiller:
+                            raw_fulfiller = val
+                    continue
+
+                # 賣家 row
+                if re.search(seller_pattern, left_txt or row_txt, re.IGNORECASE) and not raw_seller:
                     s_link = row.select_one("a, #sellerProfileTriggerId")
                     if s_link and s_link.get_text(strip=True):
                         raw_seller = s_link.get_text(strip=True)
+                    elif right_txt:
+                        raw_seller = right_txt
                     else:
-                        parts = re.split(r'販売元|Sold by', row_txt)
+                        parts = re.split(seller_pattern, row_txt, flags=re.IGNORECASE)
                         if len(parts) > 1 and parts[1].strip():
                             raw_seller = parts[1].strip()
-                if ("出荷元" in row_txt or "Ships from" in row_txt) and not raw_fulfiller:
-                    parts = re.split(r'出荷元|Ships from', row_txt)
-                    if len(parts) > 1 and parts[1].strip():
-                        raw_fulfiller = parts[1].strip()
 
-        # C. 傳統 #merchant-info (嚴格區分賣家與寄送者，避免國際/英文頁面誤判)
+                # 出貨/配送 row
+                if re.search(fulfiller_pattern, left_txt or row_txt, re.IGNORECASE) and not raw_fulfiller:
+                    if right_txt:
+                        raw_fulfiller = right_txt
+                    else:
+                        parts = re.split(fulfiller_pattern, row_txt, flags=re.IGNORECASE)
+                        if len(parts) > 1 and parts[1].strip():
+                            raw_fulfiller = parts[1].strip()
+
+        # C. 傳統 #merchant-info (嚴格區分賣家與寄送者，避免國際/中文/日文頁面誤判)
         m_info = soup.select_one("#merchant-info")
         if m_info:
             # 先檢查是否有第三方賣家專屬連結
@@ -402,16 +472,26 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
 
             m_txt = m_info.get_text(" ", strip=True)
 
-            # 先判斷是否為官方自營專屬文案 (必須是 Amazon「販売」或「sold by Amazon」，且不可帶有第三方連結)
-            if any(k in m_txt for k in ["Amazon.co.jp が販売", "アマゾンが販売", "Amazon.co.jpが販売", "アマゾン が販売", "販売、発送します"]) or "sold by amazon" in m_txt.lower():
+            # 先判斷是否為官方自營專屬文案 (必須是 Amazon「販売/销售」或「sold by Amazon」，且不可帶有第三方連結)
+            official_keywords = [
+                "Amazon.co.jp が販売", "アマゾンが販売", "Amazon.co.jpが販売", "アマゾン が販売", "販売、発送します",
+                "Amazon.co.jp 发货和销售", "Amazon.co.jp 销售并", "由 Amazon.co.jp 发货并销售", "由 Amazon.co.jp 销售",
+                "由 Amazon.co.jp 發貨並銷售", "由 Amazon.co.jp 銷售", "发货并销售", "發貨並銷售"
+            ]
+            if any(k in m_txt for k in official_keywords) or "sold by amazon" in m_txt.lower():
                 if not seller_link:
                     raw_seller = "Amazon.co.jp"
 
             if not raw_seller:
                 # 日文: 提取 が販売 之前的店名
-                s_match = re.search(r'(?:この商品は、|この出品は、)?\s*([^\s,、]+)\s*が販売', m_txt)
+                s_match = re.search(r'(?:この商品は、|この出品は、)?\s*([^,、\n]+?)\s*が販売', m_txt)
                 if s_match:
                     cand_s = s_match.group(1).strip()
+                    raw_seller = "Amazon.co.jp" if is_amazon_name(cand_s) else cand_s
+                # 中文: 由 XXX 销售 / 由 XXX 銷售
+                s_match_cn = re.search(r'(?:此商品由|本商品由|由)?\s*([^,，、\n]+?)\s*(?:销售|銷售|發貨並銷售|发货并销售)', m_txt)
+                if s_match_cn and not raw_seller:
+                    cand_s = s_match_cn.group(1).strip()
                     raw_seller = "Amazon.co.jp" if is_amazon_name(cand_s) else cand_s
                 # 英文: sold by XXX
                 s_match_en = re.search(r'sold by\s+([^.,\n]+)', m_txt, re.I)
@@ -421,16 +501,22 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
 
             # 檢查運送
             if not raw_fulfiller:
-                if any(k in m_txt for k in ["Amazon.co.jp が発送", "amazon が発送", "アマゾンが発送", "Amazon.co.jpが発送", "販売、発送します"]):
+                if any(k in m_txt for k in ["Amazon.co.jp が発送", "amazon が発送", "アマゾンが発送", "Amazon.co.jpが発送", "販売、発送します", "由 Amazon 配送", "由 Amazon.co.jp 配送", "由Amazon配送", "Amazon配送", "由 Amazon 发货", "由 Amazon 發貨"]):
                     raw_fulfiller = "Amazon.co.jp"
                 elif "ships from amazon" in m_txt.lower() or "fulfilled by amazon" in m_txt.lower() or "ships from and sold by amazon" in m_txt.lower():
                     raw_fulfiller = "Amazon.co.jp"
 
         # D. 檢查 BuyBox 內的 sellerProfileTriggerId 連結
-        if not raw_seller and buybox:
-            bb_seller = buybox.select_one("#sellerProfileTriggerId")
+        if not raw_seller and bb_container:
+            bb_seller = bb_container.select_one("#sellerProfileTriggerId")
             if bb_seller and bb_seller.get_text(strip=True):
                 raw_seller = bb_seller.get_text(strip=True)
+
+        # E. 檢查 BuyBox 內是否有配送標籤
+        if not raw_fulfiller and bb_container:
+            bb_txt = bb_container.get_text(" ", strip=True)
+            if any(k in bb_txt for k in ["由Amazon配送", "由 Amazon 配送", "Amazon配送", "アマゾンが発送", "Amazon.co.jp が発送", "Ships from Amazon", "Fulfilled by Amazon"]):
+                raw_fulfiller = "Amazon.co.jp"
 
         is_seller_amazon = is_amazon_name(raw_seller)
         is_fulfiller_amazon = is_amazon_name(raw_fulfiller)
@@ -468,8 +554,8 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
             if val >= 500:
                 tp_ints.append(val)
 
-    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display"):
-        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-size-small.a-color-price"):
+    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display, #aod-offer-list, #all-offers-display-scroller, div[id*='aod-ingress'], div[id*='unqualified-buybox'], div[id*='buying-options']"):
+        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value, [id^='aod-price-']"):
             t = p_el.get_text(strip=True)
             m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
             if m:
@@ -670,8 +756,15 @@ class KeepaChecker:
                 third_party_price = price_str
                 seller_name = "第三方賣家"
 
-            if new_price and new_price > 0 and third_party_price == "-":
-                third_party_price = f"￥{new_price:,}"
+            if new_price and new_price > 0:
+                if third_party_price == "-":
+                    third_party_price = f"￥{new_price:,}"
+                else:
+                    m_tp = re.search(r"[\d,]+", third_party_price)
+                    if m_tp:
+                        cur_tp_val = int(m_tp.group(0).replace(",", ""))
+                        if new_price < cur_tp_val:
+                            third_party_price = f"￥{new_price:,}"
 
             return {
                 "ok": True,
@@ -835,7 +928,7 @@ class AmazonJPChecker:
         # 第二優先：requests 連線池 (帶真實 Headers 輪換與住宅代理)
         if not html:
             try:
-                session = get_shared_session()
+                session = get_shared_session(proxy=proxy)
                 r = session.get(url, headers=headers, proxies=proxies, timeout=10)
                 status_code = r.status_code
                 html = r.text
@@ -874,7 +967,74 @@ class AmazonJPChecker:
             reason = "CAPTCHA 驗證" if is_captcha else "503 頻率限制"
             return {"ok": False, "msg": f"Amazon {reason} (建議填寫 Cookie/住宅代理，或填入 Keepa API Key 啟用自動備援)"}
 
-        return parse_amazon_html(html, asin, status_code=status_code, url=url)
+        res = parse_amazon_html(html, asin, status_code=status_code, url=url)
+
+        # 深度提取：若非官方自營有貨，或沒有精選優惠(no_featured_offer)，或目前無第三方報價，
+        # 額外自 AOD (All Offers Display) 提取所有第三方賣家 (包含運送為個人賣家/非官方自出貨 FBM) 的最低價
+        if not res.get("is_official", False) or res.get("no_featured_offer", False) or res.get("third_party_price") == "-":
+            try:
+                aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain?asin={asin}&pc=dp"
+                s_to_use = session if ('session' in locals() and session) else None
+                if s_to_use:
+                    aod_headers = {k: v for k, v in headers.items() if k.lower() != "cookie"}
+                    aod_headers["Referer"] = url
+                    r_aod = s_to_use.get(aod_url, headers=aod_headers, proxies=proxies, timeout=6)
+                    if r_aod.status_code == 200 and len(r_aod.text) > 500:
+                        aod_soup = BeautifulSoup(r_aod.text, "html.parser")
+                        aod_tp_ints = []
+                        for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
+                            s_el = of.select_one("#aod-offer-soldBy, [id*='soldBy']")
+                            f_el = of.select_one("#aod-offer-shipsFrom, [id*='shipsFrom']")
+                            s_txt = s_el.get_text(" ", strip=True) if s_el else ""
+                            f_txt = f_el.get_text(" ", strip=True) if f_el else ""
+
+                            has_tp_link = bool(of.select_one("a[href*='seller'], a[href*='shops'], #sellerProfileTriggerId"))
+                            is_s_amz = any(k in s_txt.lower() for k in ["amazon.co.jp", "amazon", "アマゾン"]) and ("が販売" in s_txt or "sold by" in s_txt.lower()) and not has_tp_link
+                            is_f_amz = any(k in f_txt.lower() for k in ["amazon.co.jp", "amazon", "アマゾン"])
+                            is_offer_official = is_s_amz and is_f_amz
+
+                            found_p = None
+                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .apex-pricetopay-value, [id^='aod-price-'], .a-color-price"):
+                                t = p_el.get_text(strip=True)
+                                m = re.search(r"[\d,]+", t)
+                                if m:
+                                    v = int(m.group(0).replace(",", ""))
+                                    if v >= 500:
+                                        found_p = v
+                                        break
+
+                            if found_p:
+                                if is_offer_official:
+                                    if not res.get("is_official"):
+                                        res["is_official"] = True
+                                        res["official_price"] = f"￥{found_p:,}"
+                                        res["seller"] = "Amazon.co.jp (官方自營)"
+                                        res["in_stock"] = True
+                                else:
+                                    # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA
+                                    aod_tp_ints.append(found_p)
+
+                        if aod_tp_ints:
+                            all_cands = []
+                            cur_tp = res.get("third_party_price", "-")
+                            if cur_tp and cur_tp != "-":
+                                m = re.search(r"[\d,]+", cur_tp)
+                                if m:
+                                    all_cands.append(int(m.group(0).replace(",", "")))
+                            all_cands.extend(aod_tp_ints)
+
+                            if res.get("is_official") and res.get("official_price") and res["official_price"] != "官方缺貨":
+                                m_off = re.search(r"[\d,]+", res["official_price"])
+                                if m_off:
+                                    off_val = int(m_off.group(0).replace(",", ""))
+                                    all_cands = [p for p in all_cands if p > off_val]
+
+                            if all_cands:
+                                res["third_party_price"] = f"￥{min(all_cands):,}"
+            except Exception:
+                pass
+
+        return res
 
 
 # =========================================================================
@@ -1461,7 +1621,7 @@ class NotificationManager:
         btn_text = cfg.get("btn_text", "👉 點此直達購買")
 
         payload = {
-            "content": f"🚨 **【戰鬥陀螺補貨通知】** {flag} **{store_title}** 現貨開放購買！",
+            "content": f"🚨 **【補貨】{item_name}** | {flag} **{store_title}** 現貨開放購買！",
             "embeds": [
                 {
                     "title": f"⚡ {item_name}",

@@ -420,9 +420,8 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
         if line_token:
             def _send_l():
                 msg_body = (
-                    f"\n🚨【戰鬥陀螺補貨通知】\n"
+                    f"🚨【補貨】{name}\n"
                     f"通路: {flag} {store_name}\n"
-                    f"商品: {name}\n"
                     f"即時價格: {price}\n"
                     f"店家/賣家: {seller}\n"
                     f"🔥 {btn_text}:\n{url}"
@@ -796,7 +795,7 @@ async def api_test_line(req: Request):
         return JSONResponse({"ok": False, "msg": "請填寫 LINE Token 或 Channel ID:Secret！"}, status_code=400)
 
     prod_url = get_product_url("B0H861Y9Y3")
-    msg_body = f"\n🚨【戰鬥陀螺補貨通知測試】\n通路: 🇯🇵 Amazon Japan\n商品: 【測試】UX-21 赫爾茲地獄\n價格: ￥4,500\n賣家: Amazon.co.jp (官方自營)\n🔥 1-Click 官方直達:\n{prod_url}"
+    msg_body = f"🚨【補貨測試】UX-21 赫爾茲地獄\n通路: 🇯🇵 Amazon Japan\n價格: ￥4,500\n賣家: Amazon.co.jp (官方自營)\n🔥 1-Click 官方直達:\n{prod_url}"
     ok, msg = NotificationManager.send_line_broadcast(line_token, msg_body)
     return {"ok": ok, "msg": msg}
 
