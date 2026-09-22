@@ -37,7 +37,7 @@ from monitor_engine import (
     check_store_item, get_item_direct_url,
     STORE_CONFIG, NotificationManager, get_product_url, extract_asin,
     PLAYWRIGHT_AVAILABLE, cffi_requests, test_proxy_connection,
-    KeepaChecker
+    KeepaChecker, fetch_latest_store_products, match_product_with_stealth_catalog
 )
 
 # 初始化目錄與檔案
@@ -57,6 +57,8 @@ class MonitorState:
         self._save_lock = threading.Lock()
         self.logs: List[Dict[str, str]] = []
         self.max_logs = 80
+        self.seen_stealth_urls: set = set()
+        self.stealth_thread: Any = None
         self.config: Dict[str, Any] = self.load_config()
         self.in_stock_state: Dict[str, bool] = {}
 
@@ -83,6 +85,7 @@ class MonitorState:
         cfg.setdefault("keepa_api_key", "")
         cfg.setdefault("keepa_enabled", bool(cfg.get("keepa_api_key")))
         cfg.setdefault("keepa_mode", "fallback")
+        cfg.setdefault("stealth_scan_interval", 60)
         cfg.setdefault("items", [])
         cfg.setdefault("store_settings", {})
 
@@ -126,6 +129,14 @@ class MonitorState:
         """檢查特定賣場是否開啟了監控 (True 表示要爬取，False 表示略過)"""
         s_set = self.config.get("store_settings", {}).get(store, {})
         return s_set.get("enable_monitoring", True)
+
+    def get_stealth_scan_interval(self) -> float:
+        """獲取最新上架商品防突襲雷達掃描間隔 (秒，預設 60 秒)"""
+        val = self.config.get("stealth_scan_interval", 60)
+        try:
+            return max(5.0, float(val))
+        except (ValueError, TypeError):
+            return 60.0
 
     def get_amazon_item_interval(self) -> float:
         """獲取 Amazon 每項商品檢查間隔 (秒，預設 0.6 秒)"""
@@ -200,10 +211,93 @@ class MonitorState:
 state = MonitorState()
 
 
+def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False):
+    """防突襲最新上架商品雷達
+    每 1 分鐘 (或依使用者自訂間隔、手動觸發時) 向非 Amazon 各電商抓取最新上架商品列表，
+    自動比對 98 款 BX/UX/CX 陀螺型號與關鍵字。
+    一經命中：自動補全品名、價格與直達網址，並發送 Discord 與 LINE 官方推播！
+    """
+    target_stores = [store_filter] if store_filter else ["shopee", "eslite", "twj_toys", "funbox_tw", "pchome", "mm_shop"]
+    proxy = state.get_proxy_url()
+    items = state.config.get("items", [])
+
+    for s_key in target_stores:
+        if s_key not in STORE_CONFIG or s_key in ("amazon_jp", "amazon_stealth"):
+            continue
+        if not state.is_store_monitored(s_key):
+            continue
+
+        s_cfg = STORE_CONFIG.get(s_key, {})
+        s_name = s_cfg.get("short_name", s_key)
+
+        catalog_items = [it for it in items if it.get("store") == s_key and it.get("enabled", True)]
+        if not catalog_items:
+            continue
+
+        if is_manual:
+            state.add_log(f"⚡ [{s_name}] 正在掃描最新上架商品...", "INFO")
+
+        try:
+            latest_prods = fetch_latest_store_products(s_key, proxy=proxy)
+            if not latest_prods:
+                if is_manual:
+                    state.add_log(f"[{s_name}] 最新上架商品清單為空或暫無回應", "INFO")
+                continue
+
+            hit_count = 0
+            new_hit_count = 0
+            for prod in latest_prods:
+                title = prod.get("title", "")
+                if not title:
+                    continue
+                match_res = match_product_with_stealth_catalog(title, catalog_items)
+                if match_res:
+                    matched_model = match_res["model"]
+                    target_item = match_res["catalog_item"]
+                    prod_url = prod.get("url", "")
+                    prod_price = prod.get("price", "未標示")
+                    prod_seller = prod.get("seller", s_cfg.get("name", s_key))
+
+                    alert_key = f"{s_key}_{matched_model}_{prod_url}"
+                    is_new_discovery = alert_key not in state.seen_stealth_urls
+                    state.seen_stealth_urls.add(alert_key)
+
+                    now_str = get_now_gmt8().strftime("%H:%M:%S")
+                    target_item["last_status"] = "🟢 突襲上架現貨！"
+                    target_item["last_price"] = prod_price
+                    target_item["last_seller"] = prod_seller
+                    target_item["last_time"] = now_str
+                    target_item["url"] = prod_url
+                    target_item["direct_url"] = prod_url
+                    state.save_config()
+
+                    hit_count += 1
+                    if is_new_discovery:
+                        new_hit_count += 1
+                    if is_new_discovery or is_manual:
+                        state.add_log(f"🚨【突襲上架發現！】[{s_name}] 命中型號 {matched_model}！品名: {title[:28]} 售價: {prod_price}", "SUCCESS")
+                        item_display_name = f"BEYBLADE X {matched_model} ({title[:25]})" if matched_model not in title else title[:35]
+                        trigger_notifications(target_item, item_display_name, matched_model, prod_price, prod_seller, prod_url)
+                        state.in_stock_state[f"{s_key}_{matched_model}"] = True
+
+            if hit_count == 0 and is_manual:
+                state.add_log(f"[{s_name}] 最新上架 {len(latest_prods)} 件商品掃描完成，未發現命中型號", "INFO")
+            elif new_hit_count > 0 or (hit_count > 0 and is_manual):
+                state.add_log(f"🎉 [{s_name}] 本次掃描捕獲 {new_hit_count if not is_manual else hit_count} 件防突襲陀螺上架！", "SUCCESS")
+        except Exception as e:
+            state.add_log(f"[{s_name}] 最新上架雷達掃描異常: {str(e)[:35]}", "WARNING")
+
+
 def check_items_for_store(store_key: str, is_manual: bool = False):
     """專門為單一賣場執行的極速檢查函式 (各賣場完全隔離、獨立抓價、互不干擾)"""
     if store_key not in STORE_CONFIG:
         return
+
+    # 非 Amazon 通路：直接交給「最新上架商品防突襲雷達」比對 (節省大量爬蟲次數)
+    if store_key not in ("amazon_jp", "amazon_stealth"):
+        scan_latest_arrivals_radar(store_filter=store_key, is_manual=is_manual)
+        return
+
     s_cfg = STORE_CONFIG[store_key]
     s_name = s_cfg["short_name"]
 
@@ -281,9 +375,7 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
 
 
 def store_monitor_worker(store_key: str):
-    """單一賣場專屬 24H 獨立輪詢線程 (各賣場跑各自獨立的輪詢週期，彼此完全並行、互不等待)
-    例如：PChome 跑每 3 秒週期，Amazon 跑專屬 0.6s 間隔週期，彼此完全非同步，絕無卡頓。
-    """
+    """單一賣場專屬 24H 獨立輪詢線程 (各賣場跑各自獨立的輪詢週期，彼此完全並行、互不等待)"""
     s_cfg = STORE_CONFIG.get(store_key, {})
     s_name = s_cfg.get("short_name", store_key)
 
@@ -301,13 +393,16 @@ def store_monitor_worker(store_key: str):
                 time.sleep(0.1)
             continue
 
-        # 執行該賣場的專屬商品抓價與補貨檢查 (獨立執行，絕不阻塞其他賣場)
-        check_items_for_store(store_key, is_manual=False)
-
-        # 取得該賣場專屬的輪詢週期 (秒)
-        s_set = state.config.get("store_settings", {}).get(store_key, {})
-        store_interval = float(s_set.get("item_interval_seconds", state.config.get("interval_seconds", 5)))
-        store_interval = max(2.0, store_interval)
+        if store_key in ("amazon_jp", "amazon_stealth"):
+            # Amazon 專屬高頻檢查 (預設 0.6s 間隔)
+            check_items_for_store(store_key, is_manual=False)
+            s_set = state.config.get("store_settings", {}).get(store_key, {})
+            store_interval = float(s_set.get("item_interval_seconds", state.config.get("interval_seconds", 5)))
+            store_interval = max(0.2, store_interval)
+        else:
+            # 非 Amazon 賣場：依自訂頻率 (預設 60 秒) 抓取「最新上架商品」比對 98 款陀螺型號
+            scan_latest_arrivals_radar(store_filter=store_key, is_manual=False)
+            store_interval = state.get_stealth_scan_interval()
 
         # 依該賣場自訂間隔休眠，切片為 0.1s 以保證隨時響應 stop_event
         sleep_slices = int(store_interval * 10)
@@ -493,6 +588,7 @@ async def get_status():
         "is_monitoring": state.is_monitoring,
         "current_time_gmt8": get_now_gmt8().strftime("%Y-%m-%d %H:%M:%S"),
         "interval_seconds": state.config.get("interval_seconds", 5),
+        "stealth_scan_interval": state.get_stealth_scan_interval(),
         "amazon_item_interval": state.get_amazon_item_interval(),
         "amazon_jitter": state.get_amazon_jitter(),
         "amazon_use_playwright": state.get_amazon_use_playwright(),
@@ -523,6 +619,11 @@ async def api_update_settings(req: Request):
     data = await req.json()
     if "interval_seconds" in data:
         state.config["interval_seconds"] = max(2, int(data["interval_seconds"]))
+    if "stealth_scan_interval" in data:
+        try:
+            state.config["stealth_scan_interval"] = max(5, int(data["stealth_scan_interval"]))
+        except (ValueError, TypeError):
+            pass
     if "amazon_item_interval" in data:
         try:
             val = max(0.1, float(data["amazon_item_interval"]))
@@ -960,6 +1061,13 @@ async def api_check_now(background_tasks: BackgroundTasks):
                 check_items_for_store(s_key, is_manual=True)
     background_tasks.add_task(_do_all)
     return {"ok": True, "msg": "已開始全賣場極速檢查"}
+
+
+@app.post("/api/trigger_stealth_scan")
+async def api_trigger_stealth_scan(background_tasks: BackgroundTasks, store: str = Query(None)):
+    """立即執行全電商 (或特定電商) 最新上架防突襲比對掃描"""
+    background_tasks.add_task(scan_latest_arrivals_radar, store, True)
+    return {"ok": True, "msg": "已開始最新上架商品防突襲比對掃描"}
 
 
 @app.post("/api/test_proxy")

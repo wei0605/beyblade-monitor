@@ -696,6 +696,19 @@
         <input type="number" id="settingInterval" class="form-input" min="2" max="300" value="5">
       </div>
 
+      <div class="form-group" style="background: rgba(56, 189, 248, 0.08); padding: 12px; border-radius: 8px; border: 1px dashed rgba(56, 189, 248, 0.35);">
+        <label class="form-label" style="color: #38bdf8; margin-bottom: 4px;">
+          <i class="fa-solid fa-radar"></i> 最新上架商品防突襲掃描間隔 (秒，預設 60 秒):
+        </label>
+        <div class="input-with-btn">
+          <input type="number" id="settingStealthScanInterval" class="form-input" min="10" max="600" value="60">
+          <button class="btn-test" style="background: #0284c7; color: white;" onclick="triggerStealthScanNow()"><i class="fa-solid fa-bolt"></i> 立即掃描</button>
+        </div>
+        <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block; line-height: 1.4;">
+          每隔設定秒數向蝦皮、誠品、童無忌、麗嬰、PChome、M.M小舖抓取最新上架商品，自動比對 98 款 BX/UX/CX 陀螺型號。省爬蟲次數又零漏報！
+        </span>
+      </div>
+
       <div class="form-group">
         <label class="form-label"><i class="fa-brands fa-amazon" style="color: #f59e0b;"></i> Amazon 每項商品檢查間隔 (秒，預設 0.6 秒):</label>
         <input type="number" id="settingAmazonInterval" class="form-input" step="0.1" min="0.1" max="10" value="0.6">
@@ -1174,6 +1187,9 @@
           document.getElementById('settingEnableLine').checked = data.enable_line !== false;
           document.getElementById('settingOnlyAmazon').checked = data.only_amazon_seller !== false;
           document.getElementById('settingInterval').value = data.interval_seconds || 5;
+          if (document.getElementById('settingStealthScanInterval')) {
+            document.getElementById('settingStealthScanInterval').value = data.stealth_scan_interval !== undefined ? data.stealth_scan_interval : 60;
+          }
           document.getElementById('settingAmazonInterval').value = data.amazon_item_interval !== undefined ? data.amazon_item_interval : 0.6;
 
           if (document.getElementById('settingAmazonJitter')) {
@@ -1988,14 +2004,25 @@
     async function scanCurrentStealthStore() {
       const cfg = storesConfig[currentStealthStore] || { short_name: '此賣場' };
       try {
-        const res = await fetch(`/api/check_store_now?store=${currentStealthStore}`, { method: 'POST' });
+        const res = await fetch(`/api/trigger_stealth_scan?store=${currentStealthStore}`, { method: 'POST' });
         const data = await res.json();
         if (data.ok) {
-          alert(`⚡ 已發送立即檢查指令給 [${cfg.short_name}]！系統將在背景極速掃描。`);
+          alert(`⚡ 已對 [${cfg.short_name}] 發動最新上架防突襲比對掃描！系統將在背景即時比對。`);
           fetchStatus();
         } else {
-          alert("檢查失敗: " + (data.msg || "未知錯誤"));
+          alert("掃描失敗: " + (data.msg || "未知錯誤"));
         }
+      } catch (e) {
+        alert("請求失敗: " + e);
+      }
+    }
+
+    async function triggerStealthScanNow() {
+      try {
+        const res = await fetch('/api/trigger_stealth_scan', { method: 'POST' });
+        const data = await res.json();
+        alert("⚡ 已啟動全電商最新上架防突襲雷達掃描！請查看下方即時日誌。");
+        fetchStatus();
       } catch (e) {
         alert("請求失敗: " + e);
       }
@@ -2049,6 +2076,7 @@
         enable_line: document.getElementById('settingEnableLine').checked,
         only_amazon_seller: document.getElementById('settingOnlyAmazon').checked,
         interval_seconds: parseInt(document.getElementById('settingInterval').value) || 5,
+        stealth_scan_interval: document.getElementById('settingStealthScanInterval') ? (parseInt(document.getElementById('settingStealthScanInterval').value) || 60) : 60,
         amazon_item_interval: amazonInterval,
         amazon_jitter: amazonJitter,
         amazon_use_playwright: amazonPlaywright,

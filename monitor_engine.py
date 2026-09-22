@@ -17,7 +17,7 @@ import re
 import time
 import threading
 from datetime import datetime
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, List
 
 import random
 import requests
@@ -2001,7 +2001,230 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
 
 
 # =========================================================================
-# 9. 推播管理器 (Discord & LINE)
+# 9. 最新上架雷達 (Latest Arrival Radar) & 智慧型號/關鍵字比對
+# =========================================================================
+
+def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> List[Dict[str, Any]]:
+    """單一賣場最新上架商品抓取器 (單次請求獲取最新 20~50 筆商品，供防突襲雷達比對，省 99% 請求次數)"""
+    results: List[Dict[str, Any]] = []
+    session = get_shared_session(proxy=proxy)
+
+    if store_key == "pchome":
+        url = "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=戰鬥陀螺&sort=new&page=1"
+        try:
+            r = session.get(url, timeout=6)
+            if r.status_code == 200:
+                data = r.json()
+                for p in data.get("prods", []):
+                    name = p.get("name", "")
+                    price = p.get("price", 0)
+                    pid = p.get("Id", "")
+                    is_funbox = any(k in name.lower() for k in ["funbox", "麗嬰"])
+                    results.append({
+                        "store": "pchome",
+                        "title": name,
+                        "price": f"NT$ {price:,}" if price else "未標示",
+                        "url": f"https://24h.pchome.com.tw/prod/{pid}",
+                        "item_id": pid,
+                        "seller": "funbox 麗嬰國際 (PChome)" if is_funbox else "PChome 24h 購物",
+                        "in_stock": True
+                    })
+        except Exception:
+            pass
+
+    elif store_key == "eslite":
+        url = "https://athena.eslite.com/api/v2/search?q=BEYBLADE&size=30"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Origin": "https://www.eslite.com",
+            "Referer": "https://www.eslite.com/"
+        }
+        try:
+            r = session.get(url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                data = r.json()
+                for h in data.get("hits", {}).get("hit", []):
+                    f = h.get("fields", {})
+                    name = f.get("name") or ""
+                    price = f.get("final_price") or f.get("retail_price") or 0
+                    sn = f.get("eslite_sn") or ""
+                    stock = f.get("stock", 0)
+                    results.append({
+                        "store": "eslite",
+                        "title": name,
+                        "price": f"NT$ {int(price):,}" if price else "未標示",
+                        "url": f"https://www.eslite.com/product/{sn}",
+                        "item_id": sn,
+                        "seller": "誠品線上 (Eslite)",
+                        "in_stock": stock > 0
+                    })
+        except Exception:
+            pass
+
+    elif store_key in ("twj_toys", "funbox_tw"):
+        if store_key == "twj_toys":
+            base_search = "https://www.twj.tw/search?q=BEYBLADE&sort_by=created-descending"
+            seller_name = "童無忌玩具"
+        else:
+            base_search = "https://shop.funbox.com.tw/search?q=BEYBLADE&sort_by=created-descending"
+            seller_name = "麗嬰國際官網 (Funbox)"
+
+        try:
+            r = session.get(base_search, timeout=7)
+            if r.status_code == 200:
+                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
+                seen_slugs = set()
+                for slug in found_slugs[:25]:
+                    if slug in seen_slugs:
+                        continue
+                    seen_slugs.add(slug)
+                    res = CyberbizChecker.check_prod(slug, store_key=store_key)
+                    if res.get("ok"):
+                        results.append({
+                            "store": store_key,
+                            "title": res.get("title", slug),
+                            "price": res.get("price", "未標示"),
+                            "url": res.get("url", f"https://www.twj.tw/products/{slug}" if store_key == "twj_toys" else f"https://shop.funbox.com.tw/products/{slug}"),
+                            "item_id": slug,
+                            "seller": seller_name,
+                            "in_stock": res.get("in_stock", True)
+                        })
+        except Exception:
+            pass
+
+    elif store_key == "shopee":
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Origin": "https://shopee.tw",
+            "Referer": "https://shopee.tw/funbox_toys"
+        }
+        s_client = None
+        if cffi_requests:
+            try:
+                s_client = cffi_requests.Session(impersonate="chrome124", proxies={"http": proxy, "https": proxy} if proxy else None)
+            except Exception:
+                s_client = None
+
+        if s_client:
+            try:
+                shopee_url = "https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id=37137599&sort_type=1"
+                r = s_client.get(shopee_url, headers=headers, timeout=8)
+                if r.status_code == 200:
+                    data = r.json()
+                    sections = data.get("data", {}).get("sections", [])
+                    items = []
+                    for sec in sections:
+                        items.extend(sec.get("data", {}).get("item", []))
+                    if not items:
+                        items = data.get("items", [])
+
+                    for it in items:
+                        name = it.get("name") or it.get("title") or ""
+                        price_val = it.get("price") or 0
+                        if price_val > 100000:
+                            price_str = f"NT$ {int(price_val / 100000):,}"
+                        elif price_val > 0:
+                            price_str = f"NT$ {int(price_val):,}"
+                        else:
+                            price_str = "未標示"
+                        item_id = str(it.get("itemid", ""))
+                        shop_id = str(it.get("shopid", "37137599"))
+                        prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else "https://shopee.tw/funbox_toys"
+                        results.append({
+                            "store": "shopee",
+                            "title": name,
+                            "price": price_str,
+                            "url": prod_url,
+                            "item_id": f"{shop_id}_{item_id}",
+                            "seller": "Funbox 蝦皮官方旗艦店",
+                            "in_stock": True
+                        })
+            except Exception:
+                pass
+
+    elif store_key == "mm_shop":
+        url = "https://mmtoyshop.com/search?q=戰鬥陀螺"
+        try:
+            r = session.get(url, timeout=7)
+            if r.status_code == 200:
+                found_items = re.findall(r'/item/([a-zA-Z0-9_-]+)', r.text)
+                seen_ids = set()
+                for item_id in found_items[:15]:
+                    if item_id in seen_ids:
+                        continue
+                    seen_ids.add(item_id)
+                    res = MMShopChecker.check_item(item_id)
+                    if res.get("ok"):
+                        results.append({
+                            "store": "mm_shop",
+                            "title": res.get("title", item_id),
+                            "price": res.get("price", "未標示"),
+                            "url": res.get("url", f"https://mmtoyshop.com/item/{item_id}"),
+                            "item_id": item_id,
+                            "seller": "M.M小舖",
+                            "in_stock": res.get("in_stock", True)
+                        })
+        except Exception:
+            pass
+
+    return results
+
+
+def match_product_with_stealth_catalog(
+    product_title: str,
+    stealth_catalog: List[Dict[str, Any]]
+) -> Optional[Dict[str, Any]]:
+    """比對商品標題是否命中防突襲清單中的陀螺型號 (BX-00, UX-00, CX-00) 或關鍵字
+    傳回匹配的型號資料字典，若未命中則傳回 None
+    """
+    if not product_title:
+        return None
+
+    title_clean = product_title.strip()
+    title_upper = title_clean.upper()
+
+    # 1. 優先以正規表示法比對 BX-00 / UX-00 / CX-00 系列型號
+    m = re.search(r'\b((?:BX|UX|CX)-\d{2,3}[A-Z]?)\b', title_upper)
+    if not m:
+        m = re.search(r'\b((?:BX|UX|CX)\d{2,3}[A-Z]?)\b', title_upper)
+
+    model_code = None
+    if m:
+        raw_code = m.group(1).upper()
+        if "-" not in raw_code:
+            model_code = f"{raw_code[:2]}-{raw_code[2:]}"
+        else:
+            model_code = raw_code
+
+    # 2. 從清單中比對對應型號
+    if model_code:
+        for it in stealth_catalog:
+            asin = str(it.get("asin", "")).strip().upper()
+            if asin == model_code:
+                return {
+                    "model": model_code,
+                    "catalog_item": it,
+                    "matched_by": "model_code"
+                }
+
+    # 3. 比對清單中特殊陀螺商品名稱 (如白龍、烈火、德拉克等關鍵字)
+    title_low = title_clean.lower()
+    for it in stealth_catalog:
+        c_name = str(it.get("name", "")).strip()
+        asin = str(it.get("asin", "")).strip().upper()
+        clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)-\d{2,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
+        if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
+            return {
+                "model": asin,
+                "catalog_item": it,
+                "matched_by": "keyword"
+            }
+
+    return None
+
+
+# =========================================================================
+# 10. 推播管理器 (Discord & LINE)
 # =========================================================================
 
 class NotificationManager:
