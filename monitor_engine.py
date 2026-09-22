@@ -348,77 +348,88 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     has_buy_button = (has_cart or has_buy_now or has_preorder)
     in_stock = has_buy_button and bool(price) and price not in ("-", "缺貨中") and not is_sold_out and not no_featured_offer
 
-    # 4. 精準賣家判定 (官方自營 vs 第三方真實店名)
-    seller_name = ""
-    merchant_text = ""
-    tabular_text = ""
-    is_official = False
-    is_amazon_fulfilled = False
+    # 4. 精準賣家判定 (嚴格規定：賣家是 Amazon 且 運送也是 Amazon，才算官方自營！)
+    raw_seller = ""
+    raw_fulfiller = ""
 
     if in_stock:
-        # A. 檢查 BuyBox 內是否有第三方賣家專屬連結 (#sellerProfileTriggerId)
-        bb_seller = buybox.select_one("#sellerProfileTriggerId") if buybox else None
+        # A. 現代 Amazon BuyBox ODF (Offer Display Feature)
+        m_feat = soup.select_one('[offer-display-feature-name="desktop-merchant-info"] [data-csa-c-slot-id="odf-feature-text-desktop-merchant-info"], [offer-display-feature-name="desktop-merchant-info"] .offer-display-feature-text, [offer-display-feature-name="desktop-merchant-info"] a')
+        if m_feat and m_feat.get_text(strip=True):
+            raw_seller = m_feat.get_text(strip=True)
+        elif soup.select('[offer-display-feature-name="desktop-merchant-info"]'):
+            cand = soup.select('[offer-display-feature-name="desktop-merchant-info"]')[-1].get_text(" ", strip=True)
+            raw_seller = cand.replace("販売元", "").strip()
 
-        # B. 檢查 tabular buybox 內的出荷元與販売元
-        tabular_text = ""
+        f_feat = soup.select_one('[offer-display-feature-name="desktop-fulfiller-info"] [data-csa-c-slot-id="odf-feature-text-desktop-fulfiller-info"], [offer-display-feature-name="desktop-fulfiller-info"] .offer-display-feature-text')
+        if f_feat and f_feat.get_text(strip=True):
+            raw_fulfiller = f_feat.get_text(strip=True)
+        elif soup.select('[offer-display-feature-name="desktop-fulfiller-info"]'):
+            cand = soup.select('[offer-display-feature-name="desktop-fulfiller-info"]')[-1].get_text(" ", strip=True)
+            raw_fulfiller = cand.replace("出荷元", "").strip()
+
+        # B. 傳統表格 Tabular BuyBox
         if buybox:
-            for tr in buybox.select("tr, .tabular-buybox-row, div[class*='tabular']"):
-                row_txt = tr.get_text(" ", strip=True)
-                tabular_text += " " + row_txt
-                if "販売元" in row_txt or "Sold by" in row_txt:
-                    s_link = tr.select_one("a, #sellerProfileTriggerId")
+            for row in buybox.select("tr, .tabular-buybox-row, div[class*='tabular']"):
+                row_txt = row.get_text(" ", strip=True)
+                if ("販売元" in row_txt or "Sold by" in row_txt) and not raw_seller:
+                    s_link = row.select_one("a, #sellerProfileTriggerId")
                     if s_link and s_link.get_text(strip=True):
-                        seller_name = s_link.get_text(strip=True)
+                        raw_seller = s_link.get_text(strip=True)
                     else:
                         parts = row_txt.split("販売元") if "販売元" in row_txt else row_txt.split("Sold by")
                         if len(parts) > 1 and parts[1].strip():
-                            seller_name = parts[1].strip()
-                if "出荷元" in row_txt or "Ships from" in row_txt:
-                    if "amazon" in row_txt.lower() or "アマゾン" in row_txt:
-                        is_amazon_fulfilled = True
+                            raw_seller = parts[1].strip()
+                if ("出荷元" in row_txt or "Ships from" in row_txt) and not raw_fulfiller:
+                    parts = row_txt.split("出荷元") if "出荷元" in row_txt else row_txt.split("Ships from")
+                    if len(parts) > 1 and parts[1].strip():
+                        raw_fulfiller = parts[1].strip()
 
-        # C. 檢查 #merchant-info
-        merchant_info_el = soup.select_one("#merchant-info")
-        merchant_text = merchant_info_el.get_text(" ", strip=True) if merchant_info_el else ""
+        # C. 傳統 #merchant-info
+        if not raw_seller:
+            m_info = soup.select_one("#merchant-info")
+            if m_info:
+                m_txt = m_info.get_text(" ", strip=True)
+                s_match = re.search(r'([^\s]+)\s*が販売', m_txt)
+                if s_match:
+                    raw_seller = s_match.group(1).strip()
+                elif "amazon.co.jp" in m_txt.lower() or "アマゾン" in m_txt:
+                    raw_seller = "Amazon.co.jp"
+                if ("amazon.co.jp が発送" in m_txt or "amazon が発送" in m_txt.lower() or "アマゾンが発送" in m_txt) and not raw_fulfiller:
+                    raw_fulfiller = "Amazon"
 
-        if bb_seller and bb_seller.get_text(strip=True):
-            raw_s = bb_seller.get_text(strip=True)
-            if "amazon" in raw_s.lower() or "アマゾン" in raw_s:
-                is_official = True
-                seller_name = "Amazon.co.jp (官方自營)"
-            else:
-                is_official = False
-                if is_amazon_fulfilled or "amazon" in tabular_text.lower():
-                    seller_name = f"{raw_s} (第三方, Amazon 配送)"
-                else:
-                    seller_name = f"{raw_s} (第三方賣家)"
-        elif seller_name:
-            s_lower = seller_name.strip().lower()
-            if s_lower in ("amazon.co.jp", "アマゾン", "amazon") or "amazon.co.jp" in s_lower:
-                is_official = True
-                seller_name = "Amazon.co.jp (官方自營)"
-            else:
-                is_official = False
-                if is_amazon_fulfilled:
-                    seller_name = f"{seller_name} (第三方, Amazon 配送)"
-                else:
-                    seller_name = f"{seller_name} (第三方賣家)"
-        elif merchant_text:
-            if "amazon.co.jp" in merchant_text.lower() or "アマゾン" in merchant_text:
-                if "が販売" in merchant_text or "販売、発送" in merchant_text or "Amazon.co.jp が発送" not in merchant_text:
-                    is_official = True
-                    seller_name = "Amazon.co.jp (官方自營)"
-            s_match = re.search(r'([^\s]+)\s*が販売', merchant_text)
-            if s_match and not is_official:
-                seller_name = f"{s_match.group(1).strip()} (第三方賣家)"
+        # D. 檢查 BuyBox 內的 sellerProfileTriggerId 連結
+        if not raw_seller and buybox:
+            bb_seller = buybox.select_one("#sellerProfileTriggerId")
+            if bb_seller and bb_seller.get_text(strip=True):
+                raw_seller = bb_seller.get_text(strip=True)
 
-        # D. 核心原則：如果 BuyBox 有現貨購買按鈕且沒有第三方賣家 profile 標記，則必為 Amazon.co.jp 官方自營！
-        if not seller_name:
+        def is_amazon_name(s: str) -> bool:
+            if not s:
+                return False
+            s_low = s.lower().strip()
+            return any(k in s_low for k in ["amazon.co.jp", "アマゾン", "amazon"])
+
+        is_seller_amazon = is_amazon_name(raw_seller)
+        is_fulfiller_amazon = is_amazon_name(raw_fulfiller)
+
+        # 嚴格判定：賣家是 Amazon 且 運送也是 Amazon 才是官方自營！
+        if is_seller_amazon and is_fulfiller_amazon:
             is_official = True
             seller_name = "Amazon.co.jp (官方自營)"
+        else:
+            is_official = False
+            if raw_seller:
+                if is_fulfiller_amazon:
+                    seller_name = f"{raw_seller} (第三方, Amazon 配送)"
+                else:
+                    seller_name = f"{raw_seller} (第三方賣家)"
+            else:
+                seller_name = "第三方賣家"
     else:
         price = "-"
         seller_name = "-"
+        is_official = False
 
     # 5. 官方自營價 vs 第三方最低價提取
     if in_stock and is_official:
@@ -471,7 +482,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         "is_preorder": has_preorder,
         "seller": seller_name,
         "url": url,
-        "raw_merchant": merchant_text,
+        "raw_merchant": f"Seller: {raw_seller}, Fulfiller: {raw_fulfiller}",
         "no_featured_offer": no_featured_offer
     }
 
