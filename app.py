@@ -59,6 +59,16 @@ class MonitorState:
         self.max_logs = 80
         self.seen_stealth_urls: set = set()
         self.stealth_thread: Any = None
+        self.stealth_radar_status: Dict[str, Any] = {
+            "is_running": False,
+            "last_scan_time": "-",
+            "last_scan_timestamp": 0.0,
+            "interval_seconds": 60,
+            "total_scans": 0,
+            "total_hits": 0,
+            "last_log": "⚡ 雷達準備就緒，背景常駐守候中",
+            "active_stores": []
+        }
         self.config: Dict[str, Any] = self.load_config()
         self.in_stock_state: Dict[str, bool] = {}
 
@@ -221,6 +231,9 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
     proxy = state.get_proxy_url()
     items = state.config.get("items", [])
 
+    scanned_store_names = []
+    total_new_hits = 0
+
     for s_key in target_stores:
         if s_key not in STORE_CONFIG or s_key in ("amazon_jp", "amazon_stealth"):
             continue
@@ -233,6 +246,8 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
         catalog_items = [it for it in items if it.get("store") == s_key and it.get("enabled", True)]
         if not catalog_items:
             continue
+
+        scanned_store_names.append(s_name)
 
         if is_manual:
             state.add_log(f"⚡ [{s_name}] 正在掃描最新上架商品...", "INFO")
@@ -285,6 +300,7 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
                     hit_count += 1
                     if is_new_discovery:
                         new_hit_count += 1
+                        total_new_hits += 1
                     if is_new_discovery or is_manual:
                         state.add_log(f"🚨【突襲上架發現！】[{s_name}] 命中型號 {matched_model}！品名: {title[:28]} 售價: {prod_price}", "SUCCESS")
                         item_display_name = f"BEYBLADE X {matched_model} ({title[:25]})" if matched_model not in title else title[:35]
@@ -297,6 +313,24 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
                 state.add_log(f"🎉 [{s_name}] 本次掃描捕獲 {new_hit_count if not is_manual else hit_count} 件防突襲陀螺上架！", "SUCCESS")
         except Exception as e:
             state.add_log(f"[{s_name}] 最新上架雷達掃描異常: {str(e)[:35]}", "WARNING")
+
+    # 更新防突襲雷達全域即時看板狀態
+    now_gmt8 = get_now_gmt8().strftime("%H:%M:%S")
+    state.stealth_radar_status["last_scan_time"] = now_gmt8
+    state.stealth_radar_status["last_scan_timestamp"] = time.time()
+    state.stealth_radar_status["total_scans"] += 1
+    state.stealth_radar_status["total_hits"] += total_new_hits
+    if scanned_store_names:
+        stores_summary = "、".join(scanned_store_names)
+        if total_new_hits > 0:
+            summary_msg = f"🚨 剛掃描 [{stores_summary}]，捕獲 {total_new_hits} 款陀螺突襲上架！"
+        else:
+            summary_msg = f"⚡ 剛掃描 [{stores_summary}] 最新上架，未發現新型號突襲"
+    else:
+        summary_msg = "⚡ 防突襲雷達待命中 (非 Amazon 賣場暫未開啟)"
+    state.stealth_radar_status["last_log"] = summary_msg
+    if is_manual:
+        state.add_log(summary_msg, "SUCCESS" if total_new_hits > 0 else "INFO")
 
 
 def check_items_for_store(store_key: str, is_manual: bool = False):
@@ -1079,6 +1113,33 @@ async def api_trigger_stealth_scan(background_tasks: BackgroundTasks, store: str
     """立即執行全電商 (或特定電商) 最新上架防突襲比對掃描"""
     background_tasks.add_task(scan_latest_arrivals_radar, store, True)
     return {"ok": True, "msg": "已開始最新上架商品防突襲比對掃描"}
+
+
+@app.get("/api/stealth_radar_status")
+async def api_stealth_radar_status():
+    """獲取防突襲雷達即時運作狀態、上次掃描、動態倒數與日誌"""
+    now = time.time()
+    res = dict(state.stealth_radar_status)
+    interval = state.get_stealth_scan_interval()
+    res["interval_seconds"] = interval
+
+    active_stores = [s for s in STORE_CONFIG.keys() if s not in ("amazon_jp", "amazon_stealth") and state.is_store_monitored(s)]
+    res["active_stores"] = active_stores
+    res["is_running"] = state.is_monitoring and len(active_stores) > 0
+
+    last_ts = res.get("last_scan_timestamp", 0.0)
+    if last_ts > 0:
+        elapsed = max(0, int(now - last_ts))
+        res["seconds_ago"] = elapsed
+        res["countdown"] = max(0, int(interval - elapsed))
+    else:
+        res["seconds_ago"] = None
+        res["countdown"] = int(interval)
+
+    # 守候中型號數 (非 Amazon)
+    stealth_items = [it for it in state.config.get("items", []) if it.get("store") not in ("amazon_jp", "amazon_stealth")]
+    res["stealth_items_count"] = len(stealth_items)
+    return res
 
 
 @app.post("/api/test_proxy")

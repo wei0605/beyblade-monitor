@@ -21,8 +21,8 @@
       --text-muted: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px 20px; padding-bottom: 60px; min-height: 100vh; }
-    .container { width: 100%; max-width: 1720px; margin: 0 auto; }
+    body { background: var(--bg); color: var(--text); padding: 14px 20px; padding-bottom: 60px; min-height: 100vh; }
+    .container { width: 100%; max-width: 99vw; margin: 0 auto; }
     
     /* Header */
     header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--card-bg); border-radius: 12px; margin-bottom: 14px; border: 1px solid var(--border); }
@@ -48,10 +48,208 @@
     .btn-check:active { background: #1d4ed8; }
 
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
-    .stat-card { background: var(--card-bg); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
-    .stat-val { font-size: 20px; font-weight: bold; color: #60a5fa; }
-    .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+    .stat-val { font-size: 20px; font-weight: bold; }
+    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Settings Panel */
+    .settings-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px; display: none; }
+    .settings-panel.active { display: block; }
+    .settings-title { font-size: 15px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: var(--text-muted); }
+    .form-input { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 13px; outline: none; }
+    .form-input:focus { border-color: #3b82f6; }
+    .btn-save-settings { background: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; align-self: flex-start; }
+
+    /* Toast Notification */
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border: 1px solid #334155; padding: 12px 18px; border-radius: 10px; font-size: 13px; display: none; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; animation: slideUp 0.3s ease; }
+    .toast.show { display: flex; }
+    .toast-success { border-color: #10b981; }
+    .toast-error { border-color: #ef4444; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Logs Area */
+    .logs-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 14px; }
+    .logs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
+    .logs-content { background: #0f172a; border-radius: 8px; padding: 10px 12px; max-height: 180px; overflow-y: auto; font-family: monospace; font-size: 11px; line-height: 1.5; }
+    .log-line { margin-bottom: 4px; display: flex; gap: 8px; }
+    .log-time { color: var(--text-muted); }
+    .log-SUCCESS { color: #34d399; }
+    .log-WARNING { color: #f87171; }
+    .log-INFO { color: #94a3b8; }
+
+    /* Stealth Radar Live Banner */
+    .radar-live-banner {
+      background: linear-gradient(135deg, #0b1329 0%, #111e38 50%, #0f172a 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 12px 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .radar-indicator-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .radar-pulse-beacon {
+      position: relative;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+      flex-shrink: 0;
+    }
+    .radar-pulse-beacon::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      top: -6px;
+      left: -6px;
+      border-radius: 50%;
+      border: 2px solid #22c55e;
+      opacity: 0.8;
+      animation: radar-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    .radar-pulse-beacon.paused {
+      background: #64748b;
+      box-shadow: none;
+    }
+    .radar-pulse-beacon.paused::after {
+      display: none;
+    }
+    @keyframes radar-ping {
+      75%, 100% {
+        transform: scale(1.8);
+        opacity: 0;
+      }
+    }
+    .radar-title-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .radar-title-box .radar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-radar-running {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 12px;
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      font-weight: normal;
+    }
+    .badge-radar-paused {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 12px;
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-weight: normal;
+    }
+    .radar-title-box .radar-subtitle {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .radar-metrics-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .radar-metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .radar-metric-label {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .radar-metric-val {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e2e8f0;
+      font-family: monospace;
+    }
+    .radar-countdown-val {
+      color: #38bdf8;
+      font-weight: 700;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+    .radar-latest-log {
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #cbd5e1;
+      font-size: 11px;
+    }
+    .btn-radar-scan-trigger {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: white;
+      border: 1px solid #38bdf8;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+    }
+    .btn-radar-scan-trigger:hover {
+      background: linear-gradient(135deg, #0369a1, #075985);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45);
+    }
+    .btn-radar-scan-trigger:active {
+      transform: translateY(1px);
+    }
+
+    /* Stealth Restock UI & Modal */
+    .btn-stealth-catalog {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: white;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-stealth-catalog:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5);
+    }
 
     /* Store Tabs Bar */
     .tabs-wrapper { margin-bottom: 12px; position: relative; }
@@ -400,6 +598,7 @@
     .dot-bx { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
     .dot-ux { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
     .dot-cx { background: #f97316; box-shadow: 0 0 6px #f97316; }
+    .dot-00 { background: #eab308; box-shadow: 0 0 6px #eab308; }
     .count-pill {
       background: rgba(0, 0, 0, 0.35);
       font-size: 11px;
@@ -460,6 +659,7 @@
     .badge-bx { background: rgba(59, 130, 246, 0.18); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
     .badge-ux { background: rgba(168, 85, 247, 0.18); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
     .badge-cx { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .badge-00 { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.5); }
     
     .stealth-item-title {
       font-size: 13px;
@@ -867,6 +1067,47 @@
       </div>
     </div>
 
+    <!-- Stealth Radar Real-time Status Banner -->
+    <div class="radar-live-banner" id="stealthRadarBanner">
+      <div class="radar-indicator-group">
+        <span id="radarBeacon" class="radar-pulse-beacon"></span>
+        <div class="radar-title-box">
+          <div class="radar-title">
+            <span>⚡ 防突襲上架即時雷達</span>
+            <span id="radarRunningBadge" class="badge-radar-running">運行中</span>
+          </div>
+          <div class="radar-subtitle">
+            每 <span id="radarIntervalText">60</span> 秒自動輪巡各電商最新上架 • 守候 202 款 BX/UX/CX/00 陀螺
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-metrics-row">
+        <div class="radar-metric-item">
+          <span class="radar-metric-label">上次掃描</span>
+          <span id="radarLastScan" class="radar-metric-val">16:00:00 (尚未掃描)</span>
+        </div>
+        <div class="radar-metric-item">
+          <span class="radar-metric-label">下次掃描倒數</span>
+          <span id="radarCountdown" class="radar-metric-val radar-countdown-val">60 秒</span>
+        </div>
+        <div class="radar-metric-item">
+          <span class="radar-metric-label">已巡檢次數</span>
+          <span id="radarTotalScans" class="radar-metric-val">0 次</span>
+        </div>
+        <div class="radar-metric-item">
+          <span class="radar-metric-label">雷達即時反饋</span>
+          <span id="radarLatestLog" class="radar-latest-log">⚡ 雷達背景待命中</span>
+        </div>
+      </div>
+
+      <div class="radar-actions">
+        <button class="btn-radar-scan-trigger" onclick="triggerStealthScanNow()" title="立即對所有非 Amazon 電商發起一次最新上架掃描">
+          <i class="fa-solid fa-bolt"></i> 立即掃描最新上架
+        </button>
+      </div>
+    </div>
+
     <!-- Multi-Store Tabs Navigation Bar -->
     <div class="tabs-wrapper">
       <div class="tabs-header">
@@ -1066,6 +1307,10 @@
         <button id="stealthTabCX" class="stealth-series-tab" onclick="switchStealthSeriesTab('CX')">
           <span class="series-dot dot-cx"></span>
           <span>CX 系列</span> <span id="badgeCountCX" class="count-pill">0</span>
+        </button>
+        <button id="stealthTab00" class="stealth-series-tab" onclick="switchStealthSeriesTab('00')">
+          <span class="series-dot dot-00"></span>
+          <span>00 限定款</span> <span id="badgeCount00" class="count-pill">0</span>
         </button>
       </div>
 
@@ -1646,38 +1891,38 @@
         return;
       }
 
-      // Check in-stock items
-      const inStockItems = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架')));
+      // Check in-stock items & shelf products (現有架上官方商品與突襲命中現貨直接顯示在主畫面)
+      const inStockItems = storeItems.filter(it => it.is_shelf_product || (it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'))));
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
 
-      // Non-Amazon stores: HIDE out-of-stock stealth items by default!
+      // Non-Amazon stores: HIDE waiting stealth models from main list by default, show in stealth modal!
       if (isNonAmazon && !showAllStealthCards) {
         if (inStockItems.length === 0) {
           container.innerHTML = `
             <div class="stealth-standby-banner">
               <div class="standby-radar"><i class="fa-solid fa-radar fa-spin" style="--fa-animation-duration: 6s;"></i></div>
-              <div class="standby-title">🛡️ 防突襲守候中：全系列 ${storeItems.length} 個陀螺型號全天候極速監控中</div>
+              <div class="standby-title">🛡️ 防突襲守候中：全系列 ${storeItems.length} 個陀螺型號背景全天候極速監控中</div>
               <div class="standby-desc">
                 目前 <b>${curCfg.name}</b> 尚未有突襲型號上架。<br>
                 防突襲清單已自動收合至專屬型號庫以保持畫面整潔；一旦官方上架或釋出庫存，商品卡片將<b>自動立即在此顯現並推播通知</b>！
               </div>
               <button class="btn-open-stealth-modal" onclick="openStealthModal('${currentStoreTab}')">
-                <i class="fa-solid fa-shield-halved"></i> 點此開啟【防突襲型號總庫】(BX / UX / CX 照數字降序排序)
+                <i class="fa-solid fa-shield-halved"></i> 點此開啟【防突襲型號總庫】(BX / UX / CX / 00 照數字降序排序)
               </button>
             </div>
           `;
           return;
         } else {
-          // Has restocked items!
+          // Has shelf or restocked items!
           const activeBanner = document.createElement('div');
           activeBanner.className = 'stealth-active-banner';
           activeBanner.innerHTML = `
             <div>
               <i class="fa-solid fa-circle-check" style="color: #34d399; font-size: 15px;"></i>
-              <b>發現 ${inStockItems.length} 項已突襲上架/現貨商品！</b> 其餘 ${storeItems.length - inStockItems.length} 個待命型號背景防突襲監控中
+              <b>目前展示 ${inStockItems.length} 款架上官方/現貨商品！</b> 其餘 ${storeItems.length - inStockItems.length} 款陀螺背景防突襲守候中
             </div>
             <button class="btn-open-stealth-modal-sm" onclick="openStealthModal('${currentStoreTab}')">
-              <i class="fa-solid fa-layer-group"></i> 檢視防突襲型號庫 (${storeItems.length})
+              <i class="fa-solid fa-shield-halved"></i> 檢視防突襲型號庫 (${storeItems.length})
             </button>
           `;
           container.appendChild(activeBanner);
@@ -1809,7 +2054,7 @@
 
     function switchStealthSeriesTab(seriesKey) {
       stealthActiveSeries = seriesKey;
-      ['ALL', 'BX', 'UX', 'CX'].forEach(s => {
+      ['ALL', 'BX', 'UX', 'CX', '00'].forEach(s => {
         const btn = document.getElementById(`stealthTab${s}`);
         if (btn) {
           if (s === seriesKey) btn.classList.add('active');
@@ -1819,9 +2064,14 @@
       renderStealthModalItems();
     }
 
-    function getModelNum(asin) {
-      const m = String(asin || '').match(/\d+/);
-      return m ? parseInt(m[0], 10) : 0;
+    function getModelSortNum(it) {
+      const code = String(it.code || it.asin || '');
+      const m = code.match(/\d+/g);
+      if (!m) return 0;
+      if (code.includes('00') && m.length > 1) {
+        return parseInt(m[1], 10);
+      }
+      return parseInt(m[0], 10);
     }
 
     function renderStealthModalItems() {
@@ -1834,21 +2084,29 @@
         .map((it, idx) => ({ ...it, originalIndex: idx }))
         .filter(it => (it.store || 'amazon_jp') === currentStealthStore);
 
-      // 更新分頁徽章數字
+      // 更新分頁徽章數字 (ALL, BX, UX, CX, 00)
       const countAll = storeItems.length;
-      const countBX = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith('BX')).length;
-      const countUX = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith('UX')).length;
-      const countCX = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith('CX')).length;
+      const count00 = storeItems.filter(it => it.is_00 || (it.asin || '').includes('00') || (it.code || '').startsWith('BXG') || (it.code || '').startsWith('BXH') || (it.code || '').startsWith('BXC') || (it.code || '').startsWith('BXA')).length;
+      const countBX = storeItems.filter(it => (it.series === 'BX' || (it.asin || '').toUpperCase().startsWith('BX')) && !it.is_00 && !(it.asin || '').includes('00')).length;
+      const countUX = storeItems.filter(it => (it.series === 'UX' || (it.asin || '').toUpperCase().startsWith('UX')) && !it.is_00 && !(it.asin || '').includes('00')).length;
+      const countCX = storeItems.filter(it => (it.series === 'CX' || (it.asin || '').toUpperCase().startsWith('CX')) && !it.is_00 && !(it.asin || '').includes('00')).length;
 
       if (document.getElementById('badgeCountALL')) document.getElementById('badgeCountALL').innerText = countAll;
       if (document.getElementById('badgeCountBX')) document.getElementById('badgeCountBX').innerText = countBX;
       if (document.getElementById('badgeCountUX')) document.getElementById('badgeCountUX').innerText = countUX;
       if (document.getElementById('badgeCountCX')) document.getElementById('badgeCountCX').innerText = countCX;
+      if (document.getElementById('badgeCount00')) document.getElementById('badgeCount00').innerText = count00;
 
       // 依系列過濾
       let filtered = storeItems;
-      if (stealthActiveSeries !== 'ALL') {
-        filtered = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith(stealthActiveSeries));
+      if (stealthActiveSeries === '00') {
+        filtered = storeItems.filter(it => it.is_00 || (it.asin || '').includes('00') || (it.code || '').startsWith('BXG') || (it.code || '').startsWith('BXH') || (it.code || '').startsWith('BXC') || (it.code || '').startsWith('BXA'));
+      } else if (stealthActiveSeries === 'BX') {
+        filtered = storeItems.filter(it => (it.series === 'BX' || (it.asin || '').toUpperCase().startsWith('BX')) && !it.is_00 && !(it.asin || '').includes('00'));
+      } else if (stealthActiveSeries === 'UX') {
+        filtered = storeItems.filter(it => (it.series === 'UX' || (it.asin || '').toUpperCase().startsWith('UX')) && !it.is_00 && !(it.asin || '').includes('00'));
+      } else if (stealthActiveSeries === 'CX') {
+        filtered = storeItems.filter(it => (it.series === 'CX' || (it.asin || '').toUpperCase().startsWith('CX')) && !it.is_00 && !(it.asin || '').includes('00'));
       }
 
       // 依搜尋關鍵字即時過濾
@@ -1857,21 +2115,32 @@
       if (query) {
         filtered = filtered.filter(it => {
           const code = (it.asin || '').toLowerCase();
+          const subCode = (it.code || '').toLowerCase();
           const name = (it.name || '').toLowerCase();
           const note = (it.note || '').toLowerCase();
-          return code.includes(query) || name.includes(query) || note.includes(query);
+          return code.includes(query) || subCode.includes(query) || name.includes(query) || note.includes(query);
         });
       }
 
       // 嚴格依數字排序：數字越大越上面 (越新越上面)
       filtered.sort((a, b) => {
-        const sA = (a.asin || '').substring(0, 2).toUpperCase();
-        const sB = (b.asin || '').substring(0, 2).toUpperCase();
-        if (stealthActiveSeries === 'ALL' && sA !== sB) {
-          const order = { 'BX': 1, 'UX': 2, 'CX': 3 };
-          return (order[sA] || 99) - (order[sB] || 99);
+        const is00A = a.is_00 || (a.asin || '').includes('00');
+        const is00B = b.is_00 || (b.asin || '').includes('00');
+        if (stealthActiveSeries === 'ALL') {
+          const sA = (a.series || (a.asin || '').substring(0, 2)).toUpperCase();
+          const sB = (b.series || (b.asin || '').substring(0, 2)).toUpperCase();
+          if (sA !== sB) {
+            const order = { 'BX': 1, 'UX': 2, 'CX': 3 };
+            return (order[sA] || 99) - (order[sB] || 99);
+          }
+          if (is00A !== is00B) return is00A ? 1 : -1;
+          return getModelSortNum(b) - getModelSortNum(a);
+        } else if (stealthActiveSeries === '00') {
+          return getModelSortNum(b) - getModelSortNum(a);
+        } else {
+          if (is00A !== is00B) return is00A ? 1 : -1;
+          return getModelSortNum(b) - getModelSortNum(a);
         }
-        return getModelNum(b.asin) - getModelNum(a.asin);
       });
 
       if (filtered.length === 0) {
@@ -1886,15 +2155,16 @@
           const card = document.createElement('div');
           const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'));
           const isEnabled = it.enabled !== false;
-          const series = (it.asin || '').substring(0, 2).toUpperCase();
-          const badgeClass = series === 'BX' ? 'badge-bx' : (series === 'UX' ? 'badge-ux' : 'badge-cx');
+          const is00 = it.is_00 || (it.asin || '').includes('00');
+          const series = (it.series || (it.asin || '').substring(0, 2)).toUpperCase();
+          const badgeClass = is00 ? 'badge-00' : (series === 'BX' ? 'badge-bx' : (series === 'UX' ? 'badge-ux' : 'badge-cx'));
           const buyUrl = getItemUrl(it, currentStealthStore);
 
           card.className = `stealth-item-row ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
           card.innerHTML = `
             <div class="stealth-item-header">
-              <span class="stealth-model-badge ${badgeClass}">${escapeHtml(it.asin || '-')}</span>
-              <span style="font-size: 11px; color: #64748b;">#${getModelNum(it.asin)}</span>
+              <span class="stealth-model-badge ${badgeClass}">${escapeHtml(it.asin || it.code || '-')}</span>
+              <span style="font-size: 11px; color: #94a3b8;">#${getModelSortNum(it)}</span>
             </div>
             <div class="stealth-item-title">${escapeHtml(it.name)}</div>
             <div class="stealth-item-status-row">
@@ -1923,7 +2193,7 @@
 
       // 更新底部統計資訊
       const activeCount = storeItems.filter(it => it.enabled !== false).length;
-      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'))).length;
+      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架'))).length;
       const cfg = storesConfig[currentStealthStore] || { name: '此賣場' };
       const footerStatsEl = document.getElementById('stealthFooterStats');
       if (footerStatsEl) {
@@ -2343,9 +2613,96 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    // ==========================================
+    // 防突襲雷達即時狀態、倒數計時與手動觸發
+    // ==========================================
+    let radarCountdownSeconds = 60;
+
+    async function fetchRadarStatus() {
+      try {
+        const res = await fetch('/api/stealth_radar_status');
+        const data = await res.json();
+        
+        const beacon = document.getElementById('radarBeacon');
+        const runningBadge = document.getElementById('radarRunningBadge');
+        if (beacon) {
+          if (data.is_running) {
+            beacon.classList.remove('paused');
+          } else {
+            beacon.classList.add('paused');
+          }
+        }
+        if (runningBadge) {
+          runningBadge.className = data.is_running ? 'badge-radar-running' : 'badge-radar-paused';
+          runningBadge.innerText = data.is_running ? '運行中' : '已暫停';
+        }
+
+        const intervalText = document.getElementById('radarIntervalText');
+        if (intervalText) intervalText.innerText = data.interval_seconds || 60;
+
+        const lastScanEl = document.getElementById('radarLastScan');
+        if (lastScanEl) {
+          if (data.last_scan_time && data.last_scan_time !== '-') {
+            const agoStr = (data.seconds_ago !== null && data.seconds_ago !== undefined) ? `(${data.seconds_ago}秒前)` : '';
+            lastScanEl.innerText = `${data.last_scan_time} ${agoStr}`;
+          } else {
+            lastScanEl.innerText = '待命首次掃描中...';
+          }
+        }
+
+        const totalScansEl = document.getElementById('radarTotalScans');
+        if (totalScansEl) totalScansEl.innerText = `${data.total_scans || 0} 次`;
+
+        const latestLogEl = document.getElementById('radarLatestLog');
+        if (latestLogEl && data.last_log) {
+          latestLogEl.innerText = data.last_log;
+          latestLogEl.title = data.last_log;
+        }
+
+        if (data.countdown !== undefined && data.countdown !== null) {
+          radarCountdownSeconds = data.countdown;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch radar status:', err);
+      }
+    }
+
+    // 每秒本地平滑倒數計時器
+    setInterval(() => {
+      const countdownEl = document.getElementById('radarCountdown');
+      if (!countdownEl) return;
+      if (radarCountdownSeconds > 0) {
+        radarCountdownSeconds--;
+        countdownEl.innerText = `${radarCountdownSeconds} 秒`;
+      } else {
+        countdownEl.innerText = '⚡ 掃描中...';
+      }
+    }, 1000);
+
+    async function triggerStealthScanNow() {
+      const btn = document.querySelector('.btn-radar-scan-trigger');
+      if (btn) btn.disabled = true;
+      showToast('⚡ 正在對非 Amazon 各電商發起最新上架掃描...', 'success');
+      try {
+        const res = await fetch('/api/trigger_stealth_scan', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          showToast(data.msg || '雷達掃描已啟動！', 'success');
+          setTimeout(fetchRadarStatus, 1500);
+          setTimeout(fetchStatus, 2000);
+        }
+      } catch (err) {
+        showToast('掃描觸發失敗: ' + err.message, 'error');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
     // Polling every 3.5 seconds
     fetchStatus();
     setInterval(fetchStatus, 3500);
+    fetchRadarStatus();
+    setInterval(fetchRadarStatus, 4000);
   </script>
 </body>
 </html>

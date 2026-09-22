@@ -2091,14 +2091,24 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     price = f.get("final_price") or f.get("retail_price") or 0
                     sn = f.get("eslite_sn") or ""
                     stock = f.get("stock", 0)
+                    try:
+                        price_int = int(float(price))
+                        price_str = f"NT$ {price_int:,}" if price_int > 0 else "未標示"
+                    except Exception:
+                        price_str = "未標示"
+                    try:
+                        is_in_stock = int(stock) > 0
+                    except Exception:
+                        is_in_stock = False
+
                     results.append({
                         "store": "eslite",
                         "title": name,
-                        "price": f"NT$ {int(price):,}" if price else "未標示",
+                        "price": price_str,
                         "url": f"https://www.eslite.com/product/{sn}",
                         "item_id": sn,
                         "seller": "誠品線上 (Eslite)",
-                        "in_stock": stock > 0
+                        "in_stock": is_in_stock
                     })
         except Exception:
             pass
@@ -2114,9 +2124,9 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
         try:
             r = session.get(base_search, timeout=7)
             if r.status_code == 200:
-                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
+                found_slugs = re.findall(r'href=[\'"]/products/([^\'"?#]+)[\'"]', r.text)
                 seen_slugs = set()
-                for slug in found_slugs[:25]:
+                for slug in found_slugs[:30]:
                     if slug in seen_slugs:
                         continue
                     seen_slugs.add(slug)
@@ -2217,7 +2227,8 @@ def match_product_with_stealth_catalog(
     product_title: str,
     stealth_catalog: List[Dict[str, Any]]
 ) -> Optional[Dict[str, Any]]:
-    """比對商品標題是否命中防突襲清單中的陀螺型號 (BX-00, UX-00, CX-00) 或關鍵字
+    """比對商品標題是否命中防突襲清單中的陀螺型號 (BX-00, UX-00, CX-00, BXG, BXH, BXC 等特殊款與常規款)
+    支援型號代碼比對、限定版專屬款式比對與關鍵字精確比對。
     傳回匹配的型號資料字典，若未命中則傳回 None
     """
     if not product_title:
@@ -2226,41 +2237,91 @@ def match_product_with_stealth_catalog(
     title_clean = product_title.strip()
     title_upper = title_clean.upper()
 
-    # 1. 優先以正規表示法比對 BX-00 / UX-00 / CX-00 系列型號
-    m = re.search(r'\b((?:BX|UX|CX)-\d{2,3}[A-Z]?)\b', title_upper)
-    if not m:
-        m = re.search(r'\b((?:BX|UX|CX)\d{2,3}[A-Z]?)\b', title_upper)
+    # 必須為 Beyblade X 相關商品或包含型號代碼 (嚴格排除 Tomica 小車、玩具車、其他無關模型)
+    has_beyblade_mark = any(k in title_clean for k in ["戰鬥陀螺", "陀螺", "Beyblade", "BEYBLADE"])
+    has_model_code = bool(re.search(r'\b(?:BX|UX|CX|BXG|BXH|BXC|BXA)[-_]?\d{1,3}', title_upper))
+    if not has_beyblade_mark and not has_model_code:
+        return None
 
-    model_code = None
-    if m:
-        raw_code = m.group(1).upper()
-        if "-" not in raw_code:
-            model_code = f"{raw_code[:2]}-{raw_code[2:]}"
-        else:
-            model_code = raw_code
-
-    # 2. 從清單中比對對應型號
-    if model_code:
+    # 1. 優先精準比對限定版專屬條碼 (如 BXG-47, BXG-70, BXG-57, BXH-15, BXC-13 等)
+    m_sub = re.search(r'\b((?:BXG|BXH|BXC|BXA)[-_]?\d{1,3}[A-Z]?(?:-\d{2})?)\b', title_upper)
+    if m_sub:
+        raw_sub = m_sub.group(1).upper()
+        norm_sub = raw_sub if "-" in raw_sub else f"{raw_sub[:3]}-{raw_sub[3:]}"
         for it in stealth_catalog:
-            asin = str(it.get("asin", "")).strip().upper()
-            if asin == model_code:
+            it_code = str(it.get("code", "")).upper()
+            it_asin = str(it.get("asin", "")).upper()
+            if norm_sub in it_code or norm_sub in it_asin or raw_sub.replace("-", "") in it_code.replace("-", ""):
                 return {
-                    "model": model_code,
+                    "model": it.get("asin", norm_sub),
                     "catalog_item": it,
-                    "matched_by": "model_code"
+                    "matched_by": "sub_code"
                 }
 
-    # 3. 比對清單中特殊陀螺商品名稱 (如白龍、烈火、德拉克等關鍵字)
+    # 2. 依正規表示法比對 BX-00 / UX-00 / CX-00 系列型號
+    m_code = re.search(r'\b((?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?)\b', title_upper)
+    if not m_code:
+        m_code = re.search(r'\b((?:BX|UX|CX)\d{1,3}[A-Z]?)\b', title_upper)
+
+    if m_code:
+        raw_code = m_code.group(1).upper()
+        norm_code = raw_code if "-" in raw_code else f"{raw_code[:2]}-{raw_code[2:]}"
+        
+        # 若為 00 限定款系列 (如 BX-00, UX-00, CX-00)，進一步由品名特徵關鍵字區分
+        if "-00" in norm_code or norm_code.endswith("00"):
+            series_prefix = norm_code[:2]
+            title_low = title_clean.lower()
+            for it in stealth_catalog:
+                it_asin = str(it.get("asin", "")).upper()
+                it_series = it.get("series") or it_asin[:2]
+                if it_series == series_prefix and (it.get("is_00") or "00" in it_asin):
+                    kws = it.get("keywords", [])
+                    # 先由 keywords 嚴格比對
+                    for kw in kws:
+                        if len(kw) >= 2 and kw in title_low:
+                            return {
+                                "model": it.get("asin", norm_code),
+                                "catalog_item": it,
+                                "matched_by": "00_keyword"
+                            }
+                    # 若無 keywords，從品名清理後比對
+                    c_name = str(it.get("name", "")).strip()
+                    clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
+                    if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
+                        return {
+                            "model": it.get("asin", norm_code),
+                            "catalog_item": it,
+                            "matched_by": "00_name"
+                        }
+        else:
+            # 常規型號 (BX-01 ~ BX-57, UX-01 ~ UX-21, CX-01 ~ CX-19)
+            for it in stealth_catalog:
+                asin = str(it.get("asin", "")).strip().upper()
+                if asin == norm_code or asin == raw_code:
+                    return {
+                        "model": norm_code,
+                        "catalog_item": it,
+                        "matched_by": "regular_code"
+                    }
+
+    # 3. 關鍵字比對 (限定版陀螺特有名稱，如暴風天馬、福音戰士、EVA、巴塞隆納、迪卡狂怒、蜘蛛人等)
     title_low = title_clean.lower()
     for it in stealth_catalog:
+        kws = it.get("keywords", [])
+        for kw in kws:
+            if len(kw) >= 3 and kw in title_low:
+                return {
+                    "model": it.get("asin", ""),
+                    "catalog_item": it,
+                    "matched_by": "keyword"
+                }
         c_name = str(it.get("name", "")).strip()
-        asin = str(it.get("asin", "")).strip().upper()
-        clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)-\d{2,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
+        clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
         if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
             return {
-                "model": asin,
+                "model": it.get("asin", ""),
                 "catalog_item": it,
-                "matched_by": "keyword"
+                "matched_by": "name_match"
             }
 
     return None
