@@ -334,6 +334,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
 
     # 2. 精準解析價格 (優先 Buybox -> Apex -> CorePrice，嚴格排除特價劃線參考價與推薦卡片)
     price = ""
+    buybox_shipping = 0
     if buybox:
         for p_elem in buybox.select(".priceToPay .a-offscreen, #price_inside_buybox, #newBuyBoxPrice, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
             t = p_elem.get_text(strip=True)
@@ -344,6 +345,31 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
             elif t.replace(",", "").isdigit():
                 price = f"￥{t}"
                 break
+
+        deliv_elem = buybox.select_one("[data-csa-c-delivery-price]")
+        if deliv_elem and deliv_elem.get("data-csa-c-delivery-price"):
+            m_shp = re.search(r"[\d,]+", deliv_elem.get("data-csa-c-delivery-price"))
+            if m_shp:
+                buybox_shipping = int(m_shp.group(0).replace(",", ""))
+
+        if buybox_shipping == 0:
+            deliv_box = buybox.select_one("#deliveryMessageMirId, #mir-layout-DELIVERY_BLOCK, .delivery-message, #delivery-block")
+            deliv_text = deliv_box.get_text(" ", strip=True) if deliv_box else ""
+            if deliv_text and not any(k in deliv_text for k in ["無料配送", "送料無料", "Free Delivery", "Prime", "免運", "免費配送"]):
+                m_shp = re.search(r'(?:配送料|送料|配送費|配送|delivery)[^\d￥¥]{0,10}[￥¥]\s*([\d,]+)', deliv_text, re.I)
+                if not m_shp:
+                    m_shp = re.search(r'\+\s*[￥¥]\s*([\d,]+)', deliv_text)
+                if m_shp:
+                    buybox_shipping = int(m_shp.group(1).replace(",", ""))
+
+        if buybox_shipping == 0:
+            for row in buybox.select("tr, .tabular-buybox-row"):
+                r_txt = row.get_text(" ", strip=True)
+                if any(k in r_txt for k in ["配送料", "送料", "Shipping"]):
+                    m_shp = re.search(r'[￥¥]\s*([\d,]+)', r_txt)
+                    if m_shp:
+                        buybox_shipping = int(m_shp.group(1).replace(",", ""))
+                        break
 
     if not price:
         apex = soup.select_one("#corePriceDisplay_desktop_feature_div, #apex_desktop, #corePrice_feature_div")
@@ -375,6 +401,13 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
                 m_sub = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", m_bb.group(1))
                 if m_sub:
                     price = f"￥{m_sub.group(1)}"
+
+    # 若 BuyBox 含有運費 (例如第三方自出貨 FBM)，將運費加入價格中顯示
+    if price and buybox_shipping > 0 and price not in ("-", "缺貨中"):
+        m_p = re.search(r"[\d,]+", price)
+        if m_p:
+            p_val = int(m_p.group(0).replace(",", ""))
+            price = f"￥{p_val + buybox_shipping:,}"
 
     # 3. 庫存判定 (無有效價格或無購買按鈕，絕不可能判定為有貨，杜絕「價格載入中」偽狀態)
     has_buy_button = (has_cart or has_buy_now or has_preorder)
@@ -554,19 +587,14 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
             if val >= 500:
                 tp_ints.append(val)
 
-    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, #all-offers-display, #aod-offer-list, #all-offers-display-scroller, div[id*='aod-ingress'], div[id*='unqualified-buybox'], div[id*='buying-options']"):
-        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value, [id^='aod-price-']"):
+    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, div[id*='aod-ingress'], div[id*='unqualified-buybox'], div[id*='buying-options']"):
+        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value"):
             t = p_el.get_text(strip=True)
             m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
             if m:
                 v = int(m.group(1).replace(",", ""))
                 if v >= 500:
                     tp_ints.append(v)
-        txt = box.get_text(" ", strip=True)
-        for m in re.finditer(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", txt):
-            v = int(m.group(1).replace(",", ""))
-            if v >= 500:
-                tp_ints.append(v)
 
     # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額
     if is_official and in_stock and price:
@@ -974,7 +1002,7 @@ class AmazonJPChecker:
         if not res.get("is_official", False) or res.get("no_featured_offer", False) or res.get("third_party_price") == "-":
             try:
                 aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain?asin={asin}&pc=dp"
-                s_to_use = session if ('session' in locals() and session) else None
+                s_to_use = session if ('session' in locals() and session) else get_shared_session(proxy=proxy)
                 if s_to_use:
                     aod_headers = {k: v for k, v in headers.items() if k.lower() != "cookie"}
                     aod_headers["Referer"] = url
@@ -994,7 +1022,7 @@ class AmazonJPChecker:
                             is_offer_official = is_s_amz and is_f_amz
 
                             found_p = None
-                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .apex-pricetopay-value, [id^='aod-price-'], .a-color-price"):
+                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .apex-pricetopay-value, [id^='aod-price-']"):
                                 t = p_el.get_text(strip=True)
                                 m = re.search(r"[\d,]+", t)
                                 if m:
@@ -1003,7 +1031,26 @@ class AmazonJPChecker:
                                         found_p = v
                                         break
 
+                            # 提取運費 (含自出貨 FBM 個人賣家、未達免運門檻等運費，嚴格加總)
+                            shipping_fee = 0
+                            deliv_p_el = of.select_one("[data-csa-c-delivery-price]")
+                            if deliv_p_el and deliv_p_el.get("data-csa-c-delivery-price"):
+                                m_shp = re.search(r"[\d,]+", deliv_p_el.get("data-csa-c-delivery-price"))
+                                if m_shp:
+                                    shipping_fee = int(m_shp.group(0).replace(",", ""))
+
+                            if shipping_fee == 0:
+                                deliv_box = of.select_one(".aod-delivery-promise-column, .aod-unified-delivery, [id*='delivery'], [id*='ship']")
+                                deliv_text = deliv_box.get_text(" ", strip=True) if deliv_box else of.get_text(" ", strip=True)
+                                if not any(k in deliv_text for k in ["無料配送", "送料無料", "Free Delivery", "Prime", "免運", "免費配送"]):
+                                    m_shp = re.search(r'(?:配送料|送料|配送費|配送|delivery)[^\d￥¥]{0,10}[￥¥]\s*([\d,]+)', deliv_text, re.I)
+                                    if not m_shp:
+                                        m_shp = re.search(r'\+\s*[￥¥]\s*([\d,]+)', deliv_text)
+                                    if m_shp:
+                                        shipping_fee = int(m_shp.group(1).replace(",", ""))
+
                             if found_p:
+                                total_offer_price = found_p + shipping_fee
                                 if is_offer_official:
                                     if not res.get("is_official"):
                                         res["is_official"] = True
@@ -1011,8 +1058,8 @@ class AmazonJPChecker:
                                         res["seller"] = "Amazon.co.jp (官方自營)"
                                         res["in_stock"] = True
                                 else:
-                                    # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA
-                                    aod_tp_ints.append(found_p)
+                                    # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA，嚴格加上運費
+                                    aod_tp_ints.append(total_offer_price)
 
                         if aod_tp_ints:
                             all_cands = []
