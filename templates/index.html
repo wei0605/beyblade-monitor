@@ -330,6 +330,36 @@
         </span>
       </div>
 
+      <!-- 方案 4：Amazon 自訂登入 Cookie 注入 -->
+      <div class="form-group">
+        <label class="form-label"><i class="fa-solid fa-cookie-bite" style="color: #f59e0b;"></i> Amazon 自訂登入 Cookie (大幅降低 503 與驗證碼風控):</label>
+        <div class="input-with-btn">
+          <input type="text" id="settingAmazonCookie" class="form-input" placeholder="session-id=...; ubid-acbjp=...; x-acbjp=...">
+          <button class="btn-test" style="background: #475569;" onclick="clearAmazonCookie()"><i class="fa-solid fa-eraser"></i> 清空</button>
+        </div>
+        <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block; line-height: 1.4;">
+          💡 在已登入 Amazon.co.jp 的電腦瀏覽器按 F12 ➔ 應用程式 (Application) ➔ Cookie 複製 <code>session-id</code> 與 <code>ubid-acbjp</code> 等內容貼入，帶合法憑證避開惡意爬蟲判定。
+        </span>
+      </div>
+
+      <!-- 方案 5：Keepa 官方 API 與自動降級備援 -->
+      <div class="form-group" style="background: rgba(245, 158, 11, 0.08); padding: 12px; border-radius: 8px; border: 1px dashed rgba(245, 158, 11, 0.35);">
+        <label class="form-label" style="color: #fbbf24;"><i class="fa-solid fa-cloud-bolt" style="color: #f59e0b;"></i> Keepa 官方電商 API (Amazon 零封鎖與自動備援):</label>
+        <div class="input-with-btn" style="margin-bottom: 8px;">
+          <input type="password" id="settingKeepaApiKey" class="form-input" placeholder="輸入 Keepa API Key (例如: 8a7b6c5d...)">
+          <button class="btn-test" style="background: #f59e0b; color: #0f172a; font-weight: bold;" onclick="testKeepa()"><i class="fa-solid fa-plug-circle-check"></i> 測試 Key</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #cbd5e1; flex-wrap: wrap;">
+          <span>運作模式：</span>
+          <select id="settingKeepaMode" class="form-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+            <option value="fallback">🛡️ 自動降級備援模式 (平時爬蟲，被擋自動調用 Keepa 救援，最省額度)</option>
+            <option value="primary">⚡ Keepa 優先模式 (Amazon 全走 Keepa 官方接口，零封鎖風險)</option>
+            <option value="disabled">🚫 停用 Keepa</option>
+          </select>
+        </div>
+        <span id="keepaTokenStatus" style="font-size: 11px; color: #38bdf8; margin-top: 5px; display: block;"></span>
+      </div>
+
       <!-- 7 大賣場獨立 Discord Webhook 與推播開關 -->
       <div class="store-settings-block">
         <div class="store-settings-title">
@@ -580,6 +610,15 @@
           if (document.getElementById('settingProxyUrl')) {
             document.getElementById('settingProxyUrl').value = data.proxy_url || '';
           }
+          if (document.getElementById('settingAmazonCookie')) {
+            document.getElementById('settingAmazonCookie').value = data.amazon_custom_cookie || '';
+          }
+          if (document.getElementById('settingKeepaApiKey')) {
+            document.getElementById('settingKeepaApiKey').value = data.keepa_api_key || '';
+          }
+          if (document.getElementById('settingKeepaMode')) {
+            document.getElementById('settingKeepaMode').value = data.keepa_mode || 'fallback';
+          }
           renderStoreSettingsCards();
         }
       } catch (e) {
@@ -743,6 +782,38 @@
         alert(data.msg);
       } catch (e) {
         alert("測試請求失敗: " + e);
+      }
+    }
+
+    function clearAmazonCookie() {
+      if (document.getElementById('settingAmazonCookie')) {
+        document.getElementById('settingAmazonCookie').value = '';
+        alert("已清除 Cookie 欄位，請點擊下方的「儲存所有推播與賣場設定」以生效。");
+      }
+    }
+
+    async function testKeepa() {
+      const kKey = document.getElementById('settingKeepaApiKey') ? document.getElementById('settingKeepaApiKey').value.trim() : '';
+      if (!kKey) {
+        alert("請先填寫 Keepa API Key！");
+        return;
+      }
+      const stEl = document.getElementById('keepaTokenStatus');
+      if (stEl) stEl.innerText = "⏳ 正在驗證 Keepa 官方 API Key...";
+      try {
+        const res = await fetch('/api/test_keepa', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ api_key: kKey })
+        });
+        const data = await res.json();
+        alert(data.msg);
+        if (stEl) {
+          stEl.innerText = data.ok ? `✅ Keepa 驗證通過，剩餘可用 Token: ${data.tokens}` : `❌ ${data.msg}`;
+        }
+      } catch (e) {
+        alert("Keepa 測試請求失敗: " + e);
+        if (stEl) stEl.innerText = `❌ 測試失敗: ${e}`;
       }
     }
 
@@ -1043,6 +1114,9 @@
         amazon_jitter: amazonJitter,
         amazon_use_playwright: amazonPlaywright,
         proxy_url: document.getElementById('settingProxyUrl') ? document.getElementById('settingProxyUrl').value.trim() : "",
+        amazon_custom_cookie: document.getElementById('settingAmazonCookie') ? document.getElementById('settingAmazonCookie').value.trim() : "",
+        keepa_api_key: document.getElementById('settingKeepaApiKey') ? document.getElementById('settingKeepaApiKey').value.trim() : "",
+        keepa_mode: document.getElementById('settingKeepaMode') ? document.getElementById('settingKeepaMode').value : "fallback",
         discord_webhook: document.getElementById('settingDiscordUrl').value.trim(),
         line_token: document.getElementById('settingLineToken').value.trim(),
         store_settings: store_settings

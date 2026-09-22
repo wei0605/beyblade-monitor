@@ -36,7 +36,8 @@ from monitor_engine import (
     CyberbizChecker, EsliteChecker, ShopeeChecker,
     check_store_item, get_item_direct_url,
     STORE_CONFIG, NotificationManager, get_product_url, extract_asin,
-    PLAYWRIGHT_AVAILABLE, cffi_requests, test_proxy_connection
+    PLAYWRIGHT_AVAILABLE, cffi_requests, test_proxy_connection,
+    KeepaChecker
 )
 
 # 初始化目錄與檔案
@@ -77,6 +78,9 @@ class MonitorState:
         cfg.setdefault("discord_webhook", "")
         cfg.setdefault("line_token", "")
         cfg.setdefault("proxy_url", "")
+        cfg.setdefault("amazon_custom_cookie", "")
+        cfg.setdefault("keepa_api_key", "")
+        cfg.setdefault("keepa_mode", "fallback")
         cfg.setdefault("items", [])
         cfg.setdefault("store_settings", {})
 
@@ -152,6 +156,18 @@ class MonitorState:
         """獲取全域或 Amazon 專用住宅代理 (Residential Proxy)"""
         return self.config.get("proxy_url", "").strip()
 
+    def get_amazon_custom_cookie(self) -> str:
+        """獲取 Amazon 自訂登入 Cookie (解決 503 與 CAPTCHA)"""
+        return self.config.get("amazon_custom_cookie", "").strip()
+
+    def get_keepa_api_key(self) -> str:
+        """獲取 Keepa 官方 API Key"""
+        return self.config.get("keepa_api_key", "").strip()
+
+    def get_keepa_mode(self) -> str:
+        """獲取 Keepa 運作模式: fallback (自動降級備援) | primary (優先使用) | disabled (停用)"""
+        return self.config.get("keepa_mode", "fallback").strip()
+
     def save_config(self):
         with self._save_lock:
             try:
@@ -201,9 +217,20 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     amazon_jitter = state.get_amazon_jitter()
     proxy = state.get_proxy_url()
     only_official = state.config.get("only_amazon_seller", True)
+    custom_cookie = state.get_amazon_custom_cookie() if store_key == "amazon_jp" else None
+    keepa_key = state.get_keepa_api_key() if store_key == "amazon_jp" else None
+    keepa_mode = state.get_keepa_mode() if store_key == "amazon_jp" else "fallback"
 
-    proxy_tag = " (住宅代理)" if (proxy and store_key == "amazon_jp") else ""
-    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品{proxy_tag}...", "INFO")
+    extras = []
+    if store_key == "amazon_jp":
+        if proxy:
+            extras.append("住宅代理")
+        if custom_cookie:
+            extras.append("自訂Cookie")
+        if keepa_key and keepa_mode != "disabled":
+            extras.append(f"Keepa {keepa_mode}")
+    tag = f" ({', '.join(extras)})" if extras else ""
+    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品{tag}...", "INFO")
     t0 = time.time()
 
     def worker(item_tuple):
@@ -215,7 +242,10 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             amazon_interval=amazon_delay,
             amazon_jitter=amazon_jitter,
             proxy=proxy,
-            only_amazon_seller=only_official
+            only_amazon_seller=only_official,
+            custom_cookie=custom_cookie,
+            keepa_api_key=keepa_key,
+            keepa_mode=keepa_mode
         )
         return idx, item, res
 
@@ -290,6 +320,9 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     store_short = store_cfg.get("short_name", store)
     s_settings = state.config.get("store_settings", {}).get(store, {})
     store_notify_enabled = s_settings.get("enable_notifications", True)
+
+    if res.get("status_note"):
+        state.add_log(f"[{store_short} - {name}] ℹ️ {res['status_note']}", "INFO")
 
     if not res.get("ok"):
         msg = res.get("msg", "檢測異常")
@@ -458,6 +491,9 @@ async def get_status():
         "amazon_jitter": state.get_amazon_jitter(),
         "amazon_use_playwright": state.get_amazon_use_playwright(),
         "proxy_url": state.get_proxy_url(),
+        "amazon_custom_cookie": state.get_amazon_custom_cookie(),
+        "keepa_api_key": state.get_keepa_api_key(),
+        "keepa_mode": state.get_keepa_mode(),
         "curl_cffi_available": (cffi_requests is not None),
         "playwright_available": False,
         "only_amazon_seller": state.config.get("only_amazon_seller", True),
@@ -506,6 +542,13 @@ async def api_update_settings(req: Request):
         state.config["line_token"] = str(data["line_token"]).strip()
     if "proxy_url" in data:
         state.config["proxy_url"] = str(data["proxy_url"]).strip()
+    if "amazon_custom_cookie" in data:
+        state.config["amazon_custom_cookie"] = str(data["amazon_custom_cookie"]).strip()
+    if "keepa_api_key" in data:
+        state.config["keepa_api_key"] = str(data["keepa_api_key"]).strip()
+    if "keepa_mode" in data:
+        k_mode = str(data["keepa_mode"]).strip().lower()
+        state.config["keepa_mode"] = k_mode if k_mode in ("fallback", "primary", "disabled") else "fallback"
 
     # 各賣場獨立設定 (獨立通知開關 & 獨立 Discord Webhook & 商品間隔)
     if "store_settings" in data and isinstance(data["store_settings"], dict):
@@ -540,6 +583,20 @@ async def api_update_settings(req: Request):
     state.save_config()
     state.add_log("⚙️ 雲端全域與各賣場專屬設定已儲存！", "SUCCESS")
     return {"ok": True, "config": state.config}
+
+
+@app.post("/api/test_keepa")
+async def api_test_keepa(req: Request):
+    """測試 Keepa API Key 是否有效並取得剩餘 Token 額度"""
+    try:
+        data = await req.json()
+    except Exception:
+        data = {}
+    api_key = data.get("api_key", "").strip() or state.get_keepa_api_key()
+    if not api_key:
+        return JSONResponse({"ok": False, "msg": "請先填寫 Keepa API Key！"}, status_code=400)
+    ok, msg, tokens = KeepaChecker.test_keepa_api(api_key)
+    return {"ok": ok, "msg": msg, "tokens": tokens}
 
 
 @app.post("/api/toggle_store_monitor")

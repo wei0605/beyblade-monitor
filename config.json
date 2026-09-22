@@ -215,5 +215,8 @@
   "enable_line": true,
   "amazon_jitter": true,
   "amazon_use_playwright": false,
-  "proxy_url": "http://smart-Paul1928:Qaz990501@proxy.smartproxy.net:3120"
+  "proxy_url": "http://smart-Paul1928:Qaz990501@proxy.smartproxy.net:3120",
+  "amazon_custom_cookie": "",
+  "keepa_api_key": "",
+  "keepa_mode": "fallback"
 }

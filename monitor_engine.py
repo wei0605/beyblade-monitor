@@ -215,16 +215,30 @@ AMAZON_STEALTH_PROFILES = [
 
 AMAZON_DEFAULT_ZIPCODE = "103-0003"
 
-def get_amazon_stealth_headers(profile: dict = None) -> Tuple[dict, str]:
-    """獲取真實瀏覽器輪換 Headers 與對應 Client Hints，帶日幣偏好與日本境內郵遞區號 Cookie (103-0003)"""
+def get_amazon_stealth_headers(profile: dict = None, custom_cookie: Optional[str] = None) -> Tuple[dict, str]:
+    """獲取真實瀏覽器輪換 Headers 與對應 Client Hints，支援注入真實登入 Cookie (或預設日幣與日本境內郵遞區號 103-0003)"""
     if not profile:
         profile = random.choice(AMAZON_STEALTH_PROFILES)
+    
+    default_cookie = f"i18n-prefs=JPY; lc-acbjp=ja_JP; glow-zipcode={AMAZON_DEFAULT_ZIPCODE}"
+    if custom_cookie and custom_cookie.strip():
+        c_str = custom_cookie.strip().rstrip(";")
+        if "i18n-prefs" not in c_str:
+            c_str += "; i18n-prefs=JPY"
+        if "lc-acbjp" not in c_str:
+            c_str += "; lc-acbjp=ja_JP"
+        if "glow-zipcode" not in c_str:
+            c_str += f"; glow-zipcode={AMAZON_DEFAULT_ZIPCODE}"
+        final_cookie = c_str
+    else:
+        final_cookie = default_cookie
+
     headers = {
         "User-Agent": profile["user_agent"],
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
         "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
         "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Cookie": f"i18n-prefs=JPY; lc-acbjp=ja_JP; glow-zipcode={AMAZON_DEFAULT_ZIPCODE}",
+        "Cookie": final_cookie,
         "DNT": "1",
         "Upgrade-Insecure-Requests": "1",
         "Sec-Fetch-Dest": "document",
@@ -535,8 +549,138 @@ class PlaywrightAmazonChecker:
                 return {"ok": False, "msg": f"Playwright 檢測失敗: {str(e)[:30]}"}
 
 
+class KeepaChecker:
+    """Keepa 官方 Amazon 電商 API 庫存與價格檢測器 (極速、零封鎖風險、支援日本亞馬遜 domain=5)"""
+    _last_req_time: float = 0.0
+    _lock = threading.Lock()
+
+    @classmethod
+    def test_keepa_api(cls, api_key: str) -> Tuple[bool, str, int]:
+        """測試 Keepa API Key 是否有效並取得剩餘 Token 額度"""
+        if not api_key or not api_key.strip():
+            return False, "未填寫 Keepa API Key", 0
+        api_key = api_key.strip()
+        url = f"https://api.keepa.com/token?key={api_key}"
+        try:
+            r = requests.get(url, timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                if "tokensLeft" in data:
+                    tokens = int(data.get("tokensLeft", 0))
+                    refill = data.get("refillRate", 0)
+                    return True, f"✅ Keepa API 連線成功！剩餘 Token: {tokens} (補充速率: {refill}/分)", tokens
+            try:
+                data = r.json()
+                err_msg = data.get("error", {}).get("message") or f"HTTP {r.status_code}"
+            except Exception:
+                err_msg = f"HTTP {r.status_code}"
+            return False, f"Keepa API 驗證失敗: {err_msg}", 0
+        except Exception as e:
+            return False, f"Keepa API 連線逾時或錯誤: {str(e)[:40]}", 0
+
+    @classmethod
+    def check_asin(cls, asin: str, api_key: str) -> Dict[str, Any]:
+        """透過 Keepa Product API 查詢 Amazon.co.jp ASIN 庫存、價格與販售者 (domain=5 代表日本)"""
+        asin = extract_asin(asin)
+        if not asin:
+            return {"ok": False, "msg": "無效 ASIN"}
+        if not api_key or not api_key.strip():
+            return {"ok": False, "msg": "未設定 Keepa API Key"}
+
+        api_key = api_key.strip()
+        url = f"https://api.keepa.com/product?key={api_key}&domain=5&asin={asin}&stats=1"
+
+        try:
+            r = requests.get(url, timeout=12)
+            if r.status_code != 200:
+                try:
+                    err_data = r.json()
+                    err_msg = err_data.get("error", {}).get("message") or f"HTTP {r.status_code}"
+                except Exception:
+                    err_msg = f"HTTP {r.status_code}"
+                return {"ok": False, "msg": f"Keepa 查詢失敗: {err_msg}"}
+
+            data = r.json()
+            products = data.get("products", [])
+            if not products:
+                return {"ok": False, "msg": f"Keepa 未找到此商品 ({asin})"}
+
+            prod = products[0]
+            title = prod.get("title") or f"Amazon 商品 ({asin})"
+            stats = prod.get("stats", {}) or {}
+            current = stats.get("current", []) or []
+
+            # Keepa stats.current 定義 (單位：日圓整數):
+            # 0: AMAZON 本體售價 (-1 為無價格)
+            # 1: NEW 新品第三方售價
+            # 18: BUY_BOX_SHIPPING 含運購物車價
+            amazon_price = current[0] if len(current) > 0 and current[0] is not None else -1
+            new_price = current[1] if len(current) > 1 and current[1] is not None else -1
+            buybox_price = stats.get("buyBoxPrice", -1)
+            buybox_is_amazon = bool(stats.get("buyBoxIsAmazon", False))
+
+            # availabilityAmazon: -1: 無官方, 0: 現貨可購買, 1: 預購, 2: 延遲出貨, 3: 停產
+            avail_amazon = prod.get("availabilityAmazon", -1)
+
+            in_stock = False
+            is_official = False
+            is_preorder = False
+            price_str = "-"
+            official_price = "官方缺貨"
+            third_party_price = "-"
+            seller_name = "-"
+
+            if avail_amazon in (0, 1, 2) and (amazon_price > 0 or buybox_is_amazon):
+                in_stock = True
+                is_official = True
+                if avail_amazon == 1:
+                    is_preorder = True
+                off_val = amazon_price if amazon_price > 0 else buybox_price
+                if off_val > 0:
+                    official_price = f"￥{off_val:,}"
+                    price_str = official_price
+                seller_name = "Amazon.co.jp (官方自營)"
+            elif buybox_price and buybox_price > 0:
+                in_stock = True
+                is_official = buybox_is_amazon
+                price_str = f"￥{buybox_price:,}"
+                if is_official:
+                    official_price = price_str
+                    seller_name = "Amazon.co.jp (官方自營)"
+                else:
+                    seller_name = "第三方賣家 (BuyBox)"
+                    third_party_price = price_str
+            elif new_price and new_price > 0:
+                in_stock = True
+                is_official = False
+                price_str = f"￥{new_price:,}"
+                third_party_price = price_str
+                seller_name = "第三方賣家"
+
+            if new_price and new_price > 0 and third_party_price == "-":
+                third_party_price = f"￥{new_price:,}"
+
+            return {
+                "ok": True,
+                "asin": asin,
+                "title": title,
+                "price": price_str,
+                "official_price": official_price,
+                "third_party_price": third_party_price,
+                "in_stock": in_stock,
+                "is_official": is_official,
+                "is_preorder": is_preorder,
+                "seller": seller_name,
+                "url": get_product_url(asin, official_only=is_official),
+                "source": "keepa",
+                "tokens_left": data.get("tokensLeft", 0)
+            }
+        except Exception as e:
+            return {"ok": False, "msg": f"Keepa API 異常: {str(e)[:30]}"}
+
+
 class AmazonJPChecker:
-    """Amazon Japan 核心檢測器 (真實 Headers 輪換 + Jitter 隨機延遲 + Chrome TLS 偽裝)"""
+    """Amazon Japan 核心檢測器 (支援自訂登入 Cookie + Keepa 自動備援 + 真實 Headers 輪換 + Jitter 隨機延遲 + Chrome TLS 偽裝)"""
     _last_req_time: float = 0.0
     _lock = threading.Lock()
     _cooloff_until: float = 0.0
@@ -562,43 +706,51 @@ class AmazonJPChecker:
             cls._last_req_time = time.time()
 
     @classmethod
-    def trigger_cooloff(cls, seconds: float = 20.0):
+    def trigger_cooloff(cls, seconds: float = 180.0):
         with cls._lock:
             cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
 
     _session_lock = threading.Lock()
     _cffi_session = None
     _session_proxy = None
+    _session_cookie = None
 
     @classmethod
-    def get_cffi_session(cls, proxy: Optional[str] = None, imp: str = "chrome124"):
-        """獲取已注入日本境內郵遞區號 (103-0003) 與 JPY 日幣的持久化連線池 Session"""
+    def get_cffi_session(cls, proxy: Optional[str] = None, imp: str = "chrome124", custom_cookie: Optional[str] = None):
+        """獲取已注入自訂 Cookie 或日本境內郵遞區號 (103-0003) 與 JPY 日幣的持久化連線池 Session"""
         if not cffi_requests:
             return None
         with cls._session_lock:
-            if cls._cffi_session is None or cls._session_proxy != proxy:
+            if cls._cffi_session is None or cls._session_proxy != proxy or cls._session_cookie != custom_cookie:
                 proxies = {"http": proxy, "https": proxy} if proxy else None
                 try:
                     s = cffi_requests.Session(impersonate=imp, proxies=proxies)
-                    headers, _ = get_amazon_stealth_headers()
+                    headers, _ = get_amazon_stealth_headers(custom_cookie=custom_cookie)
                     try:
-                        # 1. 先訪問首頁建立 session-id 與基礎 Cookie
-                        s.get("https://www.amazon.co.jp/", headers=headers, timeout=10)
-                        # 2. 注入日本境內郵遞區號 103-0003 (東京都中央區日本橋)
-                        addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
-                        s.post(
-                            addr_url,
-                            headers={**headers, "Content-Type": "application/x-www-form-urlencoded"},
-                            data={
-                                "locationType": "LOCATION_INPUT",
-                                "zipCode": AMAZON_DEFAULT_ZIPCODE,
-                                "storeContext": "generic",
-                                "deviceType": "web",
-                                "pageType": "Detail",
-                                "actionSource": "glow"
-                            },
-                            timeout=8
-                        )
+                        # 1. 若使用者有提供自訂 Cookie，直接注入，不進行可能觸發驗證碼的初始首頁訪問
+                        if custom_cookie and custom_cookie.strip():
+                            for part in custom_cookie.split(";"):
+                                if "=" in part:
+                                    k, v = part.strip().split("=", 1)
+                                    s.cookies.set(k.strip(), v.strip(), domain=".amazon.co.jp")
+                        else:
+                            # 2. 先訪問首頁建立 session-id 與基礎 Cookie
+                            s.get("https://www.amazon.co.jp/", headers=headers, timeout=10)
+                            # 注入日本境內郵遞區號 103-0003 (東京都中央區日本橋)
+                            addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
+                            s.post(
+                                addr_url,
+                                headers={**headers, "Content-Type": "application/x-www-form-urlencoded"},
+                                data={
+                                    "locationType": "LOCATION_INPUT",
+                                    "zipCode": AMAZON_DEFAULT_ZIPCODE,
+                                    "storeContext": "generic",
+                                    "deviceType": "web",
+                                    "pageType": "Detail",
+                                    "actionSource": "glow"
+                                },
+                                timeout=8
+                            )
                         # 3. 嚴格鎖定幣別為日圓 JPY 與日語 ja_JP
                         s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
                         s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
@@ -607,6 +759,7 @@ class AmazonJPChecker:
                         pass
                     cls._cffi_session = s
                     cls._session_proxy = proxy
+                    cls._session_cookie = custom_cookie
                 except Exception:
                     cls._cffi_session = None
             return cls._cffi_session
@@ -617,11 +770,29 @@ class AmazonJPChecker:
             cls._cffi_session = None
 
     @classmethod
-    def check_asin(cls, asin: str, interval: float = 0.6, enable_jitter: bool = True, use_playwright: bool = False, proxy: Optional[str] = None, official_only: bool = False) -> Dict[str, Any]:
-        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援真實 Headers輪換、Jitter延遲、TLS 偽裝、103-0003日本地址與住宅代理)"""
+    def check_asin(
+        cls,
+        asin: str,
+        interval: float = 0.6,
+        enable_jitter: bool = True,
+        use_playwright: bool = False,
+        proxy: Optional[str] = None,
+        official_only: bool = False,
+        custom_cookie: Optional[str] = None,
+        keepa_api_key: Optional[str] = None,
+        keepa_mode: str = "fallback"
+    ) -> Dict[str, Any]:
+        """極速檢測 Amazon.co.jp 特定 ASIN 庫存 (支援自訂登入 Cookie、Keepa 備援與優先模式、Jitter延遲、TLS 偽裝與住宅代理)"""
         asin = extract_asin(asin)
         if not asin:
             return {"ok": False, "msg": "無效 ASIN"}
+
+        # 若使用者指定優先使用 Keepa 官方 API
+        if keepa_mode == "primary" and keepa_api_key:
+            keepa_res = KeepaChecker.check_asin(asin, keepa_api_key)
+            if keepa_res.get("ok"):
+                return keepa_res
+            # 若 Keepa 失敗，自動嘗試降級回爬蟲繼續執行
 
         # 若使用者指定啟用 Playwright 且環境支援，直接走真實瀏覽器
         if use_playwright and PlaywrightAmazonChecker.is_available():
@@ -630,16 +801,16 @@ class AmazonJPChecker:
 
         cls.throttle(interval, enable_jitter=enable_jitter)
         url = get_product_url(asin, official_only=official_only)
-        headers, imp = get_amazon_stealth_headers()
+        headers, imp = get_amazon_stealth_headers(custom_cookie=custom_cookie)
 
         html = None
         status_code = 200
         proxies = {"http": proxy, "https": proxy} if proxy else None
 
-        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (支援持久化連線池與日本境內郵遞區號 103-0003)
+        # 第一優先：curl_cffi Chrome 124 TLS 指紋偽裝 (支援持久化連線池與自訂登入 Cookie)
         if cffi_requests:
             try:
-                session = cls.get_cffi_session(proxy=proxy, imp=imp)
+                session = cls.get_cffi_session(proxy=proxy, imp=imp, custom_cookie=custom_cookie)
                 if session:
                     r = session.get(url, headers=headers, timeout=12)
                     status_code = r.status_code
@@ -656,23 +827,39 @@ class AmazonJPChecker:
                 status_code = r.status_code
                 html = r.text
             except Exception as e:
+                if keepa_api_key and keepa_mode in ("fallback", "primary"):
+                    kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
+                    if kp_res.get("ok"):
+                        kp_res["status_note"] = "連線超時，Keepa 備援接手"
+                        return kp_res
                 return {"ok": False, "msg": f"網路超時: {str(e)[:25]}"}
 
         if not html:
+            if keepa_api_key and keepa_mode in ("fallback", "primary"):
+                kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
+                if kp_res.get("ok"):
+                    kp_res["status_note"] = "頁面為空，Keepa 備援接手"
+                    return kp_res
             return {"ok": False, "msg": "無法獲取頁面內容"}
 
         # 檢測 CAPTCHA 或 503 頻率限制
-        if "/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html:
-            cls.trigger_cooloff(20.0)
-            if PlaywrightAmazonChecker.is_available():
-                return PlaywrightAmazonChecker.check_asin(asin)
-            return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證，已自動避讓冷卻 20s，建議設定住宅代理)"}
+        is_captcha = ("/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html)
+        is_503 = (status_code == 503)
 
-        if status_code == 503:
-            cls.trigger_cooloff(20.0)
+        if is_captcha or is_503:
+            cls.trigger_cooloff(180.0)
+            # 【方案 5 關鍵】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
+            if keepa_api_key and keepa_mode in ("fallback", "primary"):
+                kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
+                if kp_res.get("ok"):
+                    kp_res["status_note"] = "Amazon 觸發風控，已由 Keepa 官方 API 接手"
+                    return kp_res
+
             if PlaywrightAmazonChecker.is_available():
                 return PlaywrightAmazonChecker.check_asin(asin)
-            return {"ok": False, "msg": "Amazon 頻率限制 (503，已自動避讓冷卻 20s，建議設定住宅代理)"}
+            
+            reason = "CAPTCHA 驗證" if is_captcha else "503 頻率限制"
+            return {"ok": False, "msg": f"Amazon {reason} (建議填寫 Cookie/住宅代理，或填入 Keepa API Key 啟用自動備援)"}
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
 
@@ -1238,8 +1425,18 @@ def test_proxy_connection(proxy_url: str) -> Tuple[bool, str]:
     return False, f"代理連線超時: {last_err[:50]}"
 
 
-def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_jitter: bool = True, use_playwright: bool = False, proxy: Optional[str] = None, only_amazon_seller: bool = True) -> Dict[str, Any]:
-    """多通路統一檢查調度器 (支援 Amazon 隨機 Jitter 與住宅代理)"""
+def check_store_item(
+    item: Dict[str, Any],
+    amazon_interval: float = 0.6,
+    amazon_jitter: bool = True,
+    use_playwright: bool = False,
+    proxy: Optional[str] = None,
+    only_amazon_seller: bool = True,
+    custom_cookie: Optional[str] = None,
+    keepa_api_key: Optional[str] = None,
+    keepa_mode: str = "fallback"
+) -> Dict[str, Any]:
+    """多通路統一檢查調度器 (支援 Amazon 隨機 Jitter、自訂登入 Cookie、Keepa 備援與住宅代理)"""
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
 
@@ -1250,7 +1447,10 @@ def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_
             enable_jitter=amazon_jitter,
             use_playwright=use_playwright,
             proxy=proxy,
-            official_only=False
+            official_only=False,
+            custom_cookie=custom_cookie,
+            keepa_api_key=keepa_api_key,
+            keepa_mode=keepa_mode
         )
     elif store == "pchome":
         return PChomeChecker.check_prod(asin)
@@ -1269,7 +1469,10 @@ def check_store_item(item: Dict[str, Any], amazon_interval: float = 0.6, amazon_
             enable_jitter=amazon_jitter,
             use_playwright=use_playwright,
             proxy=proxy,
-            official_only=False
+            official_only=False,
+            custom_cookie=custom_cookie,
+            keepa_api_key=keepa_api_key,
+            keepa_mode=keepa_mode
         )
 
 
