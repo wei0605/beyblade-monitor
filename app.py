@@ -252,6 +252,17 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
                     continue
                 match_res = match_product_with_stealth_catalog(title, catalog_items)
                 if match_res:
+                    # 若為 PChome 通路，嚴格檢核必須為 Funbox 麗嬰國際官方直營上架商品 (排除第三方轉賣或平行輸入水貨)
+                    if s_key == "pchome":
+                        pid = prod.get("item_id", "")
+                        is_official, full_title = PChomeChecker.is_official_funbox(pid, title)
+                        if not is_official:
+                            continue
+                        if full_title and full_title != title:
+                            title = full_title
+                            prod["title"] = full_title
+                            prod["seller"] = "funbox 麗嬰國際 (PChome 官方)"
+
                     matched_model = match_res["model"]
                     target_item = match_res["catalog_item"]
                     prod_url = prod.get("url", "")

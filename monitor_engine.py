@@ -113,15 +113,15 @@ STORE_CONFIG = {
     },
     "shopee": {
         "key": "shopee",
-        "name": "蝦皮 Funbox",
+        "name": "蝦皮 funbox 特賣會",
         "short_name": "蝦皮 Funbox",
         "icon": "fa-solid fa-shrimp",
         "flag": "🦐",
         "color": "#f97316",
-        "btn_text": "🦐 蝦皮直達",
-        "default_url": "https://shopee.tw/product/{id}",
+        "btn_text": "🦐 蝦皮特賣會直達",
+        "default_url": "https://shopee.tw/funbox5120",
         "id_label": "蝦皮商品網址或代號",
-        "id_placeholder": "例如: https://shopee.tw/product/... 或 -i.{shopid}.{itemid}",
+        "id_placeholder": "例如: https://shopee.tw/product/285705541/... 或 -i.285705541.{itemid}",
     },
     "amazon_stealth": {
         "key": "amazon_stealth",
@@ -1180,8 +1180,46 @@ class PChomeChecker:
         return text.upper()
 
     @classmethod
+    def is_official_funbox(cls, pid: str, name: str = "", session=None) -> Tuple[bool, str]:
+        """檢核 PChome 商品是否為官方 Funbox 麗嬰國際直營上架
+        官方商品特色：商品頁標題必含 'funbox 麗嬰國際'，或品名明確標示 'funbox 麗嬰國際'。
+        非官方轉賣商通常為 'TAKARA TOMY ...'、'日本代購'、'水貨'。
+        """
+        # 1. 先行快速過濾品名 (若品名本身已明確標示 funbox 麗嬰國際)
+        if "funbox 麗嬰國際" in name or ("funbox" in name.lower() and "麗嬰國際" in name):
+            return True, name
+
+        if not pid:
+            return False, name
+
+        # 2. 透過 PChome 搜尋 API 反向驗證商品索引是否帶有 "funbox 麗嬰國際" (精準且無 429 風險)
+        try:
+            r = requests.get(f"https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox 麗嬰國際 {pid}", timeout=3)
+            if r.status_code == 200:
+                for p in r.json().get("prods", []):
+                    if p.get("Id") == pid:
+                        prod_title = p.get("name") or name
+                        return True, f"funbox 麗嬰國際 {prod_title}" if "funbox" not in prod_title.lower() else prod_title
+        except Exception:
+            pass
+
+        # 3. 備援：若可連線商品頁 HTML，檢驗 <title> 是否含有 "funbox 麗嬰國際"
+        try:
+            r = requests.get(f"https://24h.pchome.com.tw/prod/{pid}", headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}, timeout=3)
+            if r.status_code == 200:
+                m = re.search(r"<title>(.*?)</title>", r.text, re.IGNORECASE)
+                page_title = m.group(1).strip() if m else ""
+                t_lower = page_title.lower()
+                if "funbox 麗嬰國際" in page_title or ("funbox" in t_lower and "麗嬰" in page_title):
+                    return True, page_title
+        except Exception:
+            pass
+
+        return False, name
+
+    @classmethod
     def check_pchome_stealth(cls, keyword: str) -> Dict[str, Any]:
-        """PChome 關鍵字突襲搜尋監控"""
+        """PChome 關鍵字突襲搜尋監控 (僅限 Funbox 麗嬰國際官方上架)"""
         search_url = f"https://ecshweb.pchome.com.tw/search/v3.3/all/results?q={keyword}"
         session = get_shared_session()
         headers = {
@@ -1200,16 +1238,19 @@ class PChomeChecker:
                         pid = p.get("Id", "")
                         price_val = p.get("price", 0)
                         price_str = f"NT$ {price_val:,}" if price_val else "未標示"
-                        is_funbox = any(k in name.lower() for k in ["funbox", "麗嬰"])
+                        is_funbox, page_title = cls.is_official_funbox(pid, name, session=session)
+                        if not is_funbox:
+                            # 非 Funbox 麗嬰國際官方上架，為第三方轉賣或平行輸入，略過不判定為官方突襲現貨
+                            continue
                         return {
                             "ok": True,
                             "store": "pchome",
                             "asin": keyword,
-                            "title": name,
+                            "title": page_title or name,
                             "price": price_str,
                             "in_stock": True,
                             "is_official": True,
-                            "seller": "funbox 麗嬰國際 (PChome)" if is_funbox else "PChome 24h 購物",
+                            "seller": "funbox 麗嬰國際 (PChome 官方)",
                             "url": f"https://24h.pchome.com.tw/prod/{pid}",
                             "status_text": "🟢 PChome 突襲上架現貨！"
                         }
@@ -1224,7 +1265,7 @@ class PChomeChecker:
             "price": "-",
             "in_stock": False,
             "is_official": True,
-            "seller": "PChome 24h 購物",
+            "seller": "funbox 麗嬰國際 (PChome 官方)",
             "url": f"https://24h.pchome.com.tw/search/?q={keyword}",
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
@@ -1276,8 +1317,8 @@ class PChomeChecker:
         except Exception:
             pass
 
-        is_funbox = any(k in (title or "").lower() for k in ["funbox", "麗嬰", "麗嬰國際"])
-        seller = "funbox 麗嬰國際 (PChome)" if is_funbox else "PChome 24h 購物"
+        is_funbox, page_title = cls.is_official_funbox(prod_id, title, session=session)
+        seller = "funbox 麗嬰國際 (PChome 官方)" if is_funbox else "PChome 第三方賣家"
         if not in_stock:
             status_text = "⚪ 缺貨中 / 暫無庫存"
         else:
@@ -1287,10 +1328,10 @@ class PChomeChecker:
             "ok": True,
             "store": "pchome",
             "asin": prod_id,
-            "title": title or prod_id,
+            "title": page_title or title or prod_id,
             "price": price_str,
             "in_stock": in_stock,
-            "is_official": True,
+            "is_official": is_funbox,
             "seller": seller,
             "url": product_url,
             "qty": qty,
@@ -1769,8 +1810,8 @@ class ShopeeChecker:
                     "price": "-",
                     "in_stock": False,
                     "is_official": True,
-                    "seller": "Funbox 蝦皮官方旗艦店",
-                    "url": f"https://shopee.tw/search?keyword={raw_text}&shop=37137599",
+                    "seller": "funbox 特賣會 (蝦皮官方)",
+                    "url": f"https://shopee.tw/search?keyword={raw_text}&shop=285705541",
                     "status_text": "⚪ 尚未上架 (待突襲發布)"
                 }
             url = raw_text
@@ -1858,8 +1899,8 @@ class ShopeeChecker:
             "title": title or "蝦皮商品",
             "price": price_str,
             "in_stock": in_stock,
-            "is_official": "funbox" in url.lower(),
-            "seller": "Funbox 蝦皮官方旗艦店" if "funbox" in url.lower() else "蝦皮賣家",
+            "is_official": "funbox" in url.lower() or "285705541" in url,
+            "seller": "funbox 特賣會 (蝦皮官方)" if ("funbox" in url.lower() or "285705541" in url) else "蝦皮賣家",
             "url": url,
             "status_text": status_desc
         }
@@ -1995,8 +2036,8 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
             sp, it = asin.split("_", 1)
             return f"https://shopee.tw/product/{sp}/{it}"
         if is_model_code:
-            return f"https://shopee.tw/search?keyword={asin}&shop=37137599"
-        return asin if asin.startswith("http") else f"https://shopee.tw/{asin}"
+            return f"https://shopee.tw/search?keyword={asin}&shop=285705541"
+        return asin if asin.startswith("http") else f"https://shopee.tw/funbox5120"
     return asin
 
 
@@ -2019,14 +2060,15 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     name = p.get("name", "")
                     price = p.get("price", 0)
                     pid = p.get("Id", "")
-                    is_funbox = any(k in name.lower() for k in ["funbox", "麗嬰"])
+                    is_funbox = "funbox 麗嬰國際" in name or ("funbox" in name.lower() and "麗嬰" in name)
                     results.append({
                         "store": "pchome",
                         "title": name,
                         "price": f"NT$ {price:,}" if price else "未標示",
                         "url": f"https://24h.pchome.com.tw/prod/{pid}",
                         "item_id": pid,
-                        "seller": "funbox 麗嬰國際 (PChome)" if is_funbox else "PChome 24h 購物",
+                        "seller": "funbox 麗嬰國際 (PChome 官方)" if is_funbox else "PChome 第三方賣家",
+                        "is_official": is_funbox,
                         "in_stock": True
                     })
         except Exception:
@@ -2096,7 +2138,7 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Origin": "https://shopee.tw",
-            "Referer": "https://shopee.tw/funbox_toys"
+            "Referer": "https://shopee.tw/funbox5120"
         }
         s_client = None
         if cffi_requests:
@@ -2107,7 +2149,7 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
         if s_client:
             try:
-                shopee_url = "https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id=37137599&sort_type=1"
+                shopee_url = "https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id=285705541&sort_type=1"
                 r = s_client.get(shopee_url, headers=headers, timeout=8)
                 if r.status_code == 200:
                     data = r.json()
@@ -2128,15 +2170,16 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                         else:
                             price_str = "未標示"
                         item_id = str(it.get("itemid", ""))
-                        shop_id = str(it.get("shopid", "37137599"))
-                        prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else "https://shopee.tw/funbox_toys"
+                        shop_id = str(it.get("shopid", "285705541"))
+                        prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else "https://shopee.tw/funbox5120"
                         results.append({
                             "store": "shopee",
                             "title": name,
                             "price": price_str,
                             "url": prod_url,
                             "item_id": f"{shop_id}_{item_id}",
-                            "seller": "Funbox 蝦皮官方旗艦店",
+                            "seller": "funbox 特賣會 (蝦皮官方)",
+                            "is_official": True,
                             "in_stock": True
                         })
             except Exception:
