@@ -19695,12 +19695,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-50",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-50",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:53",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -19718,13 +19722,17 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-52",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-52",
       "seller": "pchome",
       "enabled": true,
       "is_shelf_product": false,
-      "jan": "4904810085553"
+      "jan": "4904810085553",
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:50",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -19742,13 +19750,17 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-53",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-53",
       "seller": "pchome",
       "enabled": true,
       "is_shelf_product": false,
-      "jan": "4904810073734"
+      "jan": "4904810073734",
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:50",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -19766,12 +19778,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19790,12 +19803,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19814,12 +19828,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19838,12 +19853,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19862,12 +19878,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19887,12 +19904,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19909,12 +19927,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19932,12 +19951,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19956,12 +19976,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -19979,12 +20000,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20001,12 +20023,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20024,12 +20047,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20047,12 +20071,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20070,12 +20095,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20093,12 +20119,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20117,12 +20144,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20139,12 +20167,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20161,12 +20190,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:50"
     },
     {
       "store": "pchome",
@@ -20184,12 +20214,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20207,12 +20238,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20232,12 +20264,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20256,12 +20289,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20278,12 +20312,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20302,12 +20337,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20324,12 +20360,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20348,12 +20385,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20371,12 +20409,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20396,12 +20435,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20422,12 +20462,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20444,12 +20485,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20468,12 +20510,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20491,12 +20534,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20514,12 +20558,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20536,12 +20581,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20559,12 +20605,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20582,12 +20629,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20605,12 +20653,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20632,12 +20681,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20662,12 +20712,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20686,12 +20737,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20712,12 +20764,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20738,12 +20791,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20764,12 +20818,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20789,12 +20844,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20811,12 +20867,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20833,12 +20890,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20859,12 +20917,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20883,12 +20942,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20907,12 +20967,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20932,12 +20993,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20954,12 +21016,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -20979,12 +21042,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:51"
     },
     {
       "store": "pchome",
@@ -21001,12 +21065,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-19",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-19",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:52",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21023,12 +21091,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-20",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-20",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:55",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21045,12 +21117,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-21",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-21",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:54",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21067,12 +21143,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:52"
     },
     {
       "store": "pchome",
@@ -21089,12 +21166,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:52"
     },
     {
       "store": "pchome",
@@ -21111,12 +21189,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:52"
     },
     {
       "store": "pchome",
@@ -21133,12 +21212,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:52"
     },
     {
       "store": "pchome",
@@ -21155,12 +21235,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:52"
     },
     {
       "store": "pchome",
@@ -21177,12 +21258,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:52"
     },
     {
       "store": "pchome",
@@ -21199,12 +21281,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-01",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-01",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:53",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21221,12 +21307,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-02",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-02",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:54",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21243,12 +21333,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-03",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-03",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:54",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21265,12 +21359,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-04",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-04",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:54",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21287,12 +21385,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-05",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-05",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:55",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21309,12 +21411,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-06",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-06",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:54",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21331,12 +21437,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-07",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-07",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:54",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21353,12 +21463,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-08",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-08",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:55",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21375,12 +21489,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-09",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-09",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:55",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21397,12 +21515,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-10",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-10",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21419,12 +21541,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-11",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-11",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:55",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21441,12 +21567,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-12",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-12",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21463,12 +21593,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-13",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-13",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:55",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21487,12 +21621,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-14",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-14",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21509,12 +21647,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-15",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-15",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21531,12 +21673,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-16",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-16",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21553,12 +21699,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-17",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-17",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21575,12 +21725,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-18",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-18",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21597,12 +21751,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-19",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-19",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21619,12 +21777,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-20",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-20",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21641,12 +21803,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-21",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-21",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21663,12 +21829,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-22",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-22",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:56",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21687,12 +21857,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-23",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-23",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21711,12 +21885,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-24",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-24",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21733,12 +21911,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-25",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-25",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21755,12 +21937,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-26",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-26",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21777,12 +21963,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-27",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-27",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21800,12 +21990,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-28",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-28",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21824,12 +22018,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-29",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-29",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21848,12 +22046,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-30",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-30",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:57",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21872,12 +22074,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-31",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-31",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21894,12 +22100,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-32",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-32",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21916,12 +22126,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-33",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-33",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21938,12 +22152,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-34",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-34",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21962,12 +22180,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-35",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-35",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -21984,12 +22206,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-36",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-36",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22007,12 +22233,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-37",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-37",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22029,12 +22259,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-38",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-38",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22051,12 +22285,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-39",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-39",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22073,12 +22311,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-40",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-40",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22097,12 +22339,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-41",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-41",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22121,12 +22367,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-42",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-42",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22144,12 +22394,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-43",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-43",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22166,12 +22420,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-44",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-44",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:58",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22188,12 +22446,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-45",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-45",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22210,12 +22472,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-46",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-46",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22233,12 +22499,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-47",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-47",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22257,12 +22527,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-48",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-48",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22279,12 +22553,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-49",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-49",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22303,12 +22581,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-51",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-51",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22328,13 +22610,17 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-56",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-56",
       "seller": "pchome",
       "enabled": true,
       "is_shelf_product": false,
-      "jan": "4904810058915"
+      "jan": "4904810058915",
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22352,12 +22638,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-57",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-57",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -22376,12 +22666,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22398,12 +22689,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22420,12 +22712,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22443,12 +22736,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22467,12 +22761,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22489,12 +22784,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22513,12 +22809,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22537,12 +22834,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22560,12 +22858,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22584,12 +22883,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22608,12 +22908,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22630,12 +22931,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22652,12 +22954,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22677,12 +22980,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22700,12 +23004,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22724,12 +23029,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22749,12 +23055,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22771,12 +23078,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22793,12 +23101,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22815,12 +23124,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22838,12 +23148,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22861,12 +23172,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22885,12 +23197,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22909,12 +23222,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22932,12 +23246,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22956,12 +23271,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -22980,12 +23296,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23004,12 +23321,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23029,12 +23347,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23053,12 +23372,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23077,12 +23397,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23101,12 +23422,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23125,12 +23447,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23149,12 +23472,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23173,12 +23497,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23199,12 +23524,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23221,12 +23547,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23243,12 +23570,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23267,12 +23595,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23293,12 +23622,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23319,12 +23649,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23344,12 +23675,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23367,12 +23699,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23391,12 +23724,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23414,12 +23748,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23437,12 +23772,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23460,12 +23796,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23484,12 +23821,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23508,12 +23846,13 @@
       "is_00": true,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "查無此商品或已下架",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-00",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_time": "19:40:59"
     },
     {
       "store": "pchome",
@@ -23530,12 +23869,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-01",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-01",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:40:59",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23552,12 +23895,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-02",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-02",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23574,12 +23921,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-03",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-03",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23596,12 +23947,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-04",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-04",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23620,12 +23975,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-05",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-05",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23642,12 +24001,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-06",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-06",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23668,12 +24031,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-07",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-07",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23692,12 +24059,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-08",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-08",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23714,12 +24085,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-09",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-09",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23736,12 +24111,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-10",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-10",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23758,12 +24137,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-11",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-11",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23782,12 +24165,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-12",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-12",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23804,12 +24191,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-13",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-13",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23826,12 +24217,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-14",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-14",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23848,12 +24243,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-15",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-15",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23870,12 +24269,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-16",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-16",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23894,12 +24297,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-17",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-17",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23916,12 +24323,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-18",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-18",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23938,12 +24349,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-01",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-01",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:00",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23960,12 +24375,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-02",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-02",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -23982,12 +24401,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-03",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-03",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24004,12 +24427,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-04",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-04",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24026,12 +24453,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-05",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-05",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24048,12 +24479,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-06",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-06",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24070,12 +24505,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-07",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-07",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24092,12 +24531,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-08",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-08",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24114,12 +24557,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-09",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-09",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24136,12 +24583,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-10",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-10",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24158,12 +24609,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-11",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-11",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24182,12 +24637,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-12",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-12",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24204,12 +24663,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-13",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-13",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24226,12 +24689,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-14",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-14",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24248,12 +24715,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-15",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-15",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24270,12 +24741,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-16",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-16",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24294,12 +24769,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-17",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-17",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24318,12 +24797,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-18",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-18",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "pchome",
@@ -24340,12 +24823,16 @@
       "is_00": false,
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-19",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-19",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -33797,7 +34284,7 @@
       "jan": "4904810080763",
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-54",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-54",
       "seller": "pchome",
@@ -33810,7 +34297,11 @@
       ],
       "is_00": false,
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:01",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -33975,7 +34466,7 @@
       "jan": "4904810077596",
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-20",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-20",
       "seller": "pchome",
@@ -33988,7 +34479,11 @@
       ],
       "is_00": false,
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:02",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -34152,7 +34647,7 @@
       "jan": "4904810073741",
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-22",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-22",
       "seller": "pchome",
@@ -34165,7 +34660,11 @@
       ],
       "is_00": false,
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:02",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -34329,7 +34828,7 @@
       "jan": "4904810077602",
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-55",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-55",
       "seller": "pchome",
@@ -34342,7 +34841,11 @@
       ],
       "is_00": false,
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:02",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -34506,7 +35009,7 @@
       "jan": "4904810075936",
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-23",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-23",
       "seller": "pchome",
@@ -34519,7 +35022,11 @@
       ],
       "is_00": false,
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:02",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -34683,7 +35190,7 @@
       "jan": "4904810075929",
       "price": "-",
       "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
+      "last_status": "⚪ 尚未上架 (待突襲發布)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-21",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-21",
       "seller": "pchome",
@@ -34696,7 +35203,11 @@
       ],
       "is_00": false,
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "funbox 麗嬰國際 (PChome 官方)",
+      "last_time": "19:41:02",
+      "official_price": "-",
+      "third_party_price": "-"
     },
     {
       "store": "eslite",
@@ -34758,5 +35269,6 @@
   "keepa_api_key": "",
   "keepa_mode": "fallback",
   "proxy_enabled": true,
-  "keepa_enabled": false
+  "keepa_enabled": false,
+  "stealth_radar_enabled": true
 }

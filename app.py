@@ -13,7 +13,7 @@ import sys
 import threading
 import time
 from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 TZ_GMT8 = timezone(timedelta(hours=8))
 
@@ -59,17 +59,18 @@ class MonitorState:
         self.max_logs = 80
         self.seen_stealth_urls: set = set()
         self.stealth_thread: Any = None
+        self.config: Dict[str, Any] = self.load_config()
+        self.stealth_radar_enabled: bool = bool(self.config.get("stealth_radar_enabled", True))
         self.stealth_radar_status: Dict[str, Any] = {
-            "is_running": False,
+            "is_running": self.stealth_radar_enabled,
             "last_scan_time": "-",
             "last_scan_timestamp": 0.0,
-            "interval_seconds": 60,
+            "interval_seconds": self.config.get("stealth_scan_interval", 60),
             "total_scans": 0,
             "total_hits": 0,
-            "last_log": "⚡ 雷達準備就緒，背景常駐守候中",
+            "last_log": "⚡ 防突襲雷達準備就緒，背景常駐守候中" if self.stealth_radar_enabled else "⏸ 防突襲雷達已關閉",
             "active_stores": []
         }
-        self.config: Dict[str, Any] = self.load_config()
         self.in_stock_state: Dict[str, bool] = {}
 
     def load_config(self) -> Dict[str, Any]:
@@ -95,6 +96,7 @@ class MonitorState:
         cfg.setdefault("keepa_api_key", "")
         cfg.setdefault("keepa_enabled", bool(cfg.get("keepa_api_key")))
         cfg.setdefault("keepa_mode", "fallback")
+        cfg.setdefault("stealth_radar_enabled", True)
         cfg.setdefault("stealth_scan_interval", 60)
         cfg.setdefault("items", [])
         cfg.setdefault("store_settings", {})
@@ -342,13 +344,8 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
 
 
 def check_items_for_store(store_key: str, is_manual: bool = False):
-    """專門為單一賣場執行的極速檢查函式 (各賣場完全隔離、獨立抓價、互不干擾)"""
+    """專門為單一賣場執行的極速檢查函式 (一般價格監控專用，各賣場完全隔離、獨立抓價)"""
     if store_key not in STORE_CONFIG:
-        return
-
-    # 非 Amazon 通路：直接交給「最新上架商品防突襲雷達」比對 (節省大量爬蟲次數)
-    if store_key not in ("amazon_jp", "amazon_stealth"):
-        scan_latest_arrivals_radar(store_filter=store_key, is_manual=is_manual)
         return
 
     s_cfg = STORE_CONFIG[store_key]
@@ -364,7 +361,7 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
 
     if not store_items:
         if is_manual:
-            state.add_log(f"提示: [{s_name}] 目前無啟用監控的商品", "INFO")
+            state.add_log(f"提示: [{s_name}] 目前無啟用一般價格監控的商品", "INFO")
         return
 
     amazon_delay = state.get_amazon_item_interval()
@@ -384,7 +381,7 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
         if keepa_key and keepa_mode != "disabled":
             extras.append(f"Keepa {keepa_mode}")
     tag = f" ({', '.join(extras)})" if extras else ""
-    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品{tag}...", "INFO")
+    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
     t0 = time.time()
 
     def worker(item_tuple):
@@ -423,12 +420,12 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
                 handle_result(idx, item, res, is_manual=is_manual)
 
     dt = time.time() - t0
-    state.add_log(f"⚡ [{s_name}] 檢查完成 (耗時 {dt:.2f} 秒)", "SUCCESS" if is_manual else "INFO")
+    state.add_log(f"⚡ [{s_name}] 價格檢查完成 (耗時 {dt:.2f} 秒)", "SUCCESS" if is_manual else "INFO")
     gc.collect()
 
 
 def store_monitor_worker(store_key: str):
-    """單一賣場專屬 24H 獨立輪詢線程 (各賣場跑各自獨立的輪詢週期，彼此完全並行、互不等待)"""
+    """一般價格監控專屬獨立線程：各賣場跑各自獨立的輪詢週期，專門檢查清單中已啟用的商品價格與庫存"""
     s_cfg = STORE_CONFIG.get(store_key, {})
     s_name = s_cfg.get("short_name", store_key)
 
@@ -438,31 +435,69 @@ def store_monitor_worker(store_key: str):
     time.sleep(offset)
 
     while not state.stop_event.is_set():
-        # 如果該賣場未被啟用監控，每秒檢查一次開關狀態
-        if not state.is_store_monitored(store_key):
+        # 如果一般價格監控被關閉，或該賣場未被啟用監控，定時檢查開關狀態
+        if not state.is_monitoring or not state.is_store_monitored(store_key):
             for _ in range(10):
-                if state.stop_event.is_set():
+                if state.stop_event.is_set() or state.is_monitoring:
                     break
                 time.sleep(0.1)
             continue
 
-        if store_key in ("amazon_jp", "amazon_stealth"):
-            # Amazon 專屬高頻檢查 (預設 0.6s 間隔)
+        # 執行該賣場的一般商品價格與庫存檢查
+        try:
             check_items_for_store(store_key, is_manual=False)
-            s_set = state.config.get("store_settings", {}).get(store_key, {})
-            store_interval = float(s_set.get("item_interval_seconds", state.config.get("interval_seconds", 5)))
-            store_interval = max(0.2, store_interval)
-        else:
-            # 非 Amazon 賣場：依自訂頻率 (預設 60 秒) 抓取「最新上架商品」比對 98 款陀螺型號
-            scan_latest_arrivals_radar(store_filter=store_key, is_manual=False)
-            store_interval = state.get_stealth_scan_interval()
+        except Exception as e:
+            logger.error(f"賣場 [{s_name}] 價格監控異常: {e}", exc_info=True)
 
-        # 依該賣場自訂間隔休眠，切片為 0.1s 以保證隨時響應 stop_event
+        s_set = state.config.get("store_settings", {}).get(store_key, {})
+        default_ival = 1.5 if store_key in ("amazon_jp", "amazon_stealth") else 3.0
+        store_interval = float(s_set.get("item_interval_seconds", default_ival))
+        store_interval = max(0.5, store_interval)
+
+        # 依該賣場自訂間隔休眠，切片為 0.1s 以保證隨時響應停止或開關切換
         sleep_slices = int(store_interval * 10)
         for _ in range(sleep_slices):
-            if state.stop_event.is_set():
+            if state.stop_event.is_set() or not state.is_monitoring:
                 break
             time.sleep(0.1)
+
+
+def stealth_radar_worker():
+    """專屬防突襲上架雷達背景線程：
+    每隔設定秒數 (預設 60s) 自動向各大電商掃描最新上架商品並比對陀螺型號防突襲。
+    與一般價格監控完全分開，擁有獨立開關。
+    """
+    time.sleep(1.0)
+    while not state.stop_event.is_set():
+        if not state.stealth_radar_enabled:
+            state.stealth_radar_status["is_running"] = False
+            state.stealth_radar_status["last_log"] = "⏸ 防突襲上架雷達已暫停"
+            for _ in range(10):
+                if state.stop_event.is_set() or state.stealth_radar_enabled:
+                    break
+                time.sleep(0.1)
+            continue
+
+        state.stealth_radar_status["is_running"] = True
+        try:
+            scan_latest_arrivals_radar(store_filter=None, is_manual=False)
+        except Exception as e:
+            logger.error(f"防突襲雷達輪詢異常: {e}", exc_info=True)
+
+        interval = state.get_stealth_scan_interval()
+        sleep_slices = max(1, int(interval * 5))
+        for _ in range(sleep_slices):
+            if state.stop_event.is_set() or not state.stealth_radar_enabled:
+                break
+            time.sleep(0.2)
+
+
+def ensure_stealth_radar_worker():
+    """確保防突襲雷達獨立背景線程運行"""
+    if state.stealth_thread is None or not state.stealth_thread.is_alive():
+        t = threading.Thread(target=stealth_radar_worker, daemon=True, name="StealthRadarWorker")
+        state.stealth_thread = t
+        t.start()
 
 def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     now_str = get_now_gmt8().strftime("%H:%M:%S")
@@ -589,19 +624,19 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
 def start_monitor():
     state.is_monitoring = True
     state.stop_event.clear()
-    state.add_log("=== 雲端 24H 各賣場獨立並行監控已啟動 (7 大賣場獨立線程，互不等待) ===", "SUCCESS")
+    state.add_log("=== 雲端 24H 一般價格監控線程已啟動 ===", "SUCCESS")
     for s_key in STORE_CONFIG.keys():
         t = state.store_threads.get(s_key)
         if t is None or not t.is_alive():
-            t = threading.Thread(target=store_monitor_worker, args=(s_key,), daemon=True, name=f"Worker-{s_key}")
+            t = threading.Thread(target=store_monitor_worker, args=(s_key,), daemon=True, name=f"PriceWorker-{s_key}")
             state.store_threads[s_key] = t
             t.start()
+    ensure_stealth_radar_worker()
 
 
 def stop_monitor():
     state.is_monitoring = False
-    state.stop_event.set()
-    state.add_log("=== 雲端各賣場獨立監控線程已停止 ===", "INFO")
+    state.add_log("=== 雲端一般價格監控已暫停 ===", "INFO")
 
 
 @app.on_event("startup")
@@ -639,6 +674,7 @@ async def get_status():
 
     return {
         "is_monitoring": state.is_monitoring,
+        "stealth_radar_enabled": state.stealth_radar_enabled,
         "current_time_gmt8": get_now_gmt8().strftime("%Y-%m-%d %H:%M:%S"),
         "interval_seconds": state.config.get("interval_seconds", 5),
         "stealth_scan_interval": state.get_stealth_scan_interval(),
@@ -670,6 +706,13 @@ async def get_status():
 async def api_update_settings(req: Request):
     """更新全域與各賣場獨立設定"""
     data = await req.json()
+    if "stealth_radar_enabled" in data:
+        val = bool(data["stealth_radar_enabled"])
+        state.stealth_radar_enabled = val
+        state.config["stealth_radar_enabled"] = val
+        state.stealth_radar_status["is_running"] = val
+        if val:
+            ensure_stealth_radar_worker()
     if "interval_seconds" in data:
         state.config["interval_seconds"] = max(2, int(data["interval_seconds"]))
     if "stealth_scan_interval" in data:
@@ -1123,26 +1166,55 @@ async def api_trigger_stealth_scan(background_tasks: BackgroundTasks, store: str
     return {"ok": True, "msg": "已開始最新上架商品防突襲比對掃描"}
 
 
+@app.post("/api/toggle_stealth_radar")
+async def api_toggle_stealth_radar(enabled: Optional[bool] = None):
+    """單鍵切換【防突襲上架雷達】獨立開關 (是否掃描各大電商最新上架)"""
+    if enabled is not None:
+        state.stealth_radar_enabled = bool(enabled)
+    else:
+        state.stealth_radar_enabled = not state.stealth_radar_enabled
+
+    state.config["stealth_radar_enabled"] = state.stealth_radar_enabled
+    state.save_config()
+
+    if state.stealth_radar_enabled:
+        state.stealth_radar_status["is_running"] = True
+        state.stealth_radar_status["last_log"] = "⚡ 防突襲上架雷達已啟動"
+        state.add_log("🛡️ 防突襲上架即時雷達已【啟動】！背景定時掃描最新上架", "SUCCESS")
+        ensure_stealth_radar_worker()
+    else:
+        state.stealth_radar_status["is_running"] = False
+        state.stealth_radar_status["last_log"] = "⏸ 防突襲上架雷達已關閉"
+        state.add_log("⏸ 防突襲上架即時雷達已【關閉】", "WARNING")
+
+    return {"ok": True, "stealth_radar_enabled": state.stealth_radar_enabled, "is_running": state.stealth_radar_enabled}
+
+
 @app.get("/api/stealth_radar_status")
 async def api_stealth_radar_status():
-    """獲取防突襲雷達即時運作狀態、上次掃描、動態倒數與日誌"""
+    """獲取防突襲雷達即時運作狀態、開關狀態、上次掃描、動態倒數與日誌"""
     now = time.time()
     res = dict(state.stealth_radar_status)
     interval = state.get_stealth_scan_interval()
     res["interval_seconds"] = interval
+    res["stealth_radar_enabled"] = state.stealth_radar_enabled
 
     active_stores = [s for s in STORE_CONFIG.keys() if s not in ("amazon_jp", "amazon_stealth") and state.is_store_monitored(s)]
     res["active_stores"] = active_stores
-    res["is_running"] = state.is_monitoring and len(active_stores) > 0
+    res["is_running"] = state.stealth_radar_enabled
 
-    last_ts = res.get("last_scan_timestamp", 0.0)
-    if last_ts > 0:
-        elapsed = max(0, int(now - last_ts))
-        res["seconds_ago"] = elapsed
-        res["countdown"] = max(0, int(interval - elapsed))
-    else:
+    if not state.stealth_radar_enabled:
+        res["countdown"] = 0
         res["seconds_ago"] = None
-        res["countdown"] = int(interval)
+    else:
+        last_ts = res.get("last_scan_timestamp", 0.0)
+        if last_ts > 0:
+            elapsed = max(0, int(now - last_ts))
+            res["seconds_ago"] = elapsed
+            res["countdown"] = max(0, int(interval - elapsed))
+        else:
+            res["seconds_ago"] = None
+            res["countdown"] = int(interval)
 
     # 守候中型號數 (非 Amazon)
     stealth_items = [it for it in state.config.get("items", []) if it.get("store") not in ("amazon_jp", "amazon_stealth")]

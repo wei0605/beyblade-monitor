@@ -229,6 +229,99 @@
       transform: translateY(1px);
     }
 
+    .btn-radar-toggle {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: 1px solid #34d399;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+    .btn-radar-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+    }
+    .btn-radar-toggle.paused {
+      background: linear-gradient(135deg, #64748b, #475569);
+      border-color: #94a3b8;
+      box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+    }
+
+    .store-items-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 8px 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+    }
+    .store-items-summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+    .badge-monitored-count {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .badge-unmonitored-count {
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .badge-instock-count {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .unmonitored-section-divider {
+      grid-column: 1 / -1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0 10px 0;
+    }
+    .unmonitored-section-divider .divider-line {
+      flex: 1;
+      height: 1px;
+      background: #334155;
+    }
+    .unmonitored-section-divider .divider-label {
+      font-size: 12px;
+      color: #94a3b8;
+      background: #0f172a;
+      border: 1px dashed #475569;
+      padding: 5px 14px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     /* Stealth Restock UI & Modal */
     .btn-stealth-catalog {
       background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
@@ -891,6 +984,19 @@
         </label>
       </div>
 
+      <div class="switch-row" style="background: rgba(56, 189, 248, 0.08); padding: 10px; border-radius: 8px; border: 1px dashed rgba(56, 189, 248, 0.35); margin-bottom: 12px;">
+        <div class="switch-label">
+          <i class="fa-solid fa-radar" style="color: #38bdf8;"></i> <b>防突襲上架雷達 (獨立背景定時掃描)</b>
+          <div style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 2px;">
+            開啟後背景定時掃描各電商最新上架商品並比對陀螺型號；關閉時停止雷達爬取。
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingStealthRadar" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
       <div class="form-group">
         <label class="form-label">輪詢循環間隔 (秒，建議 3~8 秒):</label>
         <input type="number" id="settingInterval" class="form-input" min="2" max="300" value="5">
@@ -1040,10 +1146,10 @@
     <!-- Controls -->
     <div class="controls">
       <button id="toggleMonitorBtn" class="btn-start" onclick="toggleMonitoring()">
-        <i class="fa-solid fa-play"></i> <span id="btnActionText">啟動雲端監控</span>
+        <i class="fa-solid fa-play"></i> <span id="btnActionText">啟動一般價格監控</span>
       </button>
       <button class="btn-check" onclick="checkAllNow()">
-        <i class="fa-solid fa-bolt"></i> 立即全檢 (跨賣場秒查)
+        <i class="fa-solid fa-bolt"></i> 立即檢查此賣場 (抓取價格與庫存)
       </button>
     </div>
 
@@ -1075,6 +1181,10 @@
           <div class="radar-title">
             <span>⚡ 防突襲上架即時雷達</span>
             <span id="radarRunningBadge" class="badge-radar-running">運行中</span>
+            <label class="switch" style="margin-left: 6px; vertical-align: middle; transform: scale(0.8);" title="防突襲上架開關">
+              <input type="checkbox" id="radarSwitch" checked onchange="toggleStealthRadar(this.checked)">
+              <span class="slider"></span>
+            </label>
           </div>
           <div class="radar-subtitle">
             每 <span id="radarIntervalText">60</span> 秒自動輪巡各電商最新上架 • 守候 202 款 BX/UX/CX/00 陀螺
@@ -1101,8 +1211,11 @@
         </div>
       </div>
 
-      <div class="radar-actions">
-        <button class="btn-radar-scan-trigger" onclick="triggerStealthScanNow()" title="立即對所有非 Amazon 電商發起一次最新上架掃描">
+      <div class="radar-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button id="btnRadarToggle" class="btn-radar-toggle" onclick="toggleStealthRadar()" title="切換防突襲上架雷達運行或暫停">
+          <i class="fa-solid fa-power-off"></i> <span id="radarToggleText">暫停防突襲雷達</span>
+        </button>
+        <button class="btn-radar-scan-trigger" onclick="triggerStealthScanNow()" title="立即對所有電商發起一次最新上架掃描">
           <i class="fa-solid fa-bolt"></i> 立即掃描最新上架
         </button>
       </div>
@@ -1395,14 +1508,14 @@
 
         if (isRunning) {
           badge.className = 'badge-status badge-running';
-          text.innerText = '極速監控中';
+          text.innerText = '價格監控中';
           btn.className = 'btn-stop';
-          btn.innerHTML = '<i class="fa-solid fa-stop"></i> 暫停雲端監控';
+          btn.innerHTML = '<i class="fa-solid fa-stop"></i> 暫停一般價格監控';
         } else {
           badge.className = 'badge-status badge-stopped';
-          text.innerText = '監控已暫停';
+          text.innerText = '價格監控已暫停';
           btn.className = 'btn-start';
-          btn.innerHTML = '<i class="fa-solid fa-play"></i> 啟動雲端監控';
+          btn.innerHTML = '<i class="fa-solid fa-play"></i> 啟動一般價格監控';
         }
 
         renderTabs(data.store_counts || {});
@@ -1428,6 +1541,9 @@
 
         // Settings inputs (only if user is not actively editing)
         if (!isEditingSettings) {
+          if (document.getElementById('settingStealthRadar')) {
+            document.getElementById('settingStealthRadar').checked = data.stealth_radar_enabled !== false;
+          }
           document.getElementById('settingEnableDiscord').checked = data.enable_discord !== false;
           document.getElementById('settingEnableLine').checked = data.enable_line !== false;
           document.getElementById('settingOnlyAmazon').checked = data.only_amazon_seller !== false;
@@ -1891,58 +2007,87 @@
         return;
       }
 
-      // Check in-stock items & shelf products (現有架上官方商品與突襲命中現貨直接顯示在主畫面)
-      const inStockItems = storeItems.filter(it => it.is_shelf_product || (it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'))));
-      const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
-
-      // 收合未上架/待命型號至防突襲彈窗總庫，保持主畫面乾淨 (適用包含 Amazon 在內的所有賣場)
-      const shouldFoldStealth = !showAllStealthCards && (storeItems.length > inStockItems.length);
-      if (shouldFoldStealth) {
-        if (inStockItems.length === 0) {
-          container.innerHTML = `
-            <div class="stealth-standby-banner">
-              <div class="standby-radar"><i class="fa-solid fa-radar fa-spin" style="--fa-animation-duration: 6s;"></i></div>
-              <div class="standby-title">🛡️ 防突襲守候中：全系列 ${storeItems.length} 個陀螺型號背景全天候極速監控中</div>
-              <div class="standby-desc">
-                目前 <b>${curCfg.name}</b> 尚未有突襲型號上架。<br>
-                防突襲清單已自動收合至專屬型號庫以保持畫面整潔；一旦官方上架或釋出庫存，商品卡片將<b>自動立即在此顯現並推播通知</b>！
-              </div>
-              <button class="btn-open-stealth-modal" onclick="openStealthModal('${currentStoreTab}')">
-                <i class="fa-solid fa-shield-halved"></i> 點此開啟【防突襲型號總庫】(BX / UX / CX / 00 照數字降序排序)
-              </button>
-            </div>
-          `;
-          return;
-        } else {
-          // Has shelf or restocked items!
-          const activeBanner = document.createElement('div');
-          activeBanner.className = 'stealth-active-banner';
-          activeBanner.innerHTML = `
-            <div>
-              <i class="fa-solid fa-circle-check" style="color: #34d399; font-size: 15px;"></i>
-              <b>目前展示 ${inStockItems.length} 款架上官方/現貨商品！</b> 其餘 ${storeItems.length - inStockItems.length} 款陀螺背景防突襲守候中
-            </div>
-            <button class="btn-open-stealth-modal-sm" onclick="openStealthModal('${currentStoreTab}')">
-              <i class="fa-solid fa-shield-halved"></i> 檢視防突襲型號庫 (${storeItems.length})
-            </button>
-          `;
-          container.appendChild(activeBanner);
+      // 依使用者要求排序：
+      // 「一般的價格監控頁面，有監控中的要自動到最上面，沒在監控的要到下方」
+      storeItems.sort((a, b) => {
+        const aEnabled = (a.enabled !== false);
+        const bEnabled = (b.enabled !== false);
+        // 1. 監控中 (enabled: true) 自動排在最上面，沒在監控 (enabled: false) 排在下方
+        if (aEnabled !== bEnabled) {
+          return aEnabled ? -1 : 1;
         }
-      }
+        // 2. 同在監控中或同在未監控中：有現貨/預購的優先排前
+        const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家')));
+        const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家')));
+        if (aInStock !== bInStock) {
+          return aInStock ? -1 : 1;
+        }
+        // 3. 依型號編號降序 (BX-54 > BX-53...)
+        return getModelSortNum(b) - getModelSortNum(a);
+      });
 
-      let displayList = shouldFoldStealth ? inStockItems : storeItems;
+      const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
+      const monitoredItems = storeItems.filter(it => it.enabled !== false);
+      const unmonitoredItems = storeItems.filter(it => it.enabled === false);
+      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家'))).length;
+
+      // 頂部賣場快速資訊列
+      const headerBar = document.createElement('div');
+      headerBar.className = 'store-items-header-bar';
+      headerBar.innerHTML = `
+        <div class="store-items-summary">
+          <span style="font-weight: 700; color: #f8fafc;">
+            ${curCfg.flag} ${curCfg.name} 商品清單 (${storeItems.length})
+          </span>
+          <span class="badge-monitored-count">
+            <i class="fa-solid fa-satellite-dish"></i> 監控中: ${monitoredItems.length}
+          </span>
+          <span class="badge-unmonitored-count">
+            <i class="fa-solid fa-power-off"></i> 沒在監控: ${unmonitoredItems.length}
+          </span>
+          ${inStockCount > 0 ? `
+            <span class="badge-instock-count">
+              <i class="fa-solid fa-circle-check"></i> 有現貨: ${inStockCount}
+            </span>
+          ` : ''}
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn-open-stealth-modal-sm" onclick="openStealthModal('${currentStoreTab}')">
+            <i class="fa-solid fa-shield-halved"></i> 檢視防突襲型號總庫
+          </button>
+        </div>
+      `;
+      container.appendChild(headerBar);
+
+      let displayList = storeItems;
       if (filterInStockOnly) {
         displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家')));
       }
 
+      let hasRenderedDivider = false;
       displayList.forEach(it => {
         const idx = it.originalIndex;
         const storeKey = it.store || 'amazon_jp';
         const cfg = storesConfig[storeKey] || storesConfig['amazon_jp'] || {};
-        
+        const isEnabled = it.enabled !== false;
+
+        // 當從「監控中」過渡到「沒在監控」時，插入清晰的分界線
+        if (!isEnabled && !hasRenderedDivider && monitoredItems.length > 0) {
+          hasRenderedDivider = true;
+          const divider = document.createElement('div');
+          divider.className = 'unmonitored-section-divider';
+          divider.innerHTML = `
+            <div class="divider-line"></div>
+            <div class="divider-label">
+              <i class="fa-solid fa-pause-circle"></i> 以下為「沒在監控」之商品 (${unmonitoredItems.length} 款) — 點擊卡片「☑ 監控」可立即移至上方開啟監控
+            </div>
+            <div class="divider-line"></div>
+          `;
+          container.appendChild(divider);
+        }
+
         const card = document.createElement('div');
         const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'));
-        const isEnabled = it.enabled !== false;
         const statusColor = (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家'))) ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8');
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
@@ -2348,6 +2493,7 @@
       });
 
       const payload = {
+        stealth_radar_enabled: document.getElementById('settingStealthRadar') ? document.getElementById('settingStealthRadar').checked : true,
         enable_discord: document.getElementById('settingEnableDiscord').checked,
         enable_line: document.getElementById('settingEnableLine').checked,
         only_amazon_seller: document.getElementById('settingOnlyAmazon').checked,
@@ -2603,10 +2749,32 @@
 
     async function toggleItem(idx) {
       try {
-        await fetch(`/api/toggle_item?index=${idx}`, { method: 'POST' });
-        fetchStatus();
+        const res = await fetch(`/api/toggle_item?index=${idx}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok && itemsData[idx]) {
+          itemsData[idx].enabled = data.enabled;
+          renderItems();
+          renderTabs(getCurrentCounts());
+          renderStoreControlBar();
+        } else {
+          fetchStatus();
+        }
       } catch (e) {
         alert("切換失敗: " + e);
+      }
+    }
+
+    async function toggleStealthRadar(forceVal) {
+      try {
+        let url = '/api/toggle_stealth_radar';
+        if (forceVal !== undefined) {
+          url += `?enabled=${forceVal}`;
+        }
+        const res = await fetch(url, { method: 'POST' });
+        const data = await res.json();
+        fetchRadarStatus();
+      } catch (e) {
+        alert("切換防突襲雷達失敗: " + e);
       }
     }
 
@@ -2629,18 +2797,36 @@
         const res = await fetch('/api/stealth_radar_status');
         const data = await res.json();
         
+        const isRadarOn = (data.stealth_radar_enabled !== false && data.is_running);
         const beacon = document.getElementById('radarBeacon');
         const runningBadge = document.getElementById('radarRunningBadge');
         if (beacon) {
-          if (data.is_running) {
+          if (isRadarOn) {
             beacon.classList.remove('paused');
           } else {
             beacon.classList.add('paused');
           }
         }
         if (runningBadge) {
-          runningBadge.className = data.is_running ? 'badge-radar-running' : 'badge-radar-paused';
-          runningBadge.innerText = data.is_running ? '運行中' : '已暫停';
+          runningBadge.className = isRadarOn ? 'badge-radar-running' : 'badge-radar-paused';
+          runningBadge.innerText = isRadarOn ? '運行中' : '已暫停';
+        }
+
+        const radarSwitch = document.getElementById('radarSwitch');
+        if (radarSwitch) {
+          radarSwitch.checked = isRadarOn;
+        }
+
+        const btnRadarToggle = document.getElementById('btnRadarToggle');
+        const radarToggleText = document.getElementById('radarToggleText');
+        if (btnRadarToggle && radarToggleText) {
+          if (isRadarOn) {
+            btnRadarToggle.className = 'btn-radar-toggle';
+            radarToggleText.innerText = '暫停防突襲雷達';
+          } else {
+            btnRadarToggle.className = 'btn-radar-toggle paused';
+            radarToggleText.innerText = '啟動防突襲雷達';
+          }
         }
 
         const intervalText = document.getElementById('radarIntervalText');
@@ -2652,7 +2838,7 @@
             const agoStr = (data.seconds_ago !== null && data.seconds_ago !== undefined) ? `(${data.seconds_ago}秒前)` : '';
             lastScanEl.innerText = `${data.last_scan_time} ${agoStr}`;
           } else {
-            lastScanEl.innerText = '待命首次掃描中...';
+            lastScanEl.innerText = isRadarOn ? '待命首次掃描中...' : '已暫停';
           }
         }
 
@@ -2677,6 +2863,12 @@
     setInterval(() => {
       const countdownEl = document.getElementById('radarCountdown');
       if (!countdownEl) return;
+      const beacon = document.getElementById('radarBeacon');
+      const isPaused = beacon && beacon.classList.contains('paused');
+      if (isPaused) {
+        countdownEl.innerText = '已暫停';
+        return;
+      }
       if (radarCountdownSeconds > 0) {
         radarCountdownSeconds--;
         countdownEl.innerText = `${radarCountdownSeconds} 秒`;
