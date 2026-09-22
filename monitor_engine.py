@@ -2134,23 +2134,23 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
             if r.status_code == 200:
                 found_slugs = re.findall(r'href=[\'"]/products/([^\'"?#]+)[\'"]', r.text)
                 seen_slugs = set()
-                # 預先過濾：徹底排除 Tomica 多美小汽車、模型車、雜誌、非陀螺配件
+                # 預先過濾：徹底排除 Tomica 多美小汽車、模型車、雜誌、非陀螺其他玩具產線
                 filtered_slugs = []
                 for slug in found_slugs:
                     decoded = urllib.parse.unquote(slug).lower()
-                    if any(b in decoded for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒"]):
+                    if any(b in decoded for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒"]):
                         continue
                     if any(w in decoded for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
                         if slug not in seen_slugs:
                             seen_slugs.add(slug)
                             filtered_slugs.append(slug)
 
-                for slug in filtered_slugs[:25]:
+                for slug in filtered_slugs[:30]:
                     res = CyberbizChecker.check_prod(slug, store_key=store_key)
                     if res.get("ok"):
                         title = res.get("title", slug)
                         title_low = title.lower()
-                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒"]):
+                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "海綿", "不含陀螺", "紙製收納盒"]):
                             continue
                         results.append({
                             "store": store_key,
@@ -2193,7 +2193,7 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     for it in items:
                         name = it.get("name") or it.get("title") or ""
                         name_low = name.lower()
-                        if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒", "樂高", "lego"]):
+                        if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "樂高", "lego"]):
                             continue
                         if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
                             continue
@@ -2235,7 +2235,7 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     if res.get("ok"):
                         title = res.get("title", item_id)
                         title_low = title.lower()
-                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒"]):
+                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "紙製收納盒"]):
                             continue
                         results.append({
                             "store": "mm_shop",
@@ -2256,7 +2256,7 @@ def match_product_with_stealth_catalog(
     product_title: str,
     stealth_catalog: List[Dict[str, Any]]
 ) -> Optional[Dict[str, Any]]:
-    """比對商品標題是否命中防突襲清單中的陀螺型號 (BX-00, UX-00, CX-00, BXG, BXH, BXC 等特殊款與常規款)
+    """比對商品標題是否命中防突襲清單中的陀螺與官方系列型號
     支援型號代碼比對、限定版專屬款式比對與關鍵字精確比對。
     傳回匹配的型號資料字典，若未命中則傳回 None
     """
@@ -2267,18 +2267,21 @@ def match_product_with_stealth_catalog(
     title_upper = title_clean.upper()
     title_low = title_clean.lower()
 
-    # 嚴格排除 Tomica 多美小汽車、模型車、非陀螺配件、包材與雜誌 (包含中日文)
+    # 嚴格排除 Tomica 多美小汽車、其他非陀螺玩具系列 (小車、模型車、鐵道、娃娃等 Takara Tomy/萬代其他玩具)
     NON_BEYBLADE_TERMS = [
-        # 中文排除詞
-        "tomica", "多美", "小汽車", "小車", "模型車", "迷你四驅", "四驅車",
-        "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王",
-        "海綿", "不含陀螺", "紙製收納盒", "收納盒", "收納包", "陀螺箱", "戰鬥盒",
-        "巨無霸貨機", "飛機", "救護車", "消防車", "變色壽司", "貼紙機", "轉蛋貼紙機",
-        "樂高", "lego", "コミック", "コロコロ", "月刊", "雜誌", "漫畫",
-        # 日文排除詞 (發射器、握把、收納盒、貼紙等周邊)
-        "トミカ", "ミニ四駆", "ウルトラマン", "リカちゃん", "メルちゃん", "トランスフォーマー",
-        "ランチャー", "グリップ", "ワインダー", "バトルパス",
-        "ギアケース", "デッキケース", "バッグ", "ボックス", "スポンジ", "ステッカー"
+        # Tomica 小車與模型車
+        "tomica", "多美", "小汽車", "小車", "模型車", "迷你四驅", "四驅車", "トミカ", "ミニ四駆",
+        # 其他 Takara Tomy / 萬代非陀螺玩具產線
+        "超人力霸王", "奧特曼", "ウルトラマン",
+        "小美樂", "メルちゃん",
+        "莉卡", "リカちゃん",
+        "鐵道王國", "プラレール",
+        "阿尼亞", "アニア",
+        "特攻隊", "魔動王",
+        # 非官方自製包材海綿與無關商品
+        "海綿", "不含陀螺", "紙製收納盒", "巨無霸貨機", "飛機", "救護車", "消防車", "變色壽司", "貼紙機", "轉蛋貼紙機",
+        # 樂高與日文漫畫雜誌 (附錄雜誌非陀螺商品)
+        "樂高", "lego", "コミック", "コロコロ", "月刊", "雜誌", "漫畫"
     ]
     if any(term in title_low for term in NON_BEYBLADE_TERMS):
         return None
