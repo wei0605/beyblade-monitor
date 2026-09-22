@@ -56,7 +56,7 @@ from fastapi.templating import Jinja2Templates
 
 from monitor_engine import (
     AmazonJPChecker, PChomeChecker, MMShopChecker,
-    CyberbizChecker, EsliteChecker, ShopeeChecker,
+    CyberbizChecker, EsliteChecker, ShopeeChecker, TcsbChecker,
     check_store_item, get_item_direct_url,
     STORE_CONFIG, NotificationManager, get_product_url, extract_asin,
     PLAYWRIGHT_AVAILABLE, cffi_requests, test_proxy_connection,
@@ -113,7 +113,7 @@ class MonitorState:
         cfg.setdefault("concurrent_mode", True)
         cfg.setdefault("only_amazon_seller", True)
         cfg.setdefault("enable_discord", True)
-        cfg.setdefault("enable_line", True)
+        cfg.setdefault("enable_line", False)
         cfg.setdefault("discord_webhook", "")
         cfg.setdefault("line_token", "")
         cfg.setdefault("proxy_url", "")
@@ -134,7 +134,8 @@ class MonitorState:
             "funbox_tw": "https://ptb.discord.com/api/webhooks/1551281372901937313/LMmnfrhoDdtO5WFK_Ppzo3hyrMBM-prQiiBIM4G2Bu5DzH9kAzvv7HhnjWWJ-ZJ8Lens",
             "twj_toys": "https://ptb.discord.com/api/webhooks/1551281418661920822/0E1F8TSdfg2oekkcfm8OTwnCp9f5PVFYFpMfMjSgP6EZhiqSZjGojAnIAfqk6Ato2BA9",
             "shopee": "https://ptb.discord.com/api/webhooks/1551281517194514544/ISz6kbL3ODvED505ByVNPHNOvq6pThpH7F_u2v1_L4_LqjhCWCt7phi2p_9yPox2hRiK",
-            "amazon_stealth": cfg.get("discord_webhook", "")
+            "shopee_mm": "",
+            "tcsb": ""
         }
 
         # 確保現有項目相容性：未標記 store 者預設為 amazon_jp
@@ -142,24 +143,24 @@ class MonitorState:
             if "store" not in it:
                 it["store"] = "amazon_jp"
 
-        # 確保 8 大賣場皆有獨立推播與頻率設定
+        # 確保各賣場皆有獨立推播與頻率設定
         for s_key in STORE_CONFIG.keys():
             if s_key not in cfg["store_settings"]:
                 default_wh = preset_hooks.get(s_key, "")
-                if s_key in ("amazon_jp", "amazon_stealth") and not default_wh:
+                if s_key == "amazon_jp" and not default_wh:
                     default_wh = cfg.get("discord_webhook", "")
                 cfg["store_settings"][s_key] = {
                     "enable_monitoring": True,
                     "enable_notifications": True,
                     "discord_webhook": default_wh,
-                    "item_interval_seconds": 0.6 if s_key in ("amazon_jp", "amazon_stealth") else 3.0
+                    "item_interval_seconds": 0.6 if s_key == "amazon_jp" else 3.0
                 }
             else:
                 cfg["store_settings"][s_key].setdefault("enable_monitoring", True)
                 cfg["store_settings"][s_key].setdefault("enable_notifications", True)
                 if not cfg["store_settings"][s_key].get("discord_webhook"):
                     cfg["store_settings"][s_key]["discord_webhook"] = preset_hooks.get(s_key, "")
-                cfg["store_settings"][s_key].setdefault("item_interval_seconds", 0.6 if s_key in ("amazon_jp", "amazon_stealth") else 3.0)
+                cfg["store_settings"][s_key].setdefault("item_interval_seconds", 0.6 if s_key == "amazon_jp" else 3.0)
 
         return cfg
 
@@ -271,7 +272,7 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
     自動比對 98 款 BX/UX/CX 陀螺型號與關鍵字。
     一經命中：自動補全品名、價格與直達網址，並發送 Discord 與 LINE 官方推播！
     """
-    target_stores = [store_filter] if store_filter else ["shopee", "eslite", "twj_toys", "funbox_tw", "pchome", "mm_shop"]
+    target_stores = [store_filter] if store_filter else [s for s in STORE_CONFIG.keys() if s != "amazon_jp"]
     proxy = state.get_proxy_url()
     items = state.config.get("items", [])
 
@@ -279,7 +280,7 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
     total_new_hits = 0
 
     for s_key in target_stores:
-        if s_key not in STORE_CONFIG or s_key in ("amazon_jp", "amazon_stealth"):
+        if s_key not in STORE_CONFIG or s_key == "amazon_jp":
             continue
         if not state.is_store_monitored(s_key):
             continue
@@ -418,12 +419,12 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
         amazon_jitter = state.get_amazon_jitter()
         proxy = state.get_proxy_url()
         only_official = state.config.get("only_amazon_seller", True)
-        custom_cookie = state.get_amazon_custom_cookie() if store_key in ("amazon_jp", "amazon_stealth") else None
-        keepa_key = state.get_keepa_api_key() if store_key in ("amazon_jp", "amazon_stealth") else None
-        keepa_mode = state.get_keepa_mode() if store_key in ("amazon_jp", "amazon_stealth") else "fallback"
+        custom_cookie = state.get_amazon_custom_cookie() if store_key == "amazon_jp" else None
+        keepa_key = state.get_keepa_api_key() if store_key == "amazon_jp" else None
+        keepa_mode = state.get_keepa_mode() if store_key == "amazon_jp" else "fallback"
 
         extras = []
-        if store_key in ("amazon_jp", "amazon_stealth"):
+        if store_key == "amazon_jp":
             if proxy:
                 extras.append("住宅代理")
             if custom_cookie:
@@ -510,7 +511,7 @@ def store_monitor_worker(store_key: str):
             logger.error(f"賣場 [{s_name}] 價格監控異常: {e}", exc_info=True)
 
         s_set = state.config.get("store_settings", {}).get(store_key, {})
-        default_ival = 1.5 if store_key in ("amazon_jp", "amazon_stealth") else 6.0
+        default_ival = 1.5 if store_key == "amazon_jp" else 6.0
         store_interval = float(s_set.get("item_interval_seconds", default_ival))
         store_interval = max(4.0 if store_key != "amazon_jp" else 1.0, store_interval)
 
@@ -609,21 +610,21 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     official_price = res.get("official_price", "-")
     third_party_price = res.get("third_party_price", "-")
 
+    has_page = res.get("has_product_page")
     res_url = res.get("url")
-    if res_url and not res_url.endswith("/search") and "/search?q" not in res_url and "/search?q-" not in res_url:
+    is_real_page = bool(res_url and not res_url.endswith("/search") and "/search?q" not in res_url and "/search?q-" not in res_url and "/category?keyword=" not in res_url and not res_url.endswith("#product_list"))
+
+    if has_page is not None:
+        item["has_product_page"] = bool(has_page)
+    elif is_real_page:
+        item["has_product_page"] = True
+
+    if is_real_page:
         item["url"] = res_url
         item["direct_url"] = res_url
         url = res_url
-    elif store == "mm_shop":
-        if not item.get("url") or "/search?q" in item.get("url", "") or "/search?q-" in item.get("url", ""):
-            resolved_url = get_item_direct_url(item)
-            item["url"] = resolved_url
-            item["direct_url"] = resolved_url
-            url = resolved_url
-        else:
-            url = item.get("direct_url") or item.get("url") or get_item_direct_url(item)
     else:
-        url = res.get("url") or item.get("direct_url") or item.get("url") or get_item_direct_url(item)
+        url = res_url or item.get("direct_url") or item.get("url") or get_item_direct_url(item)
 
     status_text = ""
     is_alert_worthy = False
@@ -966,7 +967,7 @@ async def api_add_item(req: Request, background_tasks: BackgroundTasks):
     if not raw_input:
         return JSONResponse({"ok": False, "msg": "請輸入商品編號或網址！"}, status_code=400)
 
-    if store in ("amazon_jp", "amazon_stealth"):
+    if store == "amazon_jp":
         asin = extract_asin(raw_input) or raw_input
     elif store == "pchome":
         asin = PChomeChecker.extract_prod_id(raw_input)
@@ -976,9 +977,11 @@ async def api_add_item(req: Request, background_tasks: BackgroundTasks):
         asin = CyberbizChecker.extract_slug(raw_input)
     elif store == "eslite":
         asin = EsliteChecker.extract_id(raw_input)
-    elif store == "shopee":
+    elif store in ("shopee", "shopee_mm"):
         sp, it = ShopeeChecker.extract_ids(raw_input)
         asin = f"{sp}_{it}" if sp and it else raw_input
+    elif store == "tcsb":
+        asin = TcsbChecker.extract_id(raw_input)
     else:
         asin = raw_input
 
@@ -1040,7 +1043,7 @@ async def api_edit_item(req: Request, background_tasks: BackgroundTasks):
     if not name:
         return JSONResponse({"ok": False, "msg": "請輸入商品名稱或型號！"}, status_code=400)
 
-    if store in ("amazon_jp", "amazon_stealth"):
+    if store == "amazon_jp":
         asin = extract_asin(raw_input) or raw_input
     elif store == "pchome":
         asin = PChomeChecker.extract_prod_id(raw_input)
@@ -1050,9 +1053,11 @@ async def api_edit_item(req: Request, background_tasks: BackgroundTasks):
         asin = CyberbizChecker.extract_slug(raw_input)
     elif store == "eslite":
         asin = EsliteChecker.extract_id(raw_input)
-    elif store == "shopee":
+    elif store in ("shopee", "shopee_mm"):
         sp, it = ShopeeChecker.extract_ids(raw_input)
         asin = f"{sp}_{it}" if sp and it else raw_input
+    elif store == "tcsb":
+        asin = TcsbChecker.extract_id(raw_input)
     else:
         asin = raw_input
 
@@ -1116,7 +1121,7 @@ async def api_batch_add_items(req: Request, background_tasks: BackgroundTasks):
         if not clean_t:
             continue
         # 若為非 Amazon 通路，規範為 BX/UX/CX 系列型號；若為 Amazon 通路則支援 ASIN 或型號
-        if store not in ("amazon_jp", "amazon_stealth") and not pattern.match(clean_t):
+        if store != "amazon_jp" and not pattern.match(clean_t):
             # 嘗試從字串中尋找型號
             m = re.search(r"((?:BX|UX|CX)-\d{2}[A-Z]?)", clean_t, re.I)
             if m:
@@ -1336,7 +1341,7 @@ async def api_stealth_radar_status():
     res["interval_seconds"] = interval
     res["stealth_radar_enabled"] = state.stealth_radar_enabled
 
-    active_stores = [s for s in STORE_CONFIG.keys() if s not in ("amazon_jp", "amazon_stealth") and state.is_store_monitored(s)]
+    active_stores = [s for s in STORE_CONFIG.keys() if s != "amazon_jp" and state.is_store_monitored(s)]
     res["active_stores"] = active_stores
     res["is_running"] = state.stealth_radar_enabled
 
@@ -1354,7 +1359,7 @@ async def api_stealth_radar_status():
             res["countdown"] = int(interval)
 
     # 守候中型號數 (非 Amazon)
-    stealth_items = [it for it in state.config.get("items", []) if it.get("store") not in ("amazon_jp", "amazon_stealth")]
+    stealth_items = [it for it in state.config.get("items", []) if it.get("store") != "amazon_jp"]
     res["stealth_items_count"] = len(stealth_items)
     return res
 

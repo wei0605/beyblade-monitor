@@ -1552,7 +1552,7 @@
             document.getElementById('settingStealthRadar').checked = data.stealth_radar_enabled !== false;
           }
           document.getElementById('settingEnableDiscord').checked = data.enable_discord !== false;
-          document.getElementById('settingEnableLine').checked = data.enable_line !== false;
+          document.getElementById('settingEnableLine').checked = (data.enable_line === true);
           document.getElementById('settingOnlyAmazon').checked = data.only_amazon_seller !== false;
           document.getElementById('settingInterval').value = data.interval_seconds || 5;
           if (document.getElementById('settingStealthScanInterval')) {
@@ -1959,13 +1959,30 @@
       return counts;
     }
 
+    function hasRealProductPage(it) {
+      if (it.has_product_page !== undefined) return !!it.has_product_page;
+      const u = it.direct_url || it.url || '';
+      if (!u) return false;
+      if (u.includes('/search') || u.includes('/category?keyword=') || u.includes('#product_list')) return false;
+      if (it.last_status && (it.last_status.includes('尚未上架') || it.last_status.includes('未上架') || it.last_status.includes('未抓到'))) return false;
+      return true;
+    }
+
+    function getProductSortTier(it) {
+      const hasPage = hasRealProductPage(it);
+      const inStock = !!(it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家')));
+      if (hasPage && inStock) return 1; // Tier 1: 有商品頁面且有庫存 (最頂端)
+      if (hasPage) return 2;           // Tier 2: 有商品頁面但暫無庫存 (中間)
+      return 3;                        // Tier 3: 尚未抓到實體商品頁 (最底端)
+    }
+
     function getItemUrl(it, storeKey) {
-      if (it.direct_url && !it.direct_url.includes('/search?q') && !it.direct_url.includes('/search?q-')) return it.direct_url;
-      if (it.url && !it.url.includes('/search?q') && !it.url.includes('/search?q-')) return it.url;
+      if (it.direct_url && !it.direct_url.includes('/search') && !it.direct_url.includes('/category?keyword=') && !it.direct_url.includes('#product_list')) return it.direct_url;
+      if (it.url && !it.url.includes('/search') && !it.url.includes('/category?keyword=') && !it.url.includes('#product_list')) return it.url;
       const asin = it.asin || '';
       const isModelCode = /^(?:BX|UX|CX)-\d{2}[A-Z]?$/i.test(asin);
 
-      if (storeKey === 'amazon_jp' || storeKey === 'amazon_stealth') {
+      if (storeKey === 'amazon_jp') {
         return `https://www.amazon.co.jp/dp/${asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
       } else if (storeKey === 'pchome') {
         return isModelCode ? `https://24h.pchome.com.tw/search/?q=${asin}` : `https://24h.pchome.com.tw/prod/${asin}`;
@@ -1980,8 +1997,13 @@
         return isModelCode ? `https://www.eslite.com/search?keyword=BEYBLADE+${asin}` : `https://www.eslite.com/product/${asin}`;
       } else if (storeKey === 'shopee') {
         if (asin.includes('_')) return `https://shopee.tw/product/${asin.replace('_', '/')}`;
-        if (isModelCode) return `https://shopee.tw/search?keyword=${asin}&shop=285705541`;
-        return asin.startsWith('http') ? asin : `https://shopee.tw/funbox5120`;
+        return `https://shopee.tw/funbox5120#product_list`;
+      } else if (storeKey === 'shopee_mm') {
+        if (asin.includes('_')) return `https://shopee.tw/product/${asin.replace('_', '/')}`;
+        return `https://shopee.tw/renmao#product_list`;
+      } else if (storeKey === 'tcsb') {
+        if (isModelCode) return `https://www.tcsb.com.tw/search?query=${encodeURIComponent(asin)}`;
+        return `https://www.tcsb.com.tw/${asin}`;
       }
       return asin;
     }
@@ -2017,28 +2039,41 @@
       }
 
       // 依使用者要求排序：
-      // 「一般的價格監控頁面，有監控中的要自動到最上面，沒在監控的要到下方」
+      // 非 Amazon 賣場：三層排序 (1. 有頁面+有現貨最上 2. 有頁面缺貨次之 3. 沒抓到商品頁最下；同層內監控中優先、型號降序)
+      // Amazon 賣場：監控中優先 > 有現貨/預購優先 > 型號降序
       storeItems.sort((a, b) => {
-        const aEnabled = (a.enabled !== false);
-        const bEnabled = (b.enabled !== false);
-        // 1. 監控中 (enabled: true) 自動排在最上面，沒在監控 (enabled: false) 排在下方
-        if (aEnabled !== bEnabled) {
-          return aEnabled ? -1 : 1;
+        if (isNonAmazon) {
+          const tierA = getProductSortTier(a);
+          const tierB = getProductSortTier(b);
+          if (tierA !== tierB) {
+            return tierA - tierB;
+          }
+          const aEnabled = (a.enabled !== false);
+          const bEnabled = (b.enabled !== false);
+          if (aEnabled !== bEnabled) {
+            return aEnabled ? -1 : 1;
+          }
+          return getModelSortNum(b) - getModelSortNum(a);
+        } else {
+          const aEnabled = (a.enabled !== false);
+          const bEnabled = (b.enabled !== false);
+          if (aEnabled !== bEnabled) {
+            return aEnabled ? -1 : 1;
+          }
+          const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家')));
+          const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家')));
+          if (aInStock !== bInStock) {
+            return aInStock ? -1 : 1;
+          }
+          return getModelSortNum(b) - getModelSortNum(a);
         }
-        // 2. 同在監控中或同在未監控中：有現貨/預購的優先排前
-        const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家')));
-        const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家')));
-        if (aInStock !== bInStock) {
-          return aInStock ? -1 : 1;
-        }
-        // 3. 依型號編號降序 (BX-54 > BX-53...)
-        return getModelSortNum(b) - getModelSortNum(a);
       });
 
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
       const monitoredItems = storeItems.filter(it => it.enabled !== false);
       const unmonitoredItems = storeItems.filter(it => it.enabled === false);
       const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家'))).length;
+      const lockedPageCount = storeItems.filter(it => hasRealProductPage(it)).length;
 
       // 頂部賣場快速資訊列
       const headerBar = document.createElement('div');
@@ -2054,6 +2089,11 @@
           <span class="badge-unmonitored-count">
             <i class="fa-solid fa-power-off"></i> 沒在監控: ${unmonitoredItems.length}
           </span>
+          ${isNonAmazon ? `
+            <span class="badge-page-count" style="background: #0ea5e922; color: #38bdf8; border: 1px solid #0ea5e955; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+              <i class="fa-solid fa-link"></i> 已鎖定頁面: ${lockedPageCount}
+            </span>
+          ` : ''}
           ${inStockCount > 0 ? `
             <span class="badge-instock-count">
               <i class="fa-solid fa-circle-check"></i> 有現貨: ${inStockCount}
@@ -2100,8 +2140,19 @@
         const statusColor = (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家'))) ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8');
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
+        const hasRealPage = hasRealProductPage(it);
         const buyUrl = getItemUrl(it, storeKey);
-        const btnText = cfg.btn_text || '👉 直達商品頁';
+        let btnText = cfg.btn_text || '👉 直達商品頁';
+        let btnIcon = 'fa-bolt';
+        if (storeKey !== 'amazon_jp') {
+          if (hasRealPage) {
+            btnText = '👉 官方直達商品頁';
+            btnIcon = 'fa-bolt';
+          } else {
+            btnText = '🔍 官方搜尋賣場';
+            btnIcon = 'fa-magnifying-glass';
+          }
+        }
         const btnBg = cfg.color || '#2563eb';
 
         card.innerHTML = `
@@ -2109,6 +2160,15 @@
             <span class="store-badge" style="background: ${cfg.color}22; color: ${cfg.color}; border: 1px solid ${cfg.color}55;">
               <i class="${cfg.icon || 'fa-solid fa-store'}"></i> ${cfg.name || '線上賣場'}
             </span>
+            ${storeKey !== 'amazon_jp' ? (hasRealPage ? `
+              <span class="badge-page-locked" style="background: #05966922; color: #34d399; border: 1px solid #05966955; font-size: 11px; padding: 2px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-link"></i> 已鎖定商品頁
+              </span>
+            ` : `
+              <span class="badge-page-pending" style="background: #47556922; color: #94a3b8; border: 1px solid #47556955; font-size: 11px; padding: 2px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-clock"></i> 待捕捉商品頁
+              </span>
+            `) : ''}
             <span class="item-asin" title="${escapeHtml(it.asin || '-')}">${escapeHtml(it.asin || '-')}</span>
           </div>
 
@@ -2145,7 +2205,7 @@
               <i class="fa-solid fa-trash"></i> 刪除
             </button>
             <a href="${buyUrl}" target="_blank" class="btn-buy" style="background: ${btnBg};">
-              <i class="fa-solid fa-bolt"></i> ${btnText}
+              <i class="fa-solid ${btnIcon}"></i> ${btnText}
             </a>
           </div>
         `;
@@ -2318,7 +2378,8 @@
           const kwsHtml = (it.keywords && it.keywords.length > 0)
             ? `<div style="font-size: 11px; color: #64748b; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><i class="fa-solid fa-tags" style="font-size: 10px; margin-right: 3px; color: #38bdf8;"></i>${escapeHtml(it.keywords.slice(0, 5).join(', '))}</div>`
             : '';
-          const actionBtnText = (currentStealthStore === 'amazon_jp') ? '⚡ 官方直達' : '前往搜尋';
+          const hasRealPage = hasRealProductPage(it);
+          const actionBtnText = (currentStealthStore === 'amazon_jp' || hasRealPage) ? '⚡ 官方直達' : '前往搜尋';
 
           card.innerHTML = `
             <div class="stealth-item-header">

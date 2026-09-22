@@ -114,27 +114,39 @@ STORE_CONFIG = {
     },
     "shopee": {
         "key": "shopee",
-        "name": "fun box 玩具旗艦店",
-        "short_name": "fun box 玩具旗艦店",
+        "name": "fun box 玩具旗艦店 (蝦皮)",
+        "short_name": "蝦皮Funbox",
         "icon": "fa-solid fa-shrimp",
         "flag": "🦐",
         "color": "#f97316",
-        "btn_text": "🦐 蝦皮旗艦店直達",
-        "default_url": "https://shopee.tw/funbox5120",
+        "btn_text": "⚡ 1-Click 官方直達",
+        "default_url": "https://shopee.tw/funbox5120#product_list",
         "id_label": "蝦皮商品網址或代號",
         "id_placeholder": "例如: https://shopee.tw/product/285705541/... 或 -i.285705541.{itemid}",
     },
-    "amazon_stealth": {
-        "key": "amazon_stealth",
-        "name": "Amazon 突襲上架清單",
-        "short_name": "Amazon 突襲",
-        "icon": "fa-solid fa-bolt",
-        "flag": "⚡",
-        "color": "#eab308",
-        "btn_text": "⚡ Amazon 直達",
-        "default_url": "https://www.amazon.co.jp/dp/{id}?m=AN1VRQENFRJN5&th=1&psc=1",
-        "id_label": "ASIN 或 Amazon 網址",
-        "id_placeholder": "例如: B0HJ783F18 或 突襲待公布 ASIN",
+    "shopee_mm": {
+        "key": "shopee_mm",
+        "name": "M.M小舖 (蝦皮)",
+        "short_name": "蝦皮MM",
+        "icon": "fa-solid fa-store",
+        "flag": "🏬",
+        "color": "#ea580c",
+        "btn_text": "⚡ 1-Click 官方直達",
+        "default_url": "https://shopee.tw/renmao#product_list",
+        "id_label": "蝦皮商品網址或代號",
+        "id_placeholder": "例如: https://shopee.tw/product/11664018/... 或 -i.11664018.{itemid}",
+    },
+    "tcsb": {
+        "key": "tcsb",
+        "name": "墊腳石購物網",
+        "short_name": "墊腳石",
+        "icon": "fa-solid fa-book-bookmark",
+        "flag": "🏬",
+        "color": "#0284c7",
+        "btn_text": "⚡ 1-Click 官方直達",
+        "default_url": "https://www.tcsb.com.tw/{id}",
+        "id_label": "商品條碼或墊腳石網址",
+        "id_placeholder": "例如: 4904810059905 或 商品網址",
     }
 }
 
@@ -1272,17 +1284,32 @@ class PChomeChecker:
                         if not is_funbox:
                             # 非 Funbox 麗嬰國際官方上架，為第三方轉賣或平行輸入，略過不判定為官方突襲現貨
                             continue
+
+                        # 檢驗實際購買按鈕庫存
+                        in_stock = True
+                        try:
+                            btn_url = f"https://ecapi.pchome.com.tw/ecshop/prodapi/v2/prod/button&id={pid}&fields=Seq,Id,Price,Qty,ButtonType,SaleStatus"
+                            r_btn = session.get(btn_url, headers=headers, timeout=3)
+                            btn_data = r_btn.json()
+                            if btn_data and isinstance(btn_data, list):
+                                button_type = btn_data[0].get("ButtonType", "")
+                                qty = btn_data[0].get("Qty", 0)
+                                in_stock = (button_type == "ForSale") and (qty > 0)
+                        except Exception:
+                            pass
+
                         return {
                             "ok": True,
                             "store": "pchome",
                             "asin": keyword,
                             "title": page_title or name,
                             "price": price_str,
-                            "in_stock": True,
+                            "in_stock": in_stock,
                             "is_official": True,
                             "seller": "funbox 麗嬰國際 (PChome 官方)",
                             "url": f"https://24h.pchome.com.tw/prod/{pid}",
-                            "status_text": "🟢 PChome 突襲上架現貨！"
+                            "has_product_page": True,
+                            "status_text": "🟢 PChome 突襲上架現貨！" if in_stock else "⚪ PChome 已建檔但缺貨中"
                         }
         except Exception:
             pass
@@ -1297,6 +1324,7 @@ class PChomeChecker:
             "is_official": True,
             "seller": "funbox 麗嬰國際 (PChome 官方)",
             "url": f"https://24h.pchome.com.tw/search/?q={keyword}",
+            "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
@@ -1365,6 +1393,7 @@ class PChomeChecker:
             "seller": seller,
             "url": product_url,
             "qty": qty,
+            "has_product_page": True,
             "status_text": status_text
         }
 
@@ -1472,6 +1501,7 @@ class MMShopChecker:
                         "is_official": True,
                         "seller": "M.M小舖",
                         "url": best_card["url"],
+                        "has_product_page": True,
                         "status_text": "🟢 M.M小舖現貨開放！" if best_card["in_stock"] else "⚪ 補貨中 / 暫無庫存"
                     }
         except Exception:
@@ -1487,6 +1517,7 @@ class MMShopChecker:
             "is_official": True,
             "seller": "M.M小舖",
             "url": search_url,
+            "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
@@ -1499,7 +1530,7 @@ class MMShopChecker:
     ) -> Dict[str, Any]:
         item_id = cls.extract_item_id(item_id_or_url)
         if not item_id:
-            return {"ok": False, "msg": "無效 M.M小舖 商品 ID"}
+            return {"ok": False, "msg": "無效 M.M小舖 商品 ID", "has_product_page": False}
 
         # 若識別碼為真實商品 ID (例如 Shopee6a... 或長雜湊)，直接請求商品詳情頁
         is_direct_id = item_id.lower().startswith("shopee") or bool(re.match(r'^[a-f0-9]{20,}$', item_id, re.I))
@@ -1516,7 +1547,7 @@ class MMShopChecker:
         try:
             r = session.get(url, headers=headers, stream=True, timeout=6)
             if r.status_code == 404:
-                return {"ok": False, "msg": "商品頁面不存在 (404)"}
+                return {"ok": False, "msg": "商品頁面不存在 (404)", "has_product_page": False}
             
             content = b""
             for chunk in r.iter_content(chunk_size=32768):
@@ -1531,7 +1562,7 @@ class MMShopChecker:
                     break
             r.close()
         except Exception as e:
-            return {"ok": False, "msg": f"M.M小舖連線逾時: {str(e)[:25]}"}
+            return {"ok": False, "msg": f"M.M小舖連線逾時: {str(e)[:25]}", "has_product_page": False}
 
         html = content.decode("utf-8", errors="ignore")
         product_ld = None
@@ -1568,6 +1599,7 @@ class MMShopChecker:
             "is_official": True,
             "seller": "M.M小舖",
             "url": url,
+            "has_product_page": True,
             "status_text": "🟢 M.M小舖現貨開放！" if in_stock else "⚪ 補貨中 / 暫無庫存"
         }
 
@@ -1607,6 +1639,7 @@ class CyberbizChecker:
                         res = cls.check_prod(s, store_key="twj_toys")
                         if res.get("ok") and res.get("price") != "未標示":
                             res["asin"] = keyword
+                            res["has_product_page"] = True
                             return res
         except Exception:
             pass
@@ -1621,6 +1654,7 @@ class CyberbizChecker:
             "is_official": True,
             "seller": "童無忌玩具",
             "url": f"https://www.twj.tw/search?q={keyword}",
+            "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
@@ -1644,6 +1678,7 @@ class CyberbizChecker:
                         res = cls.check_prod(s, store_key="funbox_tw")
                         if res.get("ok") and res.get("price") != "未標示":
                             res["asin"] = keyword
+                            res["has_product_page"] = True
                             return res
         except Exception:
             pass
@@ -1658,6 +1693,7 @@ class CyberbizChecker:
             "is_official": True,
             "seller": "麗嬰國際官網 (Funbox)",
             "url": f"https://shop.funbox.com.tw/search?q={keyword}",
+            "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
@@ -1666,7 +1702,7 @@ class CyberbizChecker:
         raw_text = str(slug_or_url).strip()
         slug = cls.extract_slug(raw_text)
         if not slug:
-            return {"ok": False, "msg": "無效商品編號"}
+            return {"ok": False, "msg": "無效商品編號", "has_product_page": False}
 
         # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 調用突襲搜尋模式
         if not slug.startswith("http") and ("-" in slug and len(slug) <= 8):
@@ -1692,7 +1728,7 @@ class CyberbizChecker:
         try:
             r = session.get(url, headers=headers, stream=True, timeout=6)
             if r.status_code == 404:
-                return {"ok": False, "msg": "商品頁面不存在 (404)"}
+                return {"ok": False, "msg": "商品頁面不存在 (404)", "has_product_page": False}
 
             content = b""
             for chunk in r.iter_content(chunk_size=16384):
@@ -1707,7 +1743,7 @@ class CyberbizChecker:
                     break
             r.close()
         except Exception as e:
-            return {"ok": False, "msg": f"連線逾時: {str(e)[:25]}"}
+            return {"ok": False, "msg": f"連線逾時: {str(e)[:25]}", "has_product_page": False}
 
         html = content.decode("utf-8", errors="ignore")
         product_ld = None
@@ -1751,7 +1787,9 @@ class CyberbizChecker:
             "in_stock": in_stock,
             "is_official": True,
             "seller": seller_name,
-            "url": url
+            "url": url,
+            "has_product_page": True,
+            "status_text": f"🟢 現貨開放！" if in_stock else "⚪ 缺貨中 / 暫無庫存"
         }
 
 
@@ -1811,6 +1849,7 @@ class EsliteChecker:
                             "is_official": True,
                             "seller": "誠品線上 (Eslite)",
                             "url": f"https://www.eslite.com/product/{sn}",
+                            "has_product_page": True,
                             "status_text": f"🟢 誠品突襲上架現貨！(庫存 {stock} 件)" if in_stock else "⚪ 誠品已建檔但缺貨中"
                         }
         except Exception:
@@ -1826,6 +1865,7 @@ class EsliteChecker:
             "is_official": True,
             "seller": "誠品線上 (Eslite)",
             "url": f"https://www.eslite.com/search?keyword=BEYBLADE+{keyword}",
+            "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
@@ -1834,7 +1874,7 @@ class EsliteChecker:
         raw_text = str(id_or_url).strip()
         full_id = cls.extract_id(raw_text)
         if not full_id:
-            return {"ok": False, "msg": "無效誠品商品代號"}
+            return {"ok": False, "msg": "無效誠品商品代號", "has_product_page": False}
 
         # 若識別碼非長條碼數字 (例如 "CX-05", "UX-15", "BX-52" 等關鍵字型號) -> 突襲搜尋模式
         if not full_id.isdigit() or len(full_id) < 10:
@@ -1855,13 +1895,13 @@ class EsliteChecker:
         try:
             r = session.get(api_url, headers=headers, timeout=5)
             if r.status_code != 200:
-                return {"ok": False, "msg": f"誠品 API HTTP {r.status_code}"}
+                return {"ok": False, "msg": f"誠品 API HTTP {r.status_code}", "has_product_page": False}
             data = r.json()
         except Exception as e:
-            return {"ok": False, "msg": f"誠品連線異常: {str(e)[:25]}"}
+            return {"ok": False, "msg": f"誠品連線異常: {str(e)[:25]}", "has_product_page": False}
 
         if not data or not isinstance(data, list):
-            return {"ok": False, "msg": "誠品未收錄或查無此商品"}
+            return {"ok": False, "msg": "誠品未收錄或查無此商品", "has_product_page": False}
 
         item = data[0]
         title = item.get("product_name", "")
@@ -1882,13 +1922,29 @@ class EsliteChecker:
             "in_stock": in_stock,
             "is_official": True,
             "seller": "誠品線上 (Eslite)",
-            "url": link
+            "url": link,
+            "has_product_page": True
         }
 
 
 # =========================================================================
-# 7. Shopee Checker (fun box 玩具旗艦店 / 蝦皮商品，curl_cffi 繞過 Cloudflare/BFF)
+# 7. Shopee Checker (fun box 玩具旗艦店 / M.M小舖 蝦皮，curl_cffi 偽裝 Chrome 124)
 # =========================================================================
+
+SHOPEE_SHOPS = {
+    "shopee": {
+        "shop_id": "285705541",
+        "username": "funbox5120",
+        "name": "fun box 玩具旗艦店 (蝦皮)",
+        "list_url": "https://shopee.tw/funbox5120#product_list",
+    },
+    "shopee_mm": {
+        "shop_id": "11664018",
+        "username": "renmao",
+        "name": "M.M小舖 (蝦皮)",
+        "list_url": "https://shopee.tw/renmao#product_list",
+    }
+}
 
 class ShopeeChecker:
     @staticmethod
@@ -1908,40 +1964,58 @@ class ShopeeChecker:
         return "", ""
 
     @classmethod
-    def check_item(cls, text_or_url: str) -> Dict[str, Any]:
+    def check_item(
+        cls,
+        text_or_url: str,
+        store_key: str = "shopee",
+        item_name: str = "",
+        item_keywords: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         raw_text = str(text_or_url).strip()
+        shop_cfg = SHOPEE_SHOPS.get(store_key, SHOPEE_SHOPS["shopee"])
+        seller_name = shop_cfg.get("name", "蝦皮官方店")
+        shop_list_url = shop_cfg.get("list_url", "https://shopee.tw")
+
+        # 若傳入蝦皮短網址 (例如 https://tw.shp.ee/...)，嘗試解析真實重新導向網址
+        if "shp.ee" in raw_text:
+            try:
+                session = cffi_requests.Session(impersonate="chrome124") if cffi_requests else get_shared_session()
+                r_redir = session.get(raw_text, allow_redirects=True, timeout=5)
+                raw_text = r_redir.url
+            except Exception:
+                pass
+
         shop_id, item_id = cls.extract_ids(raw_text)
         if not shop_id or not item_id:
-            # 若為純型號關鍵字 (例如 "CX-05", "UX-15", "BX-52" 等) -> 突襲待命守候模式
-            if not raw_text.startswith("http") and not re.search(r"\d{6,}", raw_text):
-                return {
-                    "ok": True,
-                    "store": "shopee",
-                    "asin": raw_text,
-                    "title": f"BEYBLADE X {raw_text}",
-                    "price": "-",
-                    "in_stock": False,
-                    "is_official": True,
-                    "seller": "fun box 玩具旗艦店",
-                    "url": f"https://shopee.tw/search?keyword={raw_text}&shop=285705541",
-                    "status_text": "⚪ 尚未上架 (待突襲發布)"
-                }
-            url = raw_text
-        else:
-            url = f"https://shopee.tw/product/{shop_id}/{item_id}"
+            # 若為純型號關鍵字 (例如 "CX-05", "UX-15", "BX-52" 等) -> 突襲待命守候模式，回傳全部商品列表頁
+            return {
+                "ok": True,
+                "store": store_key,
+                "asin": raw_text,
+                "title": f"BEYBLADE X {raw_text}",
+                "price": "-",
+                "in_stock": False,
+                "is_official": True,
+                "seller": seller_name,
+                "url": shop_list_url,
+                "has_product_page": False,
+                "status_text": "⚪ 尚未上架 (待突襲發布)"
+            }
+
+        url = f"https://shopee.tw/product/{shop_id}/{item_id}"
 
         if not cffi_requests:
-            return {"ok": False, "msg": "缺少 curl_cffi 套件，無法解析蝦皮"}
+            return {"ok": False, "msg": "缺少 curl_cffi 套件，無法解析蝦皮", "has_product_page": False}
 
         session = None
         try:
             session = cffi_requests.Session(impersonate="chrome124")
             r = session.get(url, timeout=8)
             if r.status_code == 404:
-                return {"ok": False, "msg": "商品頁面不存在或已被刪除"}
+                return {"ok": False, "msg": "商品頁面不存在或已被刪除", "has_product_page": False}
             html = r.text
         except Exception as e:
-            return {"ok": False, "msg": f"蝦皮請求逾時: {str(e)[:25]}"}
+            return {"ok": False, "msg": f"蝦皮請求逾時: {str(e)[:25]}", "has_product_page": False}
         finally:
             if session:
                 try:
@@ -1951,7 +2025,7 @@ class ShopeeChecker:
 
         m_state = re.search(r'<script[^>]*>\s*(\{"initialState":.*?)\s*</script>', html, re.DOTALL)
         if not m_state:
-            return {"ok": False, "msg": "無法解析蝦皮商品狀態 (未取得初始資料)"}
+            return {"ok": False, "msg": "無法解析蝦皮商品狀態 (未取得初始資料)", "has_product_page": False}
 
         try:
             data = json.loads(m_state.group(1))
@@ -1965,21 +2039,22 @@ class ShopeeChecker:
             title = title_m.group(1) if title_m else "蝦皮商品"
             return {
                 "ok": True,
-                "store": "shopee",
-                "asin": f"{shop_id}_{item_id}" if shop_id else url,
+                "store": store_key,
+                "asin": f"{shop_id}_{item_id}",
                 "title": title,
                 "price": "現貨檢視中",
                 "in_stock": in_stock,
-                "is_official": False,
-                "seller": "蝦皮購物",
-                "url": url
+                "is_official": True,
+                "seller": seller_name,
+                "url": url,
+                "has_product_page": True,
+                "status_text": "🟢 蝦皮現貨有貨" if in_stock else "⚪ 缺貨中 / 已售完"
             }
 
         first_key = list(cmap.keys())[0]
         entry = cmap[first_key]
         item_data = entry.get("item") or {}
         price_data = entry.get("product_price") or {}
-
 
         title = item_data.get("title", "")
         item_status = item_data.get("item_status", "normal")
@@ -2013,16 +2088,161 @@ class ShopeeChecker:
 
         return {
             "ok": True,
-            "store": "shopee",
-            "asin": f"{shop_id}_{item_id}" if shop_id else url,
+            "store": store_key,
+            "asin": f"{shop_id}_{item_id}",
             "title": title or "蝦皮商品",
             "price": price_str,
             "in_stock": in_stock,
-            "is_official": "funbox" in url.lower() or "285705541" in url,
-            "seller": "fun box 玩具旗艦店" if ("funbox" in url.lower() or "285705541" in url) else "蝦皮賣家",
+            "is_official": True,
+            "seller": seller_name,
             "url": url,
+            "has_product_page": True,
             "status_text": status_desc
         }
+
+
+# =========================================================================
+# 8. 墊腳石購物網 Checker (TCSB Laravel/Bagisto API)
+# =========================================================================
+
+class TcsbChecker:
+    @staticmethod
+    def extract_id(text: str) -> str:
+        if not text:
+            return ""
+        text = text.strip()
+        m = re.search(r"tcsb\.com\.tw/([a-zA-Z0-9_-]+)", text, re.IGNORECASE)
+        if m:
+            return m.group(1)
+        m_q = re.search(r"(?:query=)([^&#]+)", text, re.IGNORECASE)
+        if m_q:
+            return urllib.parse.unquote(m_q.group(1)).strip()
+        return text.replace("https://", "").replace("http://", "").strip("/")
+
+    @classmethod
+    def check_tcsb_stealth(
+        cls,
+        keyword: str,
+        item_name: str = "",
+        item_keywords: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """墊腳石購物網關鍵字突襲搜尋監控與精準商品頁面解析"""
+        if item_keywords is None:
+            item_keywords = []
+
+        m_code = re.search(r'([A-Za-z]{2}-\d{2}[A-Za-z]?)', keyword)
+        base_code = m_code.group(1).upper() if m_code else keyword.strip().split()[0].upper()
+
+        url = "https://www.tcsb.com.tw/api/products"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://www.tcsb.com.tw/search"
+        }
+
+        try:
+            # 依序使用精確型號與基礎型號查詢
+            queries_to_try = [f"BEYBLADE X {base_code}", base_code]
+            for q_term in queries_to_try:
+                r = session.get(url, params={"query": q_term}, headers=headers, timeout=6)
+                if r.status_code == 200:
+                    data = r.json()
+                    prods = data.get("data", [])
+                    clean_code = base_code.lower().replace("-", "")
+                    for p in prods:
+                        name = p.get("name", "")
+                        name_clean = name.lower().replace("-", "")
+                        if clean_code in name_clean and any(k in name.lower() for k in ["beyblade", "戰鬥陀螺", "陀螺"]):
+                            prices = p.get("prices", {})
+                            price_str = prices.get("final", {}).get("formatted_price") or p.get("formatted_price") or "未標示"
+                            url_key = p.get("url_key", "")
+                            real_url = f"https://www.tcsb.com.tw/{url_key}" if url_key else f"https://www.tcsb.com.tw/search?query={urllib.parse.quote(base_code)}"
+                            in_stock = bool(p.get("is_saleable"))
+                            return {
+                                "ok": True,
+                                "store": "tcsb",
+                                "asin": keyword,
+                                "title": name,
+                                "price": price_str,
+                                "in_stock": in_stock,
+                                "is_official": True,
+                                "seller": "墊腳石購物網 (官方)",
+                                "url": real_url,
+                                "has_product_page": bool(url_key),
+                                "status_text": "🟢 墊腳石突襲上架現貨！" if in_stock else "⚪ 墊腳石已收錄但缺貨中"
+                            }
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "tcsb",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "墊腳石購物網",
+            "url": f"https://www.tcsb.com.tw/search?query={urllib.parse.quote(base_code)}",
+            "has_product_page": False,
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
+
+    @classmethod
+    def check_prod(
+        cls,
+        prod_id_or_url: str,
+        item_name: str = "",
+        item_keywords: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        prod_id = cls.extract_id(prod_id_or_url)
+        if not prod_id:
+            return {"ok": False, "msg": "無效墊腳石商品代碼", "has_product_page": False}
+
+        # 若識別碼為型號關鍵字 (例如 "BX-57", "UX-15") -> 突襲搜尋模式
+        if re.search(r'^(?:BX|UX|CX)-\d{2}', prod_id, re.I):
+            return cls.check_tcsb_stealth(prod_id, item_name=item_name, item_keywords=item_keywords)
+
+        # 若為數字條碼或特定 url_key，使用 API 查詢該商品
+        url = "https://www.tcsb.com.tw/api/products"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://www.tcsb.com.tw/search"
+        }
+        try:
+            r = session.get(url, params={"query": prod_id}, headers=headers, timeout=6)
+            if r.status_code == 200:
+                data = r.json()
+                prods = data.get("data", [])
+                for p in prods:
+                    if str(p.get("url_key")) == prod_id or str(p.get("sku")) == prod_id or prod_id in str(p.get("name")):
+                        prices = p.get("prices", {})
+                        price_str = prices.get("final", {}).get("formatted_price") or p.get("formatted_price") or "未標示"
+                        url_key = p.get("url_key", prod_id)
+                        in_stock = bool(p.get("is_saleable"))
+                        return {
+                            "ok": True,
+                            "store": "tcsb",
+                            "asin": prod_id,
+                            "title": p.get("name", prod_id),
+                            "price": price_str,
+                            "in_stock": in_stock,
+                            "is_official": True,
+                            "seller": "墊腳石購物網 (官方)",
+                            "url": f"https://www.tcsb.com.tw/{url_key}",
+                            "has_product_page": True,
+                            "status_text": "🟢 墊腳石現貨有庫存！" if in_stock else "⚪ 缺貨中 / 暫無庫存"
+                        }
+        except Exception as e:
+            return {"ok": False, "msg": f"墊腳石連線失敗: {str(e)[:25]}", "has_product_page": False}
+
+        # 備援回退到關鍵字搜尋
+        return cls.check_tcsb_stealth(prod_id, item_name=item_name, item_keywords=item_keywords)
 
 
 # =========================================================================
@@ -2081,7 +2301,7 @@ def check_store_item(
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
 
-    if store in ("amazon_jp", "amazon_stealth"):
+    if store == "amazon_jp":
         return AmazonJPChecker.check_asin(
             asin,
             interval=amazon_interval,
@@ -2105,8 +2325,19 @@ def check_store_item(
         return CyberbizChecker.check_prod(asin, store_key=store)
     elif store == "eslite":
         return EsliteChecker.check_prod(asin)
-    elif store == "shopee":
-        return ShopeeChecker.check_item(asin)
+    elif store in ("shopee", "shopee_mm"):
+        return ShopeeChecker.check_item(
+            asin,
+            store_key=store,
+            item_name=item.get("name", ""),
+            item_keywords=item.get("keywords", [])
+        )
+    elif store == "tcsb":
+        return TcsbChecker.check_prod(
+            asin,
+            item_name=item.get("name", ""),
+            item_keywords=item.get("keywords", [])
+        )
     else:
         return AmazonJPChecker.check_asin(
             asin,
@@ -2124,7 +2355,7 @@ def check_store_item(
 def get_item_direct_url(item: Dict[str, Any]) -> str:
     """取得該商品的官方直接購買連結 (Amazon 帶有 m=AN1VRQENFRJN5 官方直達)"""
     url = item.get("direct_url") or item.get("url")
-    if url and not url.endswith("/search") and "/search?q" not in url and "/search?q-" not in url:
+    if url and not url.endswith("/search") and "/search?q" not in url and "/search?q-" not in url and not url.endswith("#product_list") and "/category?keyword=" not in url:
         return url
 
     store = item.get("store", "amazon_jp")
@@ -2133,7 +2364,7 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
 
     is_model_code = bool(re.search(r"^(?:BX|UX|CX)-\d{2}[A-Z]?$", asin, re.I))
 
-    if store in ("amazon_jp", "amazon_stealth"):
+    if store == "amazon_jp":
         return get_product_url(asin, official_only=True)
     elif store == "pchome":
         if is_model_code:
@@ -2142,7 +2373,7 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
     elif store == "mm_shop":
         if asin.lower().startswith("shopee") or bool(re.match(r'^[a-f0-9]{20,}$', asin, re.I)):
             return f"https://mmtoyshop.com/item/{asin}"
-        if asin.startswith("http"):
+        if asin.startswith("http") and "/item/" in asin:
             return asin
         return f"https://mmtoyshop.com/category?keyword={urllib.parse.quote(asin)}"
     elif store == "funbox_tw":
@@ -2161,9 +2392,20 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
         if "_" in asin:
             sp, it = asin.split("_", 1)
             return f"https://shopee.tw/product/{sp}/{it}"
+        if asin.startswith("http") and not asin.endswith("/search") and "#product_list" not in asin:
+            return asin
+        return "https://shopee.tw/funbox5120#product_list"
+    elif store == "shopee_mm":
+        if "_" in asin:
+            sp, it = asin.split("_", 1)
+            return f"https://shopee.tw/product/{sp}/{it}"
+        if asin.startswith("http") and not asin.endswith("/search") and "#product_list" not in asin:
+            return asin
+        return "https://shopee.tw/renmao#product_list"
+    elif store == "tcsb":
         if is_model_code:
-            return f"https://shopee.tw/search?keyword={asin}&shop=285705541"
-        return asin if asin.startswith("http") else f"https://shopee.tw/funbox5120"
+            return f"https://www.tcsb.com.tw/search?query={urllib.parse.quote(asin)}"
+        return f"https://www.tcsb.com.tw/{asin}"
     return asin
 
 
@@ -2384,6 +2626,42 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                         "url": real_url,
                         "item_id": item_id,
                         "seller": "M.M小舖",
+                        "in_stock": in_stock
+                    })
+        except Exception:
+            pass
+
+    elif store_key == "tcsb":
+        url = "https://www.tcsb.com.tw/api/products"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://www.tcsb.com.tw/search"
+        }
+        try:
+            r = session.get(url, params={"query": "BEYBLADE"}, headers=headers, timeout=6)
+            if r.status_code == 200:
+                data = r.json()
+                for p in data.get("data", []):
+                    name = p.get("name", "")
+                    name_low = name.lower()
+                    if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "紙製收納盒", "樂高", "lego"]):
+                        continue
+                    if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0"]):
+                        continue
+                    prices = p.get("prices", {})
+                    price_str = prices.get("final", {}).get("formatted_price") or p.get("formatted_price") or "未標示"
+                    url_key = p.get("url_key", "")
+                    real_url = f"https://www.tcsb.com.tw/{url_key}" if url_key else f"https://www.tcsb.com.tw/search?query={urllib.parse.quote(name)}"
+                    in_stock = bool(p.get("is_saleable"))
+                    results.append({
+                        "store": "tcsb",
+                        "title": name,
+                        "price": price_str,
+                        "url": real_url,
+                        "item_id": url_key,
+                        "seller": "墊腳石購物網 (官方)",
                         "in_stock": in_stock
                     })
         except Exception:
