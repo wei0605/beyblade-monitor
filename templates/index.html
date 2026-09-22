@@ -1960,7 +1960,8 @@
     }
 
     function getItemUrl(it, storeKey) {
-      if (it.url) return it.url;
+      if (it.direct_url && !it.direct_url.includes('/search?q') && !it.direct_url.includes('/search?q-')) return it.direct_url;
+      if (it.url && !it.url.includes('/search?q') && !it.url.includes('/search?q-')) return it.url;
       const asin = it.asin || '';
       const isModelCode = /^(?:BX|UX|CX)-\d{2}[A-Z]?$/i.test(asin);
 
@@ -1969,7 +1970,8 @@
       } else if (storeKey === 'pchome') {
         return isModelCode ? `https://24h.pchome.com.tw/search/?q=${asin}` : `https://24h.pchome.com.tw/prod/${asin}`;
       } else if (storeKey === 'mm_shop') {
-        return isModelCode ? `https://mmtoyshop.com/search?q=${asin}` : `https://mmtoyshop.com/item/${asin}`;
+        if (asin.startsWith('Shopee') || /^[a-f0-9]{20,}$/i.test(asin)) return `https://mmtoyshop.com/item/${asin}`;
+        return `https://mmtoyshop.com/category?keyword=${encodeURIComponent(asin)}`;
       } else if (storeKey === 'funbox_tw') {
         return isModelCode ? `https://shop.funbox.com.tw/search?q=${asin}` : `https://shop.funbox.com.tw/products/${asin}`;
       } else if (storeKey === 'twj_toys') {

@@ -1382,27 +1382,98 @@ class MMShopChecker:
         m = re.search(r"mmtoyshop\.com/item/([a-zA-Z0-9_-]+)", text, re.IGNORECASE)
         if m:
             return m.group(1)
+        m_q = re.search(r"(?:search\?q=|category\?keyword=)([^&#]+)", text, re.IGNORECASE)
+        if m_q:
+            return urllib.parse.unquote(m_q.group(1)).strip()
         return text.replace("https://", "").replace("http://", "").strip("/")
 
     @classmethod
-    def check_mm_stealth(cls, keyword: str) -> Dict[str, Any]:
-        """M.M小舖關鍵字突襲搜尋監控"""
-        search_url = f"https://mmtoyshop.com/search?q={keyword}"
+    def check_mm_stealth(
+        cls,
+        keyword: str,
+        item_name: str = "",
+        item_keywords: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """M.M小舖關鍵字突襲搜尋監控與精準商品頁面解析"""
+        if item_keywords is None:
+            item_keywords = []
+
+        m_code = re.search(r'([A-Za-z]{2}-\d{2}[A-Za-z]?)', keyword)
+        base_code = m_code.group(1).upper() if m_code else keyword.strip().split()[0].upper()
+        
+        search_url = f"https://mmtoyshop.com/category?keyword={urllib.parse.quote(base_code)}"
         session = get_shared_session()
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         }
         try:
-            r = session.get(search_url, headers=headers, timeout=6)
+            r = session.get(search_url, headers=headers, timeout=8)
             if r.status_code == 200:
-                found_items = re.findall(r'/item/([a-zA-Z0-9_-]+)', r.text)
-                clean_kw = keyword.lower().replace("-", "").strip()
-                for it_id in set(found_items):
-                    res = cls.check_item(it_id)
-                    if res.get("ok") and clean_kw in res.get("title", "").lower().replace("-", ""):
-                        res["asin"] = keyword
-                        return res
+                soup = BeautifulSoup(r.text, "html.parser")
+                cards = soup.find_all(lambda tag: tag.has_attr("data-bv") and tag["data-bv"] == "product-card")
+                
+                parsed_cards = []
+                for c in cards:
+                    title = c.get("title", "")
+                    a = c.find("a", href=lambda h: h and "/item/" in h)
+                    if not a:
+                        continue
+                    href = a["href"]
+                    real_url = "https://mmtoyshop.com" + href if href.startswith("/") else href
+                    item_id = href.split("/item/")[-1].split("?")[0]
+                    
+                    price_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', c.get_text())
+                    price_str = f"NT$ {price_m.group(1)}" if price_m else "未標示"
+                    
+                    card_text = c.get_text()
+                    soldout = c.find(lambda t: t.has_attr("data-bv") and t["data-bv"] == "product-soldout")
+                    in_stock = (soldout is None) and ("補貨中" not in card_text) and ("已售完" not in card_text) and ("庫存\n0" not in card_text)
+                    
+                    parsed_cards.append({
+                        "title": title,
+                        "url": real_url,
+                        "item_id": item_id,
+                        "price": price_str,
+                        "in_stock": in_stock
+                    })
+
+                code_clean = base_code.lower().replace("-", "")
+                candidate_words = [w.lower().replace("-", "").replace(" ", "") for w in item_keywords if len(w) > 1 and w.lower() not in (code_clean, base_code.lower())]
+                if item_name:
+                    cleaned_name = re.sub(r'^(?:BX|UX|CX)-\d{2}[A-Za-z]?\s*', '', item_name)
+                    for part in cleaned_name.split():
+                        if len(part) >= 2:
+                            candidate_words.append(part.lower().replace("-", "").replace(" ", ""))
+
+                best_card = None
+                best_score = 0
+                for card in parsed_cards:
+                    title_clean = card["title"].lower().replace("-", "").replace(" ", "")
+                    if code_clean not in title_clean:
+                        continue
+                    score = 10
+                    for w in candidate_words:
+                        if w in title_clean:
+                            score += 20
+                    if score > best_score:
+                        best_score = score
+                        best_card = card
+
+                if best_card and (best_score >= 20 or base_code != "BX-00"):
+                    return {
+                        "ok": True,
+                        "store": "mm_shop",
+                        "asin": keyword,
+                        "real_item_id": best_card["item_id"],
+                        "title": best_card["title"],
+                        "price": best_card["price"],
+                        "in_stock": best_card["in_stock"],
+                        "is_official": True,
+                        "seller": "M.M小舖",
+                        "url": best_card["url"],
+                        "status_text": "🟢 M.M小舖現貨開放！" if best_card["in_stock"] else "⚪ 補貨中 / 暫無庫存"
+                    }
         except Exception:
             pass
 
@@ -1415,19 +1486,25 @@ class MMShopChecker:
             "in_stock": False,
             "is_official": True,
             "seller": "M.M小舖",
-            "url": f"https://mmtoyshop.com/search?q={keyword}",
+            "url": search_url,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
     @classmethod
-    def check_item(cls, item_id_or_url: str) -> Dict[str, Any]:
+    def check_item(
+        cls,
+        item_id_or_url: str,
+        item_name: str = "",
+        item_keywords: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         item_id = cls.extract_item_id(item_id_or_url)
         if not item_id:
             return {"ok": False, "msg": "無效 M.M小舖 商品 ID"}
 
-        # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 突襲搜尋模式
-        if "-" in item_id and len(item_id) <= 8 and not item_id.startswith("shopee"):
-            return cls.check_mm_stealth(item_id)
+        # 若識別碼為真實商品 ID (例如 Shopee6a... 或長雜湊)，直接請求商品詳情頁
+        is_direct_id = item_id.lower().startswith("shopee") or bool(re.match(r'^[a-f0-9]{20,}$', item_id, re.I))
+        if not is_direct_id:
+            return cls.check_mm_stealth(item_id, item_name=item_name, item_keywords=item_keywords)
 
         url = f"https://mmtoyshop.com/item/{item_id}"
         session = get_shared_session()
@@ -1490,7 +1567,8 @@ class MMShopChecker:
             "in_stock": in_stock,
             "is_official": True,
             "seller": "M.M小舖",
-            "url": url
+            "url": url,
+            "status_text": "🟢 M.M小舖現貨開放！" if in_stock else "⚪ 補貨中 / 暫無庫存"
         }
 
 
@@ -2018,7 +2096,11 @@ def check_store_item(
     elif store == "pchome":
         return PChomeChecker.check_prod(asin)
     elif store == "mm_shop":
-        return MMShopChecker.check_item(asin)
+        return MMShopChecker.check_item(
+            asin,
+            item_name=item.get("name", ""),
+            item_keywords=item.get("keywords", [])
+        )
     elif store in ("funbox_tw", "twj_toys"):
         return CyberbizChecker.check_prod(asin, store_key=store)
     elif store == "eslite":
@@ -2041,8 +2123,9 @@ def check_store_item(
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:
     """取得該商品的官方直接購買連結 (Amazon 帶有 m=AN1VRQENFRJN5 官方直達)"""
-    if item.get("url"):
-        return item["url"]
+    url = item.get("direct_url") or item.get("url")
+    if url and not url.endswith("/search") and "/search?q" not in url and "/search?q-" not in url:
+        return url
 
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
@@ -2057,9 +2140,11 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
             return f"https://24h.pchome.com.tw/search/?q={asin}"
         return f"https://24h.pchome.com.tw/prod/{asin}"
     elif store == "mm_shop":
-        if is_model_code:
-            return f"https://mmtoyshop.com/search?q={asin}"
-        return f"https://mmtoyshop.com/item/{asin}"
+        if asin.lower().startswith("shopee") or bool(re.match(r'^[a-f0-9]{20,}$', asin, re.I)):
+            return f"https://mmtoyshop.com/item/{asin}"
+        if asin.startswith("http"):
+            return asin
+        return f"https://mmtoyshop.com/category?keyword={urllib.parse.quote(asin)}"
     elif store == "funbox_tw":
         if is_model_code:
             return f"https://shop.funbox.com.tw/search?q={asin}"
@@ -2267,31 +2352,40 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                         pass
 
     elif store_key == "mm_shop":
-        url = "https://mmtoyshop.com/search?q=戰鬥陀螺"
+        url = "https://mmtoyshop.com/category?keyword=戰鬥陀螺"
         try:
-            r = session.get(url, timeout=7)
+            r = session.get(url, timeout=8)
             if r.status_code == 200:
-                found_items = re.findall(r'/item/([a-zA-Z0-9_-]+)', r.text)
+                soup = BeautifulSoup(r.text, "html.parser")
+                cards = soup.find_all(lambda tag: tag.has_attr("data-bv") and tag["data-bv"] == "product-card")
                 seen_ids = set()
-                for item_id in found_items[:15]:
+                for c in cards[:25]:
+                    a = c.find("a", href=lambda h: h and "/item/" in h)
+                    if not a:
+                        continue
+                    href = a["href"]
+                    item_id = href.split("/item/")[-1].split("?")[0]
                     if item_id in seen_ids:
                         continue
                     seen_ids.add(item_id)
-                    res = MMShopChecker.check_item(item_id)
-                    if res.get("ok"):
-                        title = res.get("title", item_id)
-                        title_low = title.lower()
-                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "紙製收納盒"]):
-                            continue
-                        results.append({
-                            "store": "mm_shop",
-                            "title": title,
-                            "price": res.get("price", "未標示"),
-                            "url": res.get("url", f"https://mmtoyshop.com/item/{item_id}"),
-                            "item_id": item_id,
-                            "seller": "M.M小舖",
-                            "in_stock": res.get("in_stock", True)
-                        })
+                    title = c.get("title", item_id)
+                    title_low = title.lower()
+                    if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "紙製收納盒"]):
+                        continue
+                    real_url = "https://mmtoyshop.com" + href if href.startswith("/") else href
+                    price_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', c.get_text())
+                    price_str = f"NT$ {price_m.group(1)}" if price_m else "未標示"
+                    soldout = c.find(lambda t: t.has_attr("data-bv") and t["data-bv"] == "product-soldout")
+                    in_stock = (soldout is None) and ("補貨中" not in c.get_text()) and ("已售完" not in c.get_text())
+                    results.append({
+                        "store": "mm_shop",
+                        "title": title,
+                        "price": price_str,
+                        "url": real_url,
+                        "item_id": item_id,
+                        "seller": "M.M小舖",
+                        "in_stock": in_stock
+                    })
         except Exception:
             pass
 

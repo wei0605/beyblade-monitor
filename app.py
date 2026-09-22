@@ -608,7 +608,22 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     is_preorder = res.get("is_preorder", False)
     official_price = res.get("official_price", "-")
     third_party_price = res.get("third_party_price", "-")
-    url = res.get("url") or get_item_direct_url(item)
+
+    res_url = res.get("url")
+    if res_url and not res_url.endswith("/search") and "/search?q" not in res_url and "/search?q-" not in res_url:
+        item["url"] = res_url
+        item["direct_url"] = res_url
+        url = res_url
+    elif store == "mm_shop":
+        if not item.get("url") or "/search?q" in item.get("url", "") or "/search?q-" in item.get("url", ""):
+            resolved_url = get_item_direct_url(item)
+            item["url"] = resolved_url
+            item["direct_url"] = resolved_url
+            url = resolved_url
+        else:
+            url = item.get("direct_url") or item.get("url") or get_item_direct_url(item)
+    else:
+        url = res.get("url") or item.get("direct_url") or item.get("url") or get_item_direct_url(item)
 
     status_text = ""
     is_alert_worthy = False
@@ -730,6 +745,17 @@ def stop_monitor():
 @app.on_event("startup")
 def on_startup():
     state.add_log("🌪️ 戰鬥陀螺 7 大賣場雲端監控系統初始化...", "INFO")
+    # 清理舊版 M.M小舖 404 search 網址
+    for it in state.config.get("items", []):
+        if it.get("store") == "mm_shop":
+            u = it.get("url", "")
+            du = it.get("direct_url", "")
+            if not u or "/search?q" in u or "/search?q-" in u:
+                fixed_u = get_item_direct_url(it)
+                it["url"] = fixed_u
+                if not du or "/search?q" in du or "/search?q-" in du:
+                    it["direct_url"] = fixed_u
+                state.mark_config_dirty()
     ensure_memory_watchdog()
     start_monitor()
 
@@ -973,6 +999,9 @@ async def api_add_item(req: Request, background_tasks: BackgroundTasks):
         "last_seller": "-",
         "last_time": "-"
     }
+    init_url = get_item_direct_url(new_item)
+    new_item["url"] = init_url
+    new_item["direct_url"] = init_url
     state.config.setdefault("items", []).append(new_item)
     new_idx = len(state.config["items"]) - 1
     state.save_config()
@@ -1110,6 +1139,9 @@ async def api_batch_add_items(req: Request, background_tasks: BackgroundTasks):
             "last_seller": "-",
             "last_time": "-"
         }
+        init_u = get_item_direct_url(new_item)
+        new_item["url"] = init_u
+        new_item["direct_url"] = init_u
         state.config.setdefault("items", []).append(new_item)
         existing_asins.add(clean_t)
         new_items_to_check.append((len(state.config["items"]) - 1, new_item))
