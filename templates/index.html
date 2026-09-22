@@ -214,6 +214,425 @@
     .log-ERROR { color: #f87171; font-weight: bold; }
     .log-INFO { color: #94a3b8; }
 
+    /* Stealth Restock UI & Modal */
+    .btn-stealth-catalog {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: white;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-stealth-catalog:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5);
+    }
+    .modal-box-stealth {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 1120px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 22px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+    .stealth-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .stealth-modal-title {
+      font-size: 17px;
+      font-weight: bold;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stealth-store-badge {
+      font-size: 12px;
+      font-weight: bold;
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 3px 9px;
+      border-radius: 6px;
+      color: #cbd5e1;
+    }
+    .stealth-modal-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .btn-modal-close {
+      background: #334155;
+      color: #94a3b8;
+      border: 1px solid #475569;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-modal-close:hover {
+      background: #475569;
+      color: white;
+    }
+    .stealth-modal-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .stealth-search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .stealth-search-box i.fa-magnifying-glass {
+      position: absolute;
+      left: 12px;
+      color: #64748b;
+      font-size: 13px;
+    }
+    .stealth-search-input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px 9px 36px;
+      color: white;
+      font-size: 13px;
+    }
+    .stealth-search-input:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    .stealth-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-stealth-action {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-stealth-enable { background: rgba(16, 185, 129, 0.18); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
+    .btn-stealth-enable:hover { background: rgba(16, 185, 129, 0.3); }
+    .btn-stealth-disable { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+    .btn-stealth-disable:hover { background: rgba(239, 68, 68, 0.25); }
+    .btn-stealth-scan { background: #334155; border-color: #475569; color: #facc15; }
+    .btn-stealth-scan:hover { background: #475569; color: #fef08a; }
+
+    /* Series Sub-tabs */
+    .stealth-series-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+    .stealth-series-tab {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .stealth-series-tab:hover {
+      background: #1e293b;
+      color: white;
+    }
+    .stealth-series-tab.active {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      border-color: #60a5fa;
+      color: white;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+    .series-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-bx { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+    .dot-ux { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+    .dot-cx { background: #f97316; box-shadow: 0 0 6px #f97316; }
+    .count-pill {
+      background: rgba(0, 0, 0, 0.35);
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      color: #94a3b8;
+    }
+    .stealth-series-tab.active .count-pill {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    /* Stealth Items Container & Grid */
+    .stealth-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 10px;
+      overflow-y: auto;
+      max-height: calc(88vh - 230px);
+      padding-right: 6px;
+    }
+    .stealth-items-grid::-webkit-scrollbar { width: 6px; }
+    .stealth-items-grid::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+    .stealth-item-row {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .stealth-item-row.in-stock {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+    .stealth-item-row.disabled {
+      opacity: 0.5;
+    }
+    .stealth-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .stealth-model-badge {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 2px 7px;
+      border-radius: 5px;
+      letter-spacing: 0.5px;
+    }
+    .badge-bx { background: rgba(59, 130, 246, 0.18); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .badge-ux { background: rgba(168, 85, 247, 0.18); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .badge-cx { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+    
+    .stealth-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.35;
+    }
+    .stealth-item-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+    .badge-waiting { color: #94a3b8; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-stock { color: #34d399; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+
+    .stealth-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed #1e293b;
+    }
+    .btn-stealth-link {
+      flex: 1;
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      text-decoration: none;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-stealth-link:hover {
+      background: #334155;
+      color: white;
+    }
+    .btn-stealth-toggle {
+      background: #334155;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-stealth-toggle.enabled {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    /* Modal Footer */
+    .stealth-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .stealth-footer-stats {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .btn-stealth-footer-close {
+      background: #475569;
+      color: white;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-stealth-footer-close:hover {
+      background: #64748b;
+    }
+
+    /* Standby Banner on Main Page */
+    .stealth-standby-banner {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 34px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .standby-radar {
+      font-size: 42px;
+      color: #38bdf8;
+      animation: spin-slow 10s linear infinite;
+    }
+    .standby-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #f1f5f9;
+    }
+    .standby-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 680px;
+      line-height: 1.6;
+    }
+    .btn-open-stealth-modal {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      border: 1px solid #38bdf8;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-open-stealth-modal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.6);
+    }
+    .stealth-active-banner {
+      grid-column: 1 / -1;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      color: #cbd5e1;
+      flex-wrap: wrap;
+    }
+    .btn-open-stealth-modal-sm {
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-open-stealth-modal-sm:hover {
+      background: #334155;
+      color: white;
+    }
+
     .footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; line-height: 1.6; }
   </style>
 </head>
@@ -478,6 +897,9 @@
     <div class="section-title">
       <span id="tabHeading"><i class="fa-solid fa-list-check"></i> 🇯🇵 Amazon Japan 商品清單 (<span id="activeCount">0</span> 啟用)</span>
       <div class="section-actions">
+        <button id="btnOpenStealthCatalog" class="btn-stealth-catalog" onclick="openStealthModal()">
+          <i class="fa-solid fa-shield-halved"></i> ⚡ 防突襲型號庫 (<span id="stealthCatalogBtnCount">0</span>)
+        </button>
         <button id="btnFilterInStock" class="btn-filter-toggle" onclick="toggleFilterMode()">
           <i class="fa-solid fa-filter"></i> <span id="filterModeText">僅顯示已突襲/有貨 (0)</span>
         </button>
@@ -574,6 +996,83 @@
     </div>
   </div>
 
+  <!-- Stealth Restock Catalog Modal (防突襲型號總庫) -->
+  <div id="stealthModal" class="modal-overlay">
+    <div class="modal-box-stealth">
+      <div class="stealth-modal-header">
+        <div>
+          <div class="stealth-modal-title">
+            <i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i>
+            <span>防突襲陀螺型號總庫</span>
+            <span id="stealthModalStoreBadge" class="stealth-store-badge">🦐 蝦皮 Funbox</span>
+          </div>
+          <div class="stealth-modal-subtitle">
+            全系列陀螺型號 • 照數字新至舊(數字大到小)降序排列 • 背景極速守候，上架自動於首頁顯現
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <select id="stealthStoreSelect" class="form-select" style="width: auto; padding: 6px 12px; font-size: 12px; background: #0f172a;" onchange="onStealthStoreSelectChange()">
+            <!-- Populated dynamically -->
+          </select>
+          <button class="btn-modal-close" onclick="closeStealthModal()">✕</button>
+        </div>
+      </div>
+
+      <!-- Toolbar: Search & Batch Action Buttons -->
+      <div class="stealth-modal-toolbar">
+        <div class="stealth-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="stealthSearchInput" class="stealth-search-input" placeholder="🔍 快速搜尋型號或陀螺名稱 (例如: 57, 50, 翼龍, 白龍...)" oninput="renderStealthModalItems()">
+        </div>
+        <div class="stealth-toolbar-actions">
+          <button class="btn-stealth-action btn-stealth-enable" onclick="batchToggleStealthModal(true)" title="一鍵開啟此賣場防突襲監控">
+            <i class="fa-solid fa-check-double"></i> 全開監控
+          </button>
+          <button class="btn-stealth-action btn-stealth-disable" onclick="batchToggleStealthModal(false)" title="一鍵關閉此賣場防突襲監控">
+            <i class="fa-solid fa-ban"></i> 全關略過
+          </button>
+          <button class="btn-stealth-action btn-stealth-scan" onclick="scanCurrentStealthStore()" title="立即對目前賣場發動一次掃描">
+            <i class="fa-solid fa-bolt"></i> 立即掃描
+          </button>
+        </div>
+      </div>
+
+      <!-- Series Tabs: ALL, BX, UX, CX -->
+      <div class="stealth-series-tabs">
+        <button id="stealthTabALL" class="stealth-series-tab active" onclick="switchStealthSeriesTab('ALL')">
+          <span>全部型號</span> <span id="badgeCountALL" class="count-pill">0</span>
+        </button>
+        <button id="stealthTabBX" class="stealth-series-tab" onclick="switchStealthSeriesTab('BX')">
+          <span class="series-dot dot-bx"></span>
+          <span>BX 系列</span> <span id="badgeCountBX" class="count-pill">0</span>
+        </button>
+        <button id="stealthTabUX" class="stealth-series-tab" onclick="switchStealthSeriesTab('UX')">
+          <span class="series-dot dot-ux"></span>
+          <span>UX 系列</span> <span id="badgeCountUX" class="count-pill">0</span>
+        </button>
+        <button id="stealthTabCX" class="stealth-series-tab" onclick="switchStealthSeriesTab('CX')">
+          <span class="series-dot dot-cx"></span>
+          <span>CX 系列</span> <span id="badgeCountCX" class="count-pill">0</span>
+        </button>
+      </div>
+
+      <!-- Items Grid / List -->
+      <div id="stealthItemsContainer" class="stealth-items-grid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer Status -->
+      <div class="stealth-modal-footer">
+        <div id="stealthFooterStats" class="stealth-footer-stats">
+          載入型號中...
+        </div>
+        <button class="btn-stealth-footer-close" onclick="closeStealthModal()">
+          關閉視窗
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let isRunning = false;
     let itemsData = [];
@@ -582,9 +1081,14 @@
     let currentStoreTab = 'amazon_jp';
     let isEditingSettings = false;
     let filterInStockOnly = false; // 是否開啟「僅顯示已突襲/有現貨」模式
+    let showAllStealthCards = false; // 是否在非 Amazon 賣場展開全部尚未上架的卡片
 
     function toggleFilterMode() {
-      filterInStockOnly = !filterInStockOnly;
+      if (currentStoreTab !== 'amazon_jp') {
+        showAllStealthCards = !showAllStealthCards;
+      } else {
+        filterInStockOnly = !filterInStockOnly;
+      }
       renderFilterButton();
       renderItems();
     }
@@ -595,14 +1099,24 @@
       if (!btn || !text) return;
       
       const curItems = itemsData.filter(it => (it.store || 'amazon_jp') === currentStoreTab);
-      const stockCount = curItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家'))).length;
+      const stockCount = curItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'))).length;
       
-      if (filterInStockOnly) {
-        btn.className = 'btn-filter-toggle active';
-        text.innerHTML = `🟢 僅顯示有貨 (${stockCount}) - 點擊展開全部`;
+      if (currentStoreTab !== 'amazon_jp') {
+        if (showAllStealthCards) {
+          btn.className = 'btn-filter-toggle active';
+          text.innerHTML = `<i class="fa-solid fa-layer-group"></i> 展開全部中 (${curItems.length}) - 點此收合`;
+        } else {
+          btn.className = 'btn-filter-toggle';
+          text.innerHTML = `<i class="fa-solid fa-eye-slash"></i> 防突襲已隱藏 (${stockCount} 有貨 / ${curItems.length} 待命)`;
+        }
       } else {
-        btn.className = 'btn-filter-toggle';
-        text.innerHTML = `<i class="fa-solid fa-filter"></i> 僅顯示有貨 (${stockCount}/${curItems.length})`;
+        if (filterInStockOnly) {
+          btn.className = 'btn-filter-toggle active';
+          text.innerHTML = `🟢 僅顯示有貨 (${stockCount}) - 點擊展開全部`;
+        } else {
+          btn.className = 'btn-filter-toggle';
+          text.innerHTML = `<i class="fa-solid fa-filter"></i> 僅顯示有貨 (${stockCount}/${curItems.length})`;
+        }
       }
     }
 
@@ -1061,18 +1575,45 @@
       return counts;
     }
 
+    function getItemUrl(it, storeKey) {
+      if (it.url) return it.url;
+      const asin = it.asin || '';
+      const isModelCode = /^(?:BX|UX|CX)-\d{2}[A-Z]?$/i.test(asin);
+
+      if (storeKey === 'amazon_jp' || storeKey === 'amazon_stealth') {
+        return `https://www.amazon.co.jp/dp/${asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
+      } else if (storeKey === 'pchome') {
+        return isModelCode ? `https://24h.pchome.com.tw/search/?q=${asin}` : `https://24h.pchome.com.tw/prod/${asin}`;
+      } else if (storeKey === 'mm_shop') {
+        return isModelCode ? `https://mmtoyshop.com/search?q=${asin}` : `https://mmtoyshop.com/item/${asin}`;
+      } else if (storeKey === 'funbox_tw') {
+        return isModelCode ? `https://shop.funbox.com.tw/search?q=${asin}` : `https://shop.funbox.com.tw/products/${asin}`;
+      } else if (storeKey === 'twj_toys') {
+        return isModelCode ? `https://www.twj.tw/search?q=${asin}` : `https://www.twj.tw/products/${asin}`;
+      } else if (storeKey === 'eslite') {
+        return isModelCode ? `https://www.eslite.com/search?keyword=BEYBLADE+${asin}` : `https://www.eslite.com/product/${asin}`;
+      } else if (storeKey === 'shopee') {
+        if (asin.includes('_')) return `https://shopee.tw/product/${asin.replace('_', '/')}`;
+        if (isModelCode) return `https://shopee.tw/search?keyword=${asin}&shop=37137599`;
+        return asin.startsWith('http') ? asin : `https://shopee.tw/${asin}`;
+      }
+      return asin;
+    }
+
     function renderItems() {
       const container = document.getElementById('itemsContainer');
       container.innerHTML = '';
       renderFilterButton();
 
+      const isNonAmazon = (currentStoreTab !== 'amazon_jp');
       const storeItems = itemsData
         .map((it, idx) => ({ ...it, originalIndex: idx }))
         .filter(it => (it.store || 'amazon_jp') === currentStoreTab);
 
-      let filtered = storeItems;
-      if (filterInStockOnly) {
-        filtered = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家')));
+      // Update stealth button count
+      const stealthBtnCountEl = document.getElementById('stealthCatalogBtnCount');
+      if (stealthBtnCountEl) {
+        stealthBtnCountEl.innerText = storeItems.length || 98;
       }
 
       if (storeItems.length === 0) {
@@ -1089,46 +1630,61 @@
         return;
       }
 
-      if (filterInStockOnly && filtered.length === 0) {
-        const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon" style="color: #60a5fa;"><i class="fa-solid fa-radar"></i></div>
-            <div class="empty-text">
-              目前 ${curCfg.flag} <b>${curCfg.name}</b> 共有 <b>${storeItems.length}</b> 個型號在背景待命中，尚無現貨釋出。<br>
-              <span style="font-size: 12px; color: #64748b;">一旦平台突襲上架或有貨，商品卡片將自動立即顯現並觸發通知！</span>
+      // Check in-stock items
+      const inStockItems = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架')));
+      const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
+
+      // Non-Amazon stores: HIDE out-of-stock stealth items by default!
+      if (isNonAmazon && !showAllStealthCards) {
+        if (inStockItems.length === 0) {
+          container.innerHTML = `
+            <div class="stealth-standby-banner">
+              <div class="standby-radar"><i class="fa-solid fa-radar fa-spin" style="--fa-animation-duration: 6s;"></i></div>
+              <div class="standby-title">🛡️ 防突襲守候中：全系列 ${storeItems.length} 個陀螺型號全天候極速監控中</div>
+              <div class="standby-desc">
+                目前 <b>${curCfg.name}</b> 尚未有突襲型號上架。<br>
+                防突襲清單已自動收合至專屬型號庫以保持畫面整潔；一旦官方上架或釋出庫存，商品卡片將<b>自動立即在此顯現並推播通知</b>！
+              </div>
+              <button class="btn-open-stealth-modal" onclick="openStealthModal('${currentStoreTab}')">
+                <i class="fa-solid fa-shield-halved"></i> 點此開啟【防突襲型號總庫】(BX / UX / CX 照數字降序排序)
+              </button>
             </div>
-            <button class="btn-filter-toggle active" style="margin: 0 auto;" onclick="toggleFilterMode()">
-              <i class="fa-solid fa-list-ul"></i> 展開檢視全部 ${storeItems.length} 個待命商品
+          `;
+          return;
+        } else {
+          // Has restocked items!
+          const activeBanner = document.createElement('div');
+          activeBanner.className = 'stealth-active-banner';
+          activeBanner.innerHTML = `
+            <div>
+              <i class="fa-solid fa-circle-check" style="color: #34d399; font-size: 15px;"></i>
+              <b>發現 ${inStockItems.length} 項已突襲上架/現貨商品！</b> 其餘 ${storeItems.length - inStockItems.length} 個待命型號背景防突襲監控中
+            </div>
+            <button class="btn-open-stealth-modal-sm" onclick="openStealthModal('${currentStoreTab}')">
+              <i class="fa-solid fa-layer-group"></i> 檢視防突襲型號庫 (${storeItems.length})
             </button>
-          </div>
-        `;
-        return;
+          `;
+          container.appendChild(activeBanner);
+        }
       }
 
-      filtered.forEach(it => {
+      let displayList = (isNonAmazon && !showAllStealthCards) ? inStockItems : storeItems;
+      if (filterInStockOnly) {
+        displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家')));
+      }
+
+      displayList.forEach(it => {
         const idx = it.originalIndex;
         const storeKey = it.store || 'amazon_jp';
         const cfg = storesConfig[storeKey] || storesConfig['amazon_jp'] || {};
         
         const card = document.createElement('div');
-        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家'));
+        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'));
         const isEnabled = it.enabled !== false;
         const statusColor = (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家'))) ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8');
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
-        let buyUrl = it.url;
-        if (!buyUrl) {
-          if (storeKey === 'amazon_jp') buyUrl = `https://www.amazon.co.jp/dp/${it.asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
-          else if (storeKey === 'pchome') buyUrl = `https://24h.pchome.com.tw/prod/${it.asin}`;
-          else if (storeKey === 'mm_shop') buyUrl = `https://mmtoyshop.com/item/${it.asin}`;
-          else if (storeKey === 'funbox_tw') buyUrl = `https://shop.funbox.com.tw/products/${it.asin}`;
-          else if (storeKey === 'twj_toys') buyUrl = `https://www.twj.tw/products/${it.asin}`;
-          else if (storeKey === 'eslite') buyUrl = `https://www.eslite.com/product/${it.asin}`;
-          else if (storeKey === 'shopee') buyUrl = it.asin.startsWith('http') ? it.asin : `https://shopee.tw/product/${it.asin.replace('_', '/')}`;
-          else buyUrl = it.asin;
-        }
-
+        const buyUrl = getItemUrl(it, storeKey);
         const btnText = cfg.btn_text || '👉 直達商品頁';
         const btnBg = cfg.color || '#2563eb';
 
@@ -1179,6 +1735,270 @@
         `;
         container.appendChild(card);
       });
+    }
+
+    // ==================== 防突襲型號總庫 (Stealth Catalog Modal) 核心管理 ====================
+    let currentStealthStore = 'shopee';
+    let stealthActiveSeries = 'ALL';
+
+    function openStealthModal(storeKey) {
+      if (storeKey) {
+        currentStealthStore = storeKey;
+      } else if (currentStoreTab && currentStoreTab !== 'amazon_jp') {
+        currentStealthStore = currentStoreTab;
+      } else {
+        currentStealthStore = 'shopee';
+      }
+      populateStealthStoreSelect();
+      renderStealthModalItems();
+      document.getElementById('stealthModal').classList.add('active');
+    }
+
+    function closeStealthModal() {
+      document.getElementById('stealthModal').classList.remove('active');
+    }
+
+    function populateStealthStoreSelect() {
+      const sel = document.getElementById('stealthStoreSelect');
+      if (!sel) return;
+      sel.innerHTML = '';
+      Object.keys(storesConfig).forEach(k => {
+        if (k === 'amazon_jp') return; // 防突襲清單庫專屬非 Amazon 賣場
+        const cfg = storesConfig[k];
+        const opt = document.createElement('option');
+        opt.value = k;
+        opt.innerText = `${cfg.flag} ${cfg.name}`;
+        if (k === currentStealthStore) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      updateStealthStoreBadge();
+    }
+
+    function onStealthStoreSelectChange() {
+      const sel = document.getElementById('stealthStoreSelect');
+      if (sel) {
+        currentStealthStore = sel.value;
+        updateStealthStoreBadge();
+        renderStealthModalItems();
+      }
+    }
+
+    function updateStealthStoreBadge() {
+      const badge = document.getElementById('stealthModalStoreBadge');
+      const cfg = storesConfig[currentStealthStore] || { name: '線上賣場', flag: '🏬' };
+      if (badge) {
+        badge.innerText = `${cfg.flag} ${cfg.name}`;
+      }
+    }
+
+    function switchStealthSeriesTab(seriesKey) {
+      stealthActiveSeries = seriesKey;
+      ['ALL', 'BX', 'UX', 'CX'].forEach(s => {
+        const btn = document.getElementById(`stealthTab${s}`);
+        if (btn) {
+          if (s === seriesKey) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+      renderStealthModalItems();
+    }
+
+    function getModelNum(asin) {
+      const m = String(asin || '').match(/\d+/);
+      return m ? parseInt(m[0], 10) : 0;
+    }
+
+    function renderStealthModalItems() {
+      const container = document.getElementById('stealthItemsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // 取得目標賣場的全部商品 (保留 originalIndex 以便操作)
+      const storeItems = itemsData
+        .map((it, idx) => ({ ...it, originalIndex: idx }))
+        .filter(it => (it.store || 'amazon_jp') === currentStealthStore);
+
+      // 更新分頁徽章數字
+      const countAll = storeItems.length;
+      const countBX = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith('BX')).length;
+      const countUX = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith('UX')).length;
+      const countCX = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith('CX')).length;
+
+      if (document.getElementById('badgeCountALL')) document.getElementById('badgeCountALL').innerText = countAll;
+      if (document.getElementById('badgeCountBX')) document.getElementById('badgeCountBX').innerText = countBX;
+      if (document.getElementById('badgeCountUX')) document.getElementById('badgeCountUX').innerText = countUX;
+      if (document.getElementById('badgeCountCX')) document.getElementById('badgeCountCX').innerText = countCX;
+
+      // 依系列過濾
+      let filtered = storeItems;
+      if (stealthActiveSeries !== 'ALL') {
+        filtered = storeItems.filter(it => (it.asin || '').toUpperCase().startsWith(stealthActiveSeries));
+      }
+
+      // 依搜尋關鍵字即時過濾
+      const searchInput = document.getElementById('stealthSearchInput');
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      if (query) {
+        filtered = filtered.filter(it => {
+          const code = (it.asin || '').toLowerCase();
+          const name = (it.name || '').toLowerCase();
+          const note = (it.note || '').toLowerCase();
+          return code.includes(query) || name.includes(query) || note.includes(query);
+        });
+      }
+
+      // 嚴格依數字排序：數字越大越上面 (越新越上面)
+      filtered.sort((a, b) => {
+        const sA = (a.asin || '').substring(0, 2).toUpperCase();
+        const sB = (b.asin || '').substring(0, 2).toUpperCase();
+        if (stealthActiveSeries === 'ALL' && sA !== sB) {
+          const order = { 'BX': 1, 'UX': 2, 'CX': 3 };
+          return (order[sA] || 99) - (order[sB] || 99);
+        }
+        return getModelNum(b.asin) - getModelNum(a.asin);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94a3b8;">
+            <i class="fa-solid fa-magnifying-glass" style="font-size: 28px; margin-bottom: 10px; opacity: 0.5;"></i>
+            <div>查無符合條件的陀螺型號</div>
+          </div>
+        `;
+      } else {
+        filtered.forEach(it => {
+          const card = document.createElement('div');
+          const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'));
+          const isEnabled = it.enabled !== false;
+          const series = (it.asin || '').substring(0, 2).toUpperCase();
+          const badgeClass = series === 'BX' ? 'badge-bx' : (series === 'UX' ? 'badge-ux' : 'badge-cx');
+          const buyUrl = getItemUrl(it, currentStealthStore);
+
+          card.className = `stealth-item-row ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
+          card.innerHTML = `
+            <div class="stealth-item-header">
+              <span class="stealth-model-badge ${badgeClass}">${escapeHtml(it.asin || '-')}</span>
+              <span style="font-size: 11px; color: #64748b;">#${getModelNum(it.asin)}</span>
+            </div>
+            <div class="stealth-item-title">${escapeHtml(it.name)}</div>
+            <div class="stealth-item-status-row">
+              ${isInStock ? `
+                <span class="badge-stock"><i class="fa-solid fa-circle-check"></i> ${escapeHtml(it.last_status || '現貨有貨')} (${escapeHtml(it.last_price || '-')})</span>
+              ` : `
+                <span class="badge-waiting"><i class="fa-regular fa-clock"></i> 待命中 (尚未上架)</span>
+              `}
+              <span style="color: #64748b;">${escapeHtml(it.last_time ? it.last_time.split(' ')[1] || it.last_time : '-')}</span>
+            </div>
+            <div class="stealth-item-actions">
+              <a href="${buyUrl}" target="_blank" class="btn-stealth-link">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> 前往搜尋
+              </a>
+              <button class="btn-stealth-toggle ${isEnabled ? 'enabled' : 'disabled'}" onclick="toggleModalItem(${it.originalIndex})">
+                ${isEnabled ? '☑ 監控中' : '☐ 略過'}
+              </button>
+              <button style="background: transparent; border: none; color: #f87171; cursor: pointer; padding: 4px;" onclick="deleteModalItem(${it.originalIndex})" title="刪除此型號">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // 更新底部統計資訊
+      const activeCount = storeItems.filter(it => it.enabled !== false).length;
+      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'))).length;
+      const cfg = storesConfig[currentStealthStore] || { name: '此賣場' };
+      const footerStatsEl = document.getElementById('stealthFooterStats');
+      if (footerStatsEl) {
+        footerStatsEl.innerHTML = `<b>${cfg.name}</b>：總計 <b>${storeItems.length}</b> 個型號 • <span style="color: #38bdf8;">${activeCount} 個啟用中</span> • <span style="color: #34d399;">${inStockCount} 個有現貨</span> (當前分頁符合 ${filtered.length} 個)`;
+      }
+    }
+
+    async function toggleModalItem(originalIndex) {
+      try {
+        const res = await fetch(`/api/toggle_item?index=${originalIndex}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          if (itemsData[originalIndex]) {
+            itemsData[originalIndex].enabled = data.enabled;
+          }
+          renderStealthModalItems();
+          renderItems();
+          renderTabs(getCurrentCounts());
+        } else {
+          alert("切換失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("操作失敗: " + e);
+      }
+    }
+
+    async function deleteModalItem(originalIndex) {
+      const item = itemsData[originalIndex];
+      if (!item) return;
+      if (!confirm(`確定要從防突襲清單中刪除「${item.name}」嗎？`)) return;
+
+      try {
+        const res = await fetch(`/api/delete_item?index=${originalIndex}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          fetchStatus();
+          setTimeout(renderStealthModalItems, 500);
+        } else {
+          alert("刪除失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("刪除失敗: " + e);
+      }
+    }
+
+    async function batchToggleStealthModal(enabled) {
+      const series = stealthActiveSeries === 'ALL' ? null : stealthActiveSeries;
+      try {
+        const res = await fetch('/api/batch_toggle_store_items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            store: currentStealthStore,
+            enabled: enabled,
+            series: series
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          itemsData.forEach(it => {
+            if ((it.store || 'amazon_jp') === currentStealthStore) {
+              if (!series || (it.asin || '').toUpperCase().startsWith(series)) {
+                it.enabled = enabled;
+              }
+            }
+          });
+          renderStealthModalItems();
+          renderItems();
+          renderTabs(getCurrentCounts());
+        } else {
+          alert("批次切換失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("操作請求失敗: " + e);
+      }
+    }
+
+    async function scanCurrentStealthStore() {
+      const cfg = storesConfig[currentStealthStore] || { short_name: '此賣場' };
+      try {
+        const res = await fetch(`/api/check_store_now?store=${currentStealthStore}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`⚡ 已發送立即檢查指令給 [${cfg.short_name}]！系統將在背景極速掃描。`);
+          fetchStatus();
+        } else {
+          alert("檢查失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("請求失敗: " + e);
+      }
     }
 
     function updateLogs(logs) {

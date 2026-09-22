@@ -1180,10 +1180,64 @@ class PChomeChecker:
         return text.upper()
 
     @classmethod
+    def check_pchome_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """PChome 關鍵字突襲搜尋監控"""
+        search_url = f"https://ecshweb.pchome.com.tw/search/v3.3/all/results?q={keyword}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "application/json"
+        }
+        try:
+            rs = session.get(search_url, headers=headers, timeout=5)
+            if rs.status_code == 200:
+                s_data = rs.json()
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for p in s_data.get("prods", []):
+                    name = p.get("name", "")
+                    name_clean = name.lower().replace("-", "")
+                    if clean_kw in name_clean and any(k in name.lower() for k in ["beyblade", "戰鬥陀螺", "陀螺", "takara"]):
+                        pid = p.get("Id", "")
+                        price_val = p.get("price", 0)
+                        price_str = f"NT$ {price_val:,}" if price_val else "未標示"
+                        is_funbox = any(k in name.lower() for k in ["funbox", "麗嬰"])
+                        return {
+                            "ok": True,
+                            "store": "pchome",
+                            "asin": keyword,
+                            "title": name,
+                            "price": price_str,
+                            "in_stock": True,
+                            "is_official": True,
+                            "seller": "funbox 麗嬰國際 (PChome)" if is_funbox else "PChome 24h 購物",
+                            "url": f"https://24h.pchome.com.tw/prod/{pid}",
+                            "status_text": "🟢 PChome 突襲上架現貨！"
+                        }
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "pchome",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "PChome 24h 購物",
+            "url": f"https://24h.pchome.com.tw/search/?q={keyword}",
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
+
+    @classmethod
     def check_prod(cls, prod_id_or_url: str) -> Dict[str, Any]:
         prod_id = cls.extract_prod_id(prod_id_or_url)
         if not prod_id:
             return {"ok": False, "msg": "無效 PChome 商品編號"}
+
+        # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 突襲搜尋模式
+        if "-" in prod_id and len(prod_id) <= 8 and not prod_id.startswith("DE"):
+            return cls.check_pchome_stealth(prod_id)
 
         product_url = f"https://24h.pchome.com.tw/prod/{prod_id}"
         session = get_shared_session()
@@ -1260,10 +1314,49 @@ class MMShopChecker:
         return text.replace("https://", "").replace("http://", "").strip("/")
 
     @classmethod
+    def check_mm_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """M.M小舖關鍵字突襲搜尋監控"""
+        search_url = f"https://mmtoyshop.com/search?q={keyword}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        try:
+            r = session.get(search_url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                found_items = re.findall(r'/item/([a-zA-Z0-9_-]+)', r.text)
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for it_id in set(found_items):
+                    res = cls.check_item(it_id)
+                    if res.get("ok") and clean_kw in res.get("title", "").lower().replace("-", ""):
+                        res["asin"] = keyword
+                        return res
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "mm_shop",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "M.M小舖",
+            "url": f"https://mmtoyshop.com/search?q={keyword}",
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
+
+    @classmethod
     def check_item(cls, item_id_or_url: str) -> Dict[str, Any]:
         item_id = cls.extract_item_id(item_id_or_url)
         if not item_id:
             return {"ok": False, "msg": "無效 M.M小舖 商品 ID"}
+
+        # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 突襲搜尋模式
+        if "-" in item_id and len(item_id) <= 8 and not item_id.startswith("shopee"):
+            return cls.check_mm_stealth(item_id)
 
         url = f"https://mmtoyshop.com/item/{item_id}"
         session = get_shared_session()
@@ -1383,15 +1476,55 @@ class CyberbizChecker:
         }
 
     @classmethod
+    def check_funbox_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """麗嬰國際官網關鍵字突襲搜尋監控"""
+        search_url = f"https://shop.funbox.com.tw/search?q={keyword}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        try:
+            r = session.get(search_url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for s in set(found_slugs):
+                    s_clean = s.lower().replace("-", "")
+                    if clean_kw in s_clean and any(k in s.lower() for k in ["beyblade", "bx", "ux", "cx"]):
+                        res = cls.check_prod(s, store_key="funbox_tw")
+                        if res.get("ok") and res.get("price") != "未標示":
+                            res["asin"] = keyword
+                            return res
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "funbox_tw",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "麗嬰國際官網 (Funbox)",
+            "url": f"https://shop.funbox.com.tw/search?q={keyword}",
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
+
+    @classmethod
     def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw") -> Dict[str, Any]:
         raw_text = str(slug_or_url).strip()
         slug = cls.extract_slug(raw_text)
         if not slug:
             return {"ok": False, "msg": "無效商品編號"}
 
-        # 若童無忌識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 調用突襲搜尋模式
-        if store_key == "twj_toys" and not slug.startswith("202") and not slug.startswith("http") and ("-" in slug and len(slug) <= 8):
-            return cls.check_twj_stealth(slug)
+        # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 調用突襲搜尋模式
+        if not slug.startswith("http") and ("-" in slug and len(slug) <= 8):
+            if store_key == "twj_toys" and not slug.startswith("202"):
+                return cls.check_twj_stealth(slug)
+            elif store_key == "funbox_tw" and not slug.startswith("sm"):
+                return cls.check_funbox_stealth(slug)
 
         if store_key == "twj_toys":
             base_url = "https://www.twj.tw/products"
@@ -1826,26 +1959,43 @@ def check_store_item(
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:
     """取得該商品的官方直接購買連結 (Amazon 帶有 m=AN1VRQENFRJN5 官方直達)"""
+    if item.get("url"):
+        return item["url"]
+
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
     cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
 
+    is_model_code = bool(re.search(r"^(?:BX|UX|CX)-\d{2}[A-Z]?$", asin, re.I))
+
     if store in ("amazon_jp", "amazon_stealth"):
         return get_product_url(asin, official_only=True)
     elif store == "pchome":
+        if is_model_code:
+            return f"https://24h.pchome.com.tw/search/?q={asin}"
         return f"https://24h.pchome.com.tw/prod/{asin}"
     elif store == "mm_shop":
+        if is_model_code:
+            return f"https://mmtoyshop.com/search?q={asin}"
         return f"https://mmtoyshop.com/item/{asin}"
     elif store == "funbox_tw":
+        if is_model_code:
+            return f"https://shop.funbox.com.tw/search?q={asin}"
         return f"https://shop.funbox.com.tw/products/{asin}"
     elif store == "twj_toys":
+        if is_model_code:
+            return f"https://www.twj.tw/search?q={asin}"
         return f"https://www.twj.tw/products/{asin}"
     elif store == "eslite":
+        if is_model_code:
+            return f"https://www.eslite.com/search?keyword=BEYBLADE+{asin}"
         return f"https://www.eslite.com/product/{asin}"
     elif store == "shopee":
         if "_" in asin:
             sp, it = asin.split("_", 1)
             return f"https://shopee.tw/product/{sp}/{it}"
+        if is_model_code:
+            return f"https://shopee.tw/search?keyword={asin}&shop=37137599"
         return asin if asin.startswith("http") else f"https://shopee.tw/{asin}"
     return asin
 

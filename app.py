@@ -914,6 +914,32 @@ async def api_toggle_item(index: int = Query(...)):
     return {"ok": False, "msg": "無效索引"}
 
 
+@app.post("/api/batch_toggle_store_items")
+async def api_batch_toggle_store_items(req: Request):
+    """一鍵啟用或略過指定賣場的所有商品/防突襲清單"""
+    data = await req.json()
+    store = data.get("store")
+    enabled = bool(data.get("enabled", True))
+    series = data.get("series")  # 可選: "BX", "UX", "CX" 或 None
+    
+    items = state.config.get("items", [])
+    count = 0
+    for it in items:
+        if it.get("store") == store:
+            if series:
+                asin = str(it.get("asin", "")).upper()
+                if not asin.startswith(series):
+                    continue
+            it["enabled"] = enabled
+            count += 1
+            
+    state.save_config()
+    s_name = STORE_CONFIG.get(store, {}).get("short_name", store)
+    series_tag = f" {series} 系列" if series else ""
+    state.add_log(f"已一鍵{'開啟' if enabled else '停用'} [{s_name}]{series_tag} 共 {count} 項商品監控", "INFO")
+    return {"ok": True, "count": count, "enabled": enabled}
+
+
 @app.post("/api/check_store_now")
 async def api_check_store_now(background_tasks: BackgroundTasks, store: str = Query(...)):
     """單獨立即檢查特定賣場的所有商品 (例如只查 PChome 或只查 Amazon)"""
