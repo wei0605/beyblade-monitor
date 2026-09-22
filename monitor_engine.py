@@ -379,16 +379,34 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     # Buybox 購買容器
     buybox = soup.select_one("#buybox, #desktop_buybox, #desktop_qualifiedBuyBox, #tabular-buybox, #qualifiedBuybox, div[id*='buyBox'], div[id*='buybox']")
 
-    # 1. 嚴格檢查購買按鈕 (限定於 Buybox 內，絕不跨全網頁掃描文字，徹底防止贊助廣告腳本詞彙干擾)
+    # 嚴格商品狀況判定：只抓全新品 (Brand New)，徹底排除二手、中古、非全新品、收藏品、再生品
+    AMZ_USED_KEYWORDS = (
+        "中古", "非全新品", "二手", "收藏品", "コレクター", "再生品",
+        "used", "collectible", "renewed", "refurbished", "pre-owned"
+    )
+    is_buybox_used = False
+    if buybox:
+        bb_id = (buybox.get("id") or "").lower()
+        bb_cls = " ".join(buybox.get("class") or []).lower()
+        if any(k in bb_id or k in bb_cls for k in ("used", "renewed", "collect")):
+            is_buybox_used = True
+        else:
+            for el in buybox.select("#condition, #condition_value, #olp-upd-new-used, [id*='condition'], [id*='Condition'], [data-feature-name*='condition'], .tabular-buybox-row, #merchant-info, #tabular-buybox"):
+                c_txt = el.get_text(" ", strip=True).lower()
+                if any(k in c_txt for k in AMZ_USED_KEYWORDS):
+                    is_buybox_used = True
+                    break
+
+    # 1. 嚴格檢查購買按鈕 (限定於 Buybox 內，若 Buybox 為二手/非全新品則不認定為有效購買按鈕)
     has_cart = False
     has_buy_now = False
     has_preorder = False
 
-    if buybox:
+    if buybox and not is_buybox_used:
         has_cart = bool(buybox.select_one("#add-to-cart-button, [name='submit.add-to-cart']"))
         has_buy_now = bool(buybox.select_one("#buy-now-button, [name='submit.buy-now']"))
         has_preorder = bool(buybox.select_one("#preorder-button, [name='submit.preorder'], .a-button-preorder, input[value*='予約']"))
-    else:
+    elif not buybox and not is_buybox_used:
         has_cart = bool(soup.select_one("#add-to-cart-button, [name='submit.add-to-cart']"))
         has_buy_now = bool(soup.select_one("#buy-now-button, [name='submit.buy-now']"))
         has_preorder = bool(soup.select_one("#preorder-button, [name='submit.preorder']"))
@@ -406,7 +424,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     # 2. 精準解析價格 (優先 Buybox -> Apex -> CorePrice，嚴格排除特價劃線參考價與推薦卡片)
     price = ""
     buybox_shipping = 0
-    if buybox:
+    if buybox and not is_buybox_used:
         for p_elem in buybox.select(".priceToPay .a-offscreen, #price_inside_buybox, #newBuyBoxPrice, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
             t = p_elem.get_text(strip=True)
             m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
@@ -442,7 +460,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
                         buybox_shipping = int(m_shp.group(1).replace(",", ""))
                         break
 
-    if not price:
+    if not price and not is_buybox_used:
         apex = soup.select_one("#corePriceDisplay_desktop_feature_div, #apex_desktop, #corePrice_feature_div")
         if apex:
             for p_elem in apex.select(".priceToPay .a-offscreen, .apexPriceToPay .a-offscreen, .a-price:not(.a-text-price):not(.basisPrice) .a-offscreen"):
@@ -462,7 +480,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
                         price = f"￥{whole.get_text(strip=True)}"
 
     # 備援快速正則 (僅針對中央價格區塊)
-    if not price:
+    if not price and not is_buybox_used:
         m_core = re.search(r'id="corePriceDisplay_desktop_feature_div"[^>]*>.*?(?:[￥¥]\s*([\d,]+))', html, re.DOTALL)
         if m_core:
             price = f"￥{m_core.group(1)}"
@@ -482,7 +500,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
 
     # 3. 庫存判定 (無有效價格或無購買按鈕，絕不可能判定為有貨，杜絕「價格載入中」偽狀態)
     has_buy_button = (has_cart or has_buy_now or has_preorder)
-    in_stock = has_buy_button and bool(price) and price not in ("-", "缺貨中") and not is_sold_out and not no_featured_offer
+    in_stock = has_buy_button and bool(price) and price not in ("-", "缺貨中") and not is_sold_out and not no_featured_offer and not is_buybox_used
 
     # 4. 精準賣家判定 (嚴格規定：賣家是 Amazon 且 運送也是 Amazon，才算官方自營！)
     raw_seller = ""
@@ -639,9 +657,9 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     else:
         official_price = "官方缺貨"
 
-    # 第三方最低價提取 (從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取)
+    # 第三方最低價提取 (從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取，嚴格只抓全新品)
     tp_ints = []
-    if in_stock and not is_official and price and price != "-":
+    if in_stock and not is_official and price and price != "-" and not is_buybox_used:
         m = re.search(r"[\d,]+", price)
         if m:
             val = int(m.group(0).replace(",", ""))
@@ -649,13 +667,18 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
                 tp_ints.append(val)
 
     for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, div[id*='aod-ingress'], div[id*='unqualified-buybox'], div[id*='buying-options']"):
-        for p_el in box.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value"):
-            t = p_el.get_text(strip=True)
-            m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
-            if m:
-                v = int(m.group(1).replace(",", ""))
-                if v >= 500:
-                    tp_ints.append(v)
+        rows = box.select(".olp-touch-link, li, tr, .a-section, .a-row, .a-box") or [box]
+        for row in rows:
+            row_txt = row.get_text(" ", strip=True).lower()
+            if any(k in row_txt for k in AMZ_USED_KEYWORDS):
+                continue
+            for p_el in row.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value"):
+                t = p_el.get_text(strip=True)
+                m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
+                if m:
+                    v = int(m.group(1).replace(",", ""))
+                    if v >= 500:
+                        tp_ints.append(v)
 
     # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額 (官方售價絕不可變為第三方價格)
     if is_official and in_stock and price:
@@ -1080,6 +1103,20 @@ class AmazonJPChecker:
                         aod_soup = BeautifulSoup(r_aod.text, "html.parser")
                         aod_tp_ints = []
                         for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
+                            # 1. 嚴格狀況檢查：只抓全新品 (Brand New)，徹底排除二手/中古/非全新品/收藏品/再生品
+                            cond_el = of.select_one("#aod-offer-heading, [id*='heading'], [id*='condition'], [id*='Condition'], .aod-offer-heading")
+                            cond_text = cond_el.get_text(" ", strip=True).lower() if cond_el else ""
+                            
+                            is_used = any(b in cond_text for b in [
+                                "中古", "非全新品", "二手", "收藏品", "コレクター", "再生品",
+                                "used", "collectible", "renewed", "refurbished", "pre-owned"
+                            ])
+                            is_explicit_new = any(w in cond_text for w in ["新品", "全新", "new"])
+                            
+                            # 若包含二手/收藏品關鍵字，或者有標示狀況但不是全新品，一律剔除！
+                            if is_used or (cond_text and not is_explicit_new):
+                                continue
+
                             s_el = of.select_one("#aod-offer-soldBy, [id*='soldBy']")
                             f_el = of.select_one("#aod-offer-shipsFrom, [id*='shipsFrom']")
 
@@ -1112,6 +1149,9 @@ class AmazonJPChecker:
                                         found_p = v
                                         break
 
+                            if not found_p:
+                                continue
+
                             # 提取運費 (含自出貨 FBM 個人賣家、未達免運門檻等運費，嚴格加總)
                             shipping_fee = 0
                             deliv_p_el = of.select_one("[data-csa-c-delivery-price]")
@@ -1130,34 +1170,22 @@ class AmazonJPChecker:
                                     if m_shp:
                                         shipping_fee = int(m_shp.group(1).replace(",", ""))
 
-                            if found_p:
-                                total_offer_price = found_p + shipping_fee
-                                if is_offer_official:
-                                    res["is_official"] = True
-                                    res["official_price"] = f"￥{found_p:,}"
-                                    res["seller"] = "Amazon.co.jp (官方自營)"
-                                    res["in_stock"] = True
-                                else:
-                                    # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA，嚴格加上運費
-                                    aod_tp_ints.append(total_offer_price)
+                            total_offer_price = found_p + shipping_fee
+                            if is_offer_official:
+                                res["is_official"] = True
+                                res["official_price"] = f"￥{found_p:,}"
+                                res["seller"] = "Amazon.co.jp (官方自營)"
+                                res["in_stock"] = True
+                            else:
+                                # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA，嚴格加上運費
+                                aod_tp_ints.append(total_offer_price)
 
-                        all_cands = []
-                        cur_tp = res.get("third_party_price", "-")
-                        if cur_tp and cur_tp != "-":
-                            m = re.search(r"[\d,]+", cur_tp)
-                            if m:
-                                all_cands.append(int(m.group(0).replace(",", "")))
-                        all_cands.extend(aod_tp_ints)
-
-                        if res.get("is_official") and res.get("official_price") and res["official_price"] != "官方缺貨":
-                            m_off = re.search(r"[\d,]+", res["official_price"])
-                            if m_off:
-                                off_val = int(m_off.group(0).replace(",", ""))
-                                all_cands = [p for p in all_cands if p != off_val]
-
-                        if all_cands:
-                            res["third_party_price"] = f"￥{min(all_cands):,}"
-                        elif res.get("is_official"):
+                        # AOD 為經過精確全新品狀況檢驗的清單：
+                        # 1. 若 aod_tp_ints 有值，則取最低全新品總價 (售價+運費)
+                        # 2. 若 AOD 有 offers 但 aod_tp_ints 為空，代表所有賣家均為二手/收藏品，全新品第三方報價為 "-"
+                        if aod_tp_ints:
+                            res["third_party_price"] = f"￥{min(aod_tp_ints):,}"
+                        elif aod_soup.select("#aod-pinned-offer, #aod-offer"):
                             res["third_party_price"] = "-"
             except Exception:
                 pass
