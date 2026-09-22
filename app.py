@@ -5,6 +5,7 @@
 """
 
 import concurrent.futures
+import ctypes
 import gc
 import json
 import os
@@ -14,6 +15,28 @@ import threading
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
+
+# Render / Linux 記憶體瘦身環境變數：限制 glibc 記憶體 arena 數量為 2，杜絕記憶體碎片化
+os.environ.setdefault("MALLOC_ARENA_MAX", "2")
+
+# 限制 Python 執行緒堆疊大小為 256KB (預設 Linux glibc 為 8MB，大幅降低執行緒記憶體開銷 95%)
+try:
+    threading.stack_size(256 * 1024)
+except Exception:
+    pass
+
+# 更積極的垃圾回收機制
+gc.set_threshold(150, 10, 10)
+
+def force_release_memory():
+    """強制回收 Python 記憶體並透過 glibc malloc_trim 將未使用的堆記憶體歸還 Linux 核心 (防止 Render 512MB OOM 重啟)"""
+    gc.collect()
+    if os.name == "posix":
+        try:
+            libc = ctypes.CDLL("libc.so.6")
+            libc.malloc_trim(0)
+        except Exception:
+            pass
 
 TZ_GMT8 = timezone(timedelta(hours=8))
 
@@ -55,10 +78,13 @@ class MonitorState:
         self.stop_event = threading.Event()
         self.store_threads: Dict[str, threading.Thread] = {}
         self._save_lock = threading.Lock()
+        self._config_dirty = False
+        self._last_save_time = time.time()
         self.logs: List[Dict[str, str]] = []
-        self.max_logs = 80
+        self.max_logs = 40  # 瘦身日誌長度以節省記憶體
         self.seen_stealth_urls: set = set()
         self.stealth_thread: Any = None
+        self.watchdog_thread: Any = None
         self.config: Dict[str, Any] = self.load_config()
         self.stealth_radar_enabled: bool = bool(self.config.get("stealth_radar_enabled", True))
         self.stealth_radar_status: Dict[str, Any] = {
@@ -198,11 +224,27 @@ class MonitorState:
         """獲取 Keepa 運作模式: fallback (自動降級備援) | primary (優先使用) | disabled (停用)"""
         return self.config.get("keepa_mode", "fallback").strip()
 
-    def save_config(self):
+    def mark_config_dirty(self):
+        self._config_dirty = True
+
+    def save_config(self, force: bool = True):
+        """將設定存檔至磁碟 (支援強制存檔與防抖動機制，杜絕每次查價都高頻 json.dump 導致記憶體飆升)"""
+        now = time.time()
+        if not force and not self._config_dirty:
+            return
+        if not force and (now - self._last_save_time < 5.0):
+            self._config_dirty = True
+            return
+
         with self._save_lock:
             try:
-                with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-                    json.dump(self.config, f, ensure_ascii=False, indent=2)
+                tmp_path = CONFIG_PATH + ".tmp"
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(self.config, f, ensure_ascii=False)
+                if os.path.exists(tmp_path):
+                    os.replace(tmp_path, CONFIG_PATH)
+                self._config_dirty = False
+                self._last_save_time = now
             except Exception:
                 pass
 
@@ -300,12 +342,12 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
 
                     if not is_in_stock:
                         target_item["last_status"] = "⚪ 已售完 (無庫存)"
-                        state.save_config()
+                        state.mark_config_dirty()
                         continue
 
                     # 只有真正有庫存/現貨時，才標記現貨並推播通知
                     target_item["last_status"] = "🟢 突襲上架現貨！"
-                    state.save_config()
+                    state.mark_config_dirty()
 
                     hit_count += 1
                     if is_new_discovery:
@@ -342,6 +384,13 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
     if is_manual:
         state.add_log(summary_msg, "SUCCESS" if total_new_hits > 0 else "INFO")
 
+    if state._config_dirty:
+        state.save_config(force=True)
+    force_release_memory()
+
+
+# 全域並行賣場掃描限制：至多同時允許 2 個賣場進行爬蟲檢查，避免 7 大賣場同秒併發 28 條連線爆記憶體
+GLOBAL_STORE_SEMAPHORE = threading.Semaphore(2)
 
 def check_items_for_store(store_key: str, is_manual: bool = False):
     """專門為單一賣場執行的極速檢查函式 (一般價格監控專用，各賣場完全隔離、獨立抓價)"""
@@ -364,69 +413,75 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             state.add_log(f"提示: [{s_name}] 目前無啟用一般價格監控的商品", "INFO")
         return
 
-    amazon_delay = state.get_amazon_item_interval()
-    amazon_jitter = state.get_amazon_jitter()
-    proxy = state.get_proxy_url()
-    only_official = state.config.get("only_amazon_seller", True)
-    custom_cookie = state.get_amazon_custom_cookie() if store_key in ("amazon_jp", "amazon_stealth") else None
-    keepa_key = state.get_keepa_api_key() if store_key in ("amazon_jp", "amazon_stealth") else None
-    keepa_mode = state.get_keepa_mode() if store_key in ("amazon_jp", "amazon_stealth") else "fallback"
+    with GLOBAL_STORE_SEMAPHORE:
+        amazon_delay = state.get_amazon_item_interval()
+        amazon_jitter = state.get_amazon_jitter()
+        proxy = state.get_proxy_url()
+        only_official = state.config.get("only_amazon_seller", True)
+        custom_cookie = state.get_amazon_custom_cookie() if store_key in ("amazon_jp", "amazon_stealth") else None
+        keepa_key = state.get_keepa_api_key() if store_key in ("amazon_jp", "amazon_stealth") else None
+        keepa_mode = state.get_keepa_mode() if store_key in ("amazon_jp", "amazon_stealth") else "fallback"
 
-    extras = []
-    if store_key in ("amazon_jp", "amazon_stealth"):
-        if proxy:
-            extras.append("住宅代理")
-        if custom_cookie:
-            extras.append("自訂Cookie")
-        if keepa_key and keepa_mode != "disabled":
-            extras.append(f"Keepa {keepa_mode}")
-    tag = f" ({', '.join(extras)})" if extras else ""
-    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
-    t0 = time.time()
+        extras = []
+        if store_key in ("amazon_jp", "amazon_stealth"):
+            if proxy:
+                extras.append("住宅代理")
+            if custom_cookie:
+                extras.append("自訂Cookie")
+            if keepa_key and keepa_mode != "disabled":
+                extras.append(f"Keepa {keepa_mode}")
+        tag = f" ({', '.join(extras)})" if extras else ""
+        state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
+        t0 = time.time()
 
-    def worker(item_tuple):
-        if state.stop_event.is_set():
-            return None
-        idx, item = item_tuple
-        res = check_store_item(
-            item,
-            amazon_interval=amazon_delay,
-            amazon_jitter=amazon_jitter,
-            proxy=proxy,
-            only_amazon_seller=only_official,
-            custom_cookie=custom_cookie,
-            keepa_api_key=keepa_key,
-            keepa_mode=keepa_mode
-        )
-        return idx, item, res
-
-    max_workers = min(len(store_items), 4)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for it in store_items:
+        def worker(item_tuple):
             if state.stop_event.is_set():
-                break
-            futures.append(executor.submit(worker, it))
-            if store_key == "amazon_jp" and amazon_delay > 0:
-                stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
-                time.sleep(stagger)
+                return None
+            idx, item = item_tuple
+            res = check_store_item(
+                item,
+                amazon_interval=amazon_delay,
+                amazon_jitter=amazon_jitter,
+                proxy=proxy,
+                only_amazon_seller=only_official,
+                custom_cookie=custom_cookie,
+                keepa_api_key=keepa_key,
+                keepa_mode=keepa_mode
+            )
+            return idx, item, res
 
-        in_stock_hits = 0
-        for f in concurrent.futures.as_completed(futures):
-            if state.stop_event.is_set():
-                break
-            result = f.result()
-            if result:
-                idx, item, res = result
-                if handle_result(idx, item, res, is_manual=is_manual):
-                    in_stock_hits += 1
+        # 限制每賣場同時連線工作線程至多 2 個，減輕 CPU 與記憶體瞬間負載
+        max_workers = min(len(store_items), 2)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+            for it in store_items:
+                if state.stop_event.is_set():
+                    break
+                futures.append(executor.submit(worker, it))
+                if store_key == "amazon_jp" and amazon_delay > 0:
+                    stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
+                    time.sleep(stagger)
 
-    dt = time.time() - t0
-    if in_stock_hits > 0:
-        state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨！", "SUCCESS")
-    else:
-        state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨", "INFO")
-    gc.collect()
+            in_stock_hits = 0
+            for f in concurrent.futures.as_completed(futures):
+                if state.stop_event.is_set():
+                    break
+                result = f.result()
+                if result:
+                    idx, item, res = result
+                    if handle_result(idx, item, res, is_manual=is_manual):
+                        in_stock_hits += 1
+
+        dt = time.time() - t0
+        if in_stock_hits > 0:
+            state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨！", "SUCCESS")
+        else:
+            state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨", "INFO")
+
+        # 每賣場檢查結束後，批量將狀態寫入磁碟並強制呼叫 malloc_trim 將記憶體歸還 OS
+        if state._config_dirty:
+            state.save_config(force=True)
+        force_release_memory()
 
 
 def store_monitor_worker(store_key: str):
@@ -434,9 +489,9 @@ def store_monitor_worker(store_key: str):
     s_cfg = STORE_CONFIG.get(store_key, {})
     s_name = s_cfg.get("short_name", store_key)
 
-    # 錯開各賣場初次啟動時間 (依序錯開 0.25s)，避免一開機瞬間全部賣場同毫秒出發
+    # 錯開各賣場初次啟動時間 (依序錯開 0.5s)，避免一開機瞬間全部賣場同毫秒出發
     keys_list = list(STORE_CONFIG.keys())
-    offset = keys_list.index(store_key) * 0.25 if store_key in keys_list else 0.0
+    offset = keys_list.index(store_key) * 0.5 if store_key in keys_list else 0.0
     time.sleep(offset)
 
     while not state.stop_event.is_set():
@@ -455,9 +510,9 @@ def store_monitor_worker(store_key: str):
             logger.error(f"賣場 [{s_name}] 價格監控異常: {e}", exc_info=True)
 
         s_set = state.config.get("store_settings", {}).get(store_key, {})
-        default_ival = 1.5 if store_key in ("amazon_jp", "amazon_stealth") else 3.0
+        default_ival = 1.5 if store_key in ("amazon_jp", "amazon_stealth") else 6.0
         store_interval = float(s_set.get("item_interval_seconds", default_ival))
-        store_interval = max(0.5, store_interval)
+        store_interval = max(4.0 if store_key != "amazon_jp" else 1.0, store_interval)
 
         # 依該賣場自訂間隔休眠，切片為 0.1s 以保證隨時響應停止或開關切換
         sleep_slices = int(store_interval * 10)
@@ -503,6 +558,29 @@ def ensure_stealth_radar_worker():
         t = threading.Thread(target=stealth_radar_worker, daemon=True, name="StealthRadarWorker")
         state.stealth_thread = t
         t.start()
+
+
+def memory_watchdog():
+    """背景記憶體守護與定時存檔線程 (每 30 秒執行一次，主動釋放未使用的記憶體歸還 Linux)"""
+    while not state.stop_event.is_set():
+        time.sleep(30)
+        try:
+            if state._config_dirty:
+                state.save_config(force=True)
+            if len(state.seen_stealth_urls) > 1000:
+                state.seen_stealth_urls.clear()
+            force_release_memory()
+        except Exception:
+            pass
+
+
+def ensure_memory_watchdog():
+    """確保記憶體守護線程運行"""
+    if state.watchdog_thread is None or not state.watchdog_thread.is_alive():
+        t = threading.Thread(target=memory_watchdog, daemon=True, name="MemoryWatchdog")
+        state.watchdog_thread = t
+        t.start()
+
 
 def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     now_str = get_now_gmt8().strftime("%H:%M:%S")
@@ -564,7 +642,7 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     item["last_time"] = now_str
     item["official_price"] = official_price
     item["third_party_price"] = third_party_price
-    state.save_config()
+    state.mark_config_dirty()
 
     prev_was_in_stock = state.in_stock_state.get(item_key, False)
     state.in_stock_state[item_key] = is_alert_worthy
@@ -629,6 +707,7 @@ def start_monitor():
     state.is_monitoring = True
     state.stop_event.clear()
     state.add_log("=== 雲端 24H 一般價格監控線程已啟動 ===", "SUCCESS")
+    ensure_memory_watchdog()
     for s_key in STORE_CONFIG.keys():
         t = state.store_threads.get(s_key)
         if t is None or not t.is_alive():
@@ -646,6 +725,7 @@ def stop_monitor():
 @app.on_event("startup")
 def on_startup():
     state.add_log("🌪️ 戰鬥陀螺 7 大賣場雲端監控系統初始化...", "INFO")
+    ensure_memory_watchdog()
     start_monitor()
 
 

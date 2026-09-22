@@ -1194,8 +1194,9 @@ class PChomeChecker:
             return False, name
 
         # 2. 透過 PChome 搜尋 API 反向驗證商品索引是否帶有 "funbox 麗嬰國際" (精準且無 429 風險)
+        s_obj = session or get_shared_session()
         try:
-            r = requests.get(f"https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox 麗嬰國際 {pid}", timeout=3)
+            r = s_obj.get(f"https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox 麗嬰國際 {pid}", timeout=3)
             if r.status_code == 200:
                 for p in r.json().get("prods", []):
                     if p.get("Id") == pid:
@@ -1206,7 +1207,7 @@ class PChomeChecker:
 
         # 3. 備援：若可連線商品頁 HTML，檢驗 <title> 是否含有 "funbox 麗嬰國際"
         try:
-            r = requests.get(f"https://24h.pchome.com.tw/prod/{pid}", headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}, timeout=3)
+            r = s_obj.get(f"https://24h.pchome.com.tw/prod/{pid}", headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}, timeout=3)
             if r.status_code == 200:
                 m = re.search(r"<title>(.*?)</title>", r.text, re.IGNORECASE)
                 page_title = m.group(1).strip() if m else ""
@@ -1826,6 +1827,7 @@ class ShopeeChecker:
         if not cffi_requests:
             return {"ok": False, "msg": "缺少 curl_cffi 套件，無法解析蝦皮"}
 
+        session = None
         try:
             session = cffi_requests.Session(impersonate="chrome124")
             r = session.get(url, timeout=8)
@@ -1834,6 +1836,12 @@ class ShopeeChecker:
             html = r.text
         except Exception as e:
             return {"ok": False, "msg": f"蝦皮請求逾時: {str(e)[:25]}"}
+        finally:
+            if session:
+                try:
+                    session.close()
+                except Exception:
+                    pass
 
         m_state = re.search(r'<script[^>]*>\s*(\{"initialState":.*?)\s*</script>', html, re.DOTALL)
         if not m_state:
@@ -2223,6 +2231,12 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                         })
             except Exception:
                 pass
+            finally:
+                if s_client:
+                    try:
+                        s_client.close()
+                    except Exception:
+                        pass
 
     elif store_key == "mm_shop":
         url = "https://mmtoyshop.com/search?q=戰鬥陀螺"
