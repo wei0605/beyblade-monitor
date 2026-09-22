@@ -122,6 +122,18 @@ STORE_CONFIG = {
         "default_url": "https://shopee.tw/product/{id}",
         "id_label": "蝦皮商品網址或代號",
         "id_placeholder": "例如: https://shopee.tw/product/... 或 -i.{shopid}.{itemid}",
+    },
+    "amazon_stealth": {
+        "key": "amazon_stealth",
+        "name": "Amazon 突襲上架清單",
+        "short_name": "Amazon 突襲",
+        "icon": "fa-solid fa-bolt",
+        "flag": "⚡",
+        "color": "#eab308",
+        "btn_text": "⚡ Amazon 直達",
+        "default_url": "https://www.amazon.co.jp/dp/{id}?m=AN1VRQENFRJN5&th=1&psc=1",
+        "id_label": "ASIN 或 Amazon 網址",
+        "id_placeholder": "例如: B0HJ783F18 或 突襲待公布 ASIN",
     }
 }
 
@@ -1334,10 +1346,52 @@ class CyberbizChecker:
         return text.replace("https://", "").replace("http://", "").strip("/")
 
     @classmethod
+    def check_twj_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """童無忌玩具關鍵字突襲搜尋監控"""
+        search_url = f"https://www.twj.tw/search?q={keyword}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        try:
+            r = session.get(search_url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for s in set(found_slugs):
+                    s_clean = s.lower().replace("-", "")
+                    if clean_kw in s_clean and any(k in s.lower() for k in ["beyblade", "bx", "ux", "cx"]):
+                        res = cls.check_prod(s, store_key="twj_toys")
+                        if res.get("ok") and res.get("price") != "未標示":
+                            res["asin"] = keyword
+                            return res
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "twj_toys",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "童無忌玩具",
+            "url": f"https://www.twj.tw/search?q={keyword}",
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
+
+    @classmethod
     def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw") -> Dict[str, Any]:
-        slug = cls.extract_slug(slug_or_url)
+        raw_text = str(slug_or_url).strip()
+        slug = cls.extract_slug(raw_text)
         if not slug:
             return {"ok": False, "msg": "無效商品編號"}
+
+        # 若童無忌識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 調用突襲搜尋模式
+        if store_key == "twj_toys" and not slug.startswith("202") and not slug.startswith("http") and ("-" in slug and len(slug) <= 8):
+            return cls.check_twj_stealth(slug)
 
         if store_key == "twj_toys":
             base_url = "https://www.twj.tw/products"
@@ -1434,10 +1488,72 @@ class EsliteChecker:
         return text
 
     @classmethod
+    def check_keyword_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """誠品線上關鍵字突襲搜尋監控 (Athena API v2)"""
+        search_q = f"BEYBLADE {keyword}"
+        api_url = f"https://athena.eslite.com/api/v2/search?q={search_q}&size=15"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Origin": "https://www.eslite.com",
+            "Referer": "https://www.eslite.com/"
+        }
+        try:
+            r = session.get(api_url, headers=headers, timeout=5)
+            if r.status_code == 200:
+                data = r.json()
+                hits = data.get("hits", {}).get("hit", [])
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for h in hits:
+                    f = h.get("fields", {})
+                    name = f.get("name") or ""
+                    # 必須同時符合型號關鍵字與戰鬥陀螺標籤
+                    name_clean = name.lower().replace("-", "")
+                    if clean_kw in name_clean and any(k in name.lower() for k in ["beyblade", "戰鬥陀螺", "陀螺"]):
+                        price_val = f.get("final_price") or f.get("retail_price") or 0
+                        stock = f.get("stock", 0)
+                        sn = f.get("eslite_sn") or keyword
+                        in_stock = (stock > 0)
+                        price_str = f"NT$ {int(price_val):,}" if price_val else "未標示"
+                        return {
+                            "ok": True,
+                            "store": "eslite",
+                            "asin": keyword,
+                            "title": name,
+                            "price": price_str,
+                            "in_stock": in_stock,
+                            "is_official": True,
+                            "seller": "誠品線上 (Eslite)",
+                            "url": f"https://www.eslite.com/product/{sn}",
+                            "status_text": f"🟢 誠品突襲上架現貨！(庫存 {stock} 件)" if in_stock else "⚪ 誠品已建檔但缺貨中"
+                        }
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "eslite",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "誠品線上 (Eslite)",
+            "url": f"https://www.eslite.com/search?keyword=BEYBLADE+{keyword}",
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
+
+    @classmethod
     def check_prod(cls, id_or_url: str) -> Dict[str, Any]:
-        full_id = cls.extract_id(id_or_url)
+        raw_text = str(id_or_url).strip()
+        full_id = cls.extract_id(raw_text)
         if not full_id:
             return {"ok": False, "msg": "無效誠品商品代號"}
+
+        # 若識別碼非長條碼數字 (例如 "CX-05", "UX-15", "BX-52" 等關鍵字型號) -> 突襲搜尋模式
+        if not full_id.isdigit() or len(full_id) < 10:
+            keyword = raw_text.replace("https://", "").replace("http://", "").strip("/")
+            return cls.check_keyword_stealth(keyword)
 
         sn_id = full_id[-13:] if len(full_id) >= 13 else full_id
         product_url = f"https://www.eslite.com/product/{full_id}"
@@ -1507,9 +1623,24 @@ class ShopeeChecker:
 
     @classmethod
     def check_item(cls, text_or_url: str) -> Dict[str, Any]:
-        shop_id, item_id = cls.extract_ids(text_or_url)
+        raw_text = str(text_or_url).strip()
+        shop_id, item_id = cls.extract_ids(raw_text)
         if not shop_id or not item_id:
-            url = text_or_url.strip()
+            # 若為純型號關鍵字 (例如 "CX-05", "UX-15", "BX-52" 等) -> 突襲待命守候模式
+            if not raw_text.startswith("http") and not re.search(r"\d{6,}", raw_text):
+                return {
+                    "ok": True,
+                    "store": "shopee",
+                    "asin": raw_text,
+                    "title": f"BEYBLADE X {raw_text}",
+                    "price": "-",
+                    "in_stock": False,
+                    "is_official": True,
+                    "seller": "Funbox 蝦皮官方旗艦店",
+                    "url": f"https://shopee.tw/search?keyword={raw_text}&shop=37137599",
+                    "status_text": "⚪ 尚未上架 (待突襲發布)"
+                }
+            url = raw_text
         else:
             url = f"https://shopee.tw/product/{shop_id}/{item_id}"
 
@@ -1657,7 +1788,7 @@ def check_store_item(
     store = item.get("store", "amazon_jp")
     asin = item.get("asin", "")
 
-    if store == "amazon_jp":
+    if store in ("amazon_jp", "amazon_stealth"):
         return AmazonJPChecker.check_asin(
             asin,
             interval=amazon_interval,
@@ -1699,7 +1830,7 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
     asin = item.get("asin", "")
     cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
 
-    if store == "amazon_jp":
+    if store in ("amazon_jp", "amazon_stealth"):
         return get_product_url(asin, official_only=True)
     elif store == "pchome":
         return f"https://24h.pchome.com.tw/prod/{asin}"

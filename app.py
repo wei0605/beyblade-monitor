@@ -78,19 +78,22 @@ class MonitorState:
         cfg.setdefault("discord_webhook", "")
         cfg.setdefault("line_token", "")
         cfg.setdefault("proxy_url", "")
+        cfg.setdefault("proxy_enabled", True)
         cfg.setdefault("amazon_custom_cookie", "")
         cfg.setdefault("keepa_api_key", "")
+        cfg.setdefault("keepa_enabled", bool(cfg.get("keepa_api_key")))
         cfg.setdefault("keepa_mode", "fallback")
         cfg.setdefault("items", [])
         cfg.setdefault("store_settings", {})
 
-        # 預設 5 大賣場專屬 Webhook
+        # 預設各賣場專屬 Webhook
         preset_hooks = {
             "pchome": "https://ptb.discord.com/api/webhooks/1551281208799793233/0mXgFbPr6LgHNVtlILCYmDbw6lGyNfgvyS6EeCcWS5pjcGVl5RGksuOVbI3QeTXryKc7",
             "mm_shop": "https://ptb.discord.com/api/webhooks/1551281302509068400/OarsOGYXf_G7RqY2tA5FgB8x4e6iGW0ngnkCbxwVrdI9ougiI7VL3vq_6m9Rdp-EDsl3",
             "funbox_tw": "https://ptb.discord.com/api/webhooks/1551281372901937313/LMmnfrhoDdtO5WFK_Ppzo3hyrMBM-prQiiBIM4G2Bu5DzH9kAzvv7HhnjWWJ-ZJ8Lens",
             "twj_toys": "https://ptb.discord.com/api/webhooks/1551281418661920822/0E1F8TSdfg2oekkcfm8OTwnCp9f5PVFYFpMfMjSgP6EZhiqSZjGojAnIAfqk6Ato2BA9",
-            "shopee": "https://ptb.discord.com/api/webhooks/1551281517194514544/ISz6kbL3ODvED505ByVNPHNOvq6pThpH7F_u2v1_L4_LqjhCWCt7phi2p_9yPox2hRiK"
+            "shopee": "https://ptb.discord.com/api/webhooks/1551281517194514544/ISz6kbL3ODvED505ByVNPHNOvq6pThpH7F_u2v1_L4_LqjhCWCt7phi2p_9yPox2hRiK",
+            "amazon_stealth": cfg.get("discord_webhook", "")
         }
 
         # 確保現有項目相容性：未標記 store 者預設為 amazon_jp
@@ -98,24 +101,24 @@ class MonitorState:
             if "store" not in it:
                 it["store"] = "amazon_jp"
 
-        # 確保 7 大賣場皆有獨立推播與頻率設定
+        # 確保 8 大賣場皆有獨立推播與頻率設定
         for s_key in STORE_CONFIG.keys():
             if s_key not in cfg["store_settings"]:
                 default_wh = preset_hooks.get(s_key, "")
-                if s_key == "amazon_jp" and not default_wh:
+                if s_key in ("amazon_jp", "amazon_stealth") and not default_wh:
                     default_wh = cfg.get("discord_webhook", "")
                 cfg["store_settings"][s_key] = {
                     "enable_monitoring": True,
                     "enable_notifications": True,
                     "discord_webhook": default_wh,
-                    "item_interval_seconds": 0.6 if s_key == "amazon_jp" else 3.0
+                    "item_interval_seconds": 0.6 if s_key in ("amazon_jp", "amazon_stealth") else 3.0
                 }
             else:
                 cfg["store_settings"][s_key].setdefault("enable_monitoring", True)
                 cfg["store_settings"][s_key].setdefault("enable_notifications", True)
                 if not cfg["store_settings"][s_key].get("discord_webhook"):
                     cfg["store_settings"][s_key]["discord_webhook"] = preset_hooks.get(s_key, "")
-                cfg["store_settings"][s_key].setdefault("item_interval_seconds", 0.6 if s_key == "amazon_jp" else 3.0)
+                cfg["store_settings"][s_key].setdefault("item_interval_seconds", 0.6 if s_key in ("amazon_jp", "amazon_stealth") else 3.0)
 
         return cfg
 
@@ -154,6 +157,8 @@ class MonitorState:
 
     def get_proxy_url(self) -> str:
         """獲取全域或 Amazon 專用住宅代理 (Residential Proxy)"""
+        if not self.config.get("proxy_enabled", True):
+            return ""
         return self.config.get("proxy_url", "").strip()
 
     def get_amazon_custom_cookie(self) -> str:
@@ -162,6 +167,8 @@ class MonitorState:
 
     def get_keepa_api_key(self) -> str:
         """獲取 Keepa 官方 API Key"""
+        if not self.config.get("keepa_enabled", True):
+            return ""
         return self.config.get("keepa_api_key", "").strip()
 
     def get_keepa_mode(self) -> str:
@@ -217,12 +224,12 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     amazon_jitter = state.get_amazon_jitter()
     proxy = state.get_proxy_url()
     only_official = state.config.get("only_amazon_seller", True)
-    custom_cookie = state.get_amazon_custom_cookie() if store_key == "amazon_jp" else None
-    keepa_key = state.get_keepa_api_key() if store_key == "amazon_jp" else None
-    keepa_mode = state.get_keepa_mode() if store_key == "amazon_jp" else "fallback"
+    custom_cookie = state.get_amazon_custom_cookie() if store_key in ("amazon_jp", "amazon_stealth") else None
+    keepa_key = state.get_keepa_api_key() if store_key in ("amazon_jp", "amazon_stealth") else None
+    keepa_mode = state.get_keepa_mode() if store_key in ("amazon_jp", "amazon_stealth") else "fallback"
 
     extras = []
-    if store_key == "amazon_jp":
+    if store_key in ("amazon_jp", "amazon_stealth"):
         if proxy:
             extras.append("住宅代理")
         if custom_cookie:
@@ -489,9 +496,11 @@ async def get_status():
         "amazon_item_interval": state.get_amazon_item_interval(),
         "amazon_jitter": state.get_amazon_jitter(),
         "amazon_use_playwright": state.get_amazon_use_playwright(),
-        "proxy_url": state.get_proxy_url(),
+        "proxy_url": state.config.get("proxy_url", ""),
+        "proxy_enabled": state.config.get("proxy_enabled", True),
         "amazon_custom_cookie": state.get_amazon_custom_cookie(),
-        "keepa_api_key": state.get_keepa_api_key(),
+        "keepa_api_key": state.config.get("keepa_api_key", ""),
+        "keepa_enabled": state.config.get("keepa_enabled", bool(state.config.get("keepa_api_key"))),
         "keepa_mode": state.get_keepa_mode(),
         "curl_cffi_available": (cffi_requests is not None),
         "playwright_available": False,
@@ -541,10 +550,14 @@ async def api_update_settings(req: Request):
         state.config["line_token"] = str(data["line_token"]).strip()
     if "proxy_url" in data:
         state.config["proxy_url"] = str(data["proxy_url"]).strip()
+    if "proxy_enabled" in data:
+        state.config["proxy_enabled"] = bool(data["proxy_enabled"])
     if "amazon_custom_cookie" in data:
         state.config["amazon_custom_cookie"] = str(data["amazon_custom_cookie"]).strip()
     if "keepa_api_key" in data:
         state.config["keepa_api_key"] = str(data["keepa_api_key"]).strip()
+    if "keepa_enabled" in data:
+        state.config["keepa_enabled"] = bool(data["keepa_enabled"])
     if "keepa_mode" in data:
         k_mode = str(data["keepa_mode"]).strip().lower()
         state.config["keepa_mode"] = k_mode if k_mode in ("fallback", "primary", "disabled") else "fallback"
@@ -641,8 +654,8 @@ async def api_add_item(req: Request, background_tasks: BackgroundTasks):
     if not raw_input:
         return JSONResponse({"ok": False, "msg": "請輸入商品編號或網址！"}, status_code=400)
 
-    if store == "amazon_jp":
-        asin = extract_asin(raw_input)
+    if store in ("amazon_jp", "amazon_stealth"):
+        asin = extract_asin(raw_input) or raw_input
     elif store == "pchome":
         asin = PChomeChecker.extract_prod_id(raw_input)
     elif store == "mm_shop":
@@ -712,8 +725,8 @@ async def api_edit_item(req: Request, background_tasks: BackgroundTasks):
     if not name:
         return JSONResponse({"ok": False, "msg": "請輸入商品名稱或型號！"}, status_code=400)
 
-    if store == "amazon_jp":
-        asin = extract_asin(raw_input)
+    if store in ("amazon_jp", "amazon_stealth"):
+        asin = extract_asin(raw_input) or raw_input
     elif store == "pchome":
         asin = PChomeChecker.extract_prod_id(raw_input)
     elif store == "mm_shop":

@@ -320,13 +320,19 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label"><i class="fa-solid fa-network-wired" style="color: #38bdf8;"></i> 住宅代理 (Residential Proxy) 設定 (徹底解決 Amazon 擋 IP):</label>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <label class="form-label" style="margin-bottom: 0;"><i class="fa-solid fa-network-wired" style="color: #38bdf8;"></i> 住宅代理 (Residential Proxy):</label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #38bdf8; user-select: none;">
+            <input type="checkbox" id="settingProxyEnabled">
+            <span style="font-weight: 600;">啟用住宅代理</span>
+          </label>
+        </div>
         <div class="input-with-btn">
           <input type="text" id="settingProxyUrl" class="form-input" placeholder="http://username:password@gate.smartproxy.com:7000">
           <button class="btn-test" onclick="testProxy()"><i class="fa-solid fa-plug"></i> 測試代理</button>
         </div>
         <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block; line-height: 1.4;">
-          支援 HTTP/SOCKS5 住宅真實家用寬頻 IP。填入後 Amazon JP 請求將自動透過該代理轉發，留空則使用雲端直連。
+          支援 HTTP/SOCKS5 住宅真實家用寬頻 IP。開關關閉時使用本機/雲端直連，無需清空代理網址。
         </span>
       </div>
 
@@ -344,7 +350,13 @@
 
       <!-- 方案 5：Keepa 官方 API 與自動降級備援 -->
       <div class="form-group" style="background: rgba(245, 158, 11, 0.08); padding: 12px; border-radius: 8px; border: 1px dashed rgba(245, 158, 11, 0.35);">
-        <label class="form-label" style="color: #fbbf24;"><i class="fa-solid fa-cloud-bolt" style="color: #f59e0b;"></i> Keepa 官方電商 API (Amazon 零封鎖與自動備援):</label>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <label class="form-label" style="color: #fbbf24; margin-bottom: 0;"><i class="fa-solid fa-cloud-bolt" style="color: #f59e0b;"></i> Keepa 官方電商 API (Amazon 零封鎖與自動備援):</label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #fbbf24; user-select: none;">
+            <input type="checkbox" id="settingKeepaEnabled">
+            <span style="font-weight: 600;">啟用 Keepa</span>
+          </label>
+        </div>
         <div class="input-with-btn" style="margin-bottom: 8px;">
           <input type="password" id="settingKeepaApiKey" class="form-input" placeholder="輸入 Keepa API Key (例如: 8a7b6c5d...)">
           <button class="btn-test" style="background: #f59e0b; color: #0f172a; font-weight: bold;" onclick="testKeepa()"><i class="fa-solid fa-plug-circle-check"></i> 測試 Key</button>
@@ -610,11 +622,17 @@
           if (document.getElementById('settingProxyUrl')) {
             document.getElementById('settingProxyUrl').value = data.proxy_url || '';
           }
+          if (document.getElementById('settingProxyEnabled')) {
+            document.getElementById('settingProxyEnabled').checked = (data.proxy_enabled !== false);
+          }
           if (document.getElementById('settingAmazonCookie')) {
             document.getElementById('settingAmazonCookie').value = data.amazon_custom_cookie || '';
           }
           if (document.getElementById('settingKeepaApiKey')) {
             document.getElementById('settingKeepaApiKey').value = data.keepa_api_key || '';
+          }
+          if (document.getElementById('settingKeepaEnabled')) {
+            document.getElementById('settingKeepaEnabled').checked = (data.keepa_enabled !== false);
           }
           if (document.getElementById('settingKeepaMode')) {
             document.getElementById('settingKeepaMode').value = data.keepa_mode || 'fallback';
@@ -1114,8 +1132,10 @@
         amazon_jitter: amazonJitter,
         amazon_use_playwright: amazonPlaywright,
         proxy_url: document.getElementById('settingProxyUrl') ? document.getElementById('settingProxyUrl').value.trim() : "",
+        proxy_enabled: document.getElementById('settingProxyEnabled') ? document.getElementById('settingProxyEnabled').checked : true,
         amazon_custom_cookie: document.getElementById('settingAmazonCookie') ? document.getElementById('settingAmazonCookie').value.trim() : "",
         keepa_api_key: document.getElementById('settingKeepaApiKey') ? document.getElementById('settingKeepaApiKey').value.trim() : "",
+        keepa_enabled: document.getElementById('settingKeepaEnabled') ? document.getElementById('settingKeepaEnabled').checked : true,
         keepa_mode: document.getElementById('settingKeepaMode') ? document.getElementById('settingKeepaMode').value : "fallback",
         discord_webhook: document.getElementById('settingDiscordUrl').value.trim(),
         line_token: document.getElementById('settingLineToken').value.trim(),
