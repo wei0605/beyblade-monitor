@@ -2078,8 +2078,8 @@
           if (aEnabled !== bEnabled) {
             return aEnabled ? -1 : 1;
           }
-          const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家')));
-          const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家')));
+          const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家') || a.last_status.includes('第三方最低')));
+          const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家') || b.last_status.includes('第三方最低')));
           if (aInStock !== bInStock) {
             return aInStock ? -1 : 1;
           }
@@ -2090,7 +2090,7 @@
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
       const monitoredItems = storeItems.filter(it => it.enabled !== false);
       const unmonitoredItems = storeItems.filter(it => it.enabled === false);
-      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家'))).length;
+      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低'))).length;
       const lockedPageCount = storeItems.filter(it => hasRealProductPage(it)).length;
 
       // 頂部賣場快速資訊列
@@ -2128,7 +2128,7 @@
 
       let displayList = storeItems;
       if (filterInStockOnly) {
-        displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家')));
+        displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低')));
       }
 
       let hasRenderedDivider = false;
@@ -2154,8 +2154,8 @@
         }
 
         const card = document.createElement('div');
-        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'));
-        const statusColor = (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家'))) ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8');
+        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低') || it.last_status.includes('突襲上架'));
+        const statusColor = (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低'))) ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8');
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
         const hasRealPage = hasRealProductPage(it);
@@ -2172,6 +2172,14 @@
           }
         }
         const btnBg = cfg.color || '#2563eb';
+
+        let displayStatus = it.last_status || '待檢查';
+        if (storeKey === 'amazon_jp') {
+          if (displayStatus.includes('第三方優質賣家') || (it.third_party_price && it.third_party_price !== '-' && (!it.last_seller || !it.last_seller.includes('官方自營')) && displayStatus.includes('僅轉賣選項'))) {
+            const tpVal = (it.third_party_price && it.third_party_price !== '-') ? it.third_party_price : (it.last_price || '');
+            displayStatus = tpVal ? `🟡 第三方最低(含運): ${tpVal}` : '🟡 第三方最低(含運)';
+          }
+        }
 
         card.innerHTML = `
           <div class="item-top-bar">
@@ -2195,16 +2203,13 @@
 
           <div class="item-meta">
             <div>
-              <div class="item-status" style="color: ${statusColor}">${escapeHtml(it.last_status || '待檢查')}</div>
+              <div class="item-status" style="color: ${statusColor}">${escapeHtml(displayStatus)}</div>
               <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}</div>
             </div>
             ${storeKey === 'amazon_jp' ? `
               <div class="item-price" style="text-align: right; display: flex; flex-direction: column; gap: 2px; align-items: flex-end;">
                 <div style="font-size: 13px; font-weight: 700; color: ${it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' ? '#34d399' : '#94a3b8'}; white-space: nowrap;">
                   <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">官方: </span>${escapeHtml(it.official_price || (it.last_seller && it.last_seller.includes('官方') ? it.last_price : '官方缺貨'))}
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: ${it.third_party_price && it.third_party_price !== '-' ? '#fbbf24' : '#64748b'}; white-space: nowrap;">
-                  <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">第三方最低(含運): </span>${escapeHtml(it.third_party_price || '-')}
                 </div>
               </div>
             ` : `
