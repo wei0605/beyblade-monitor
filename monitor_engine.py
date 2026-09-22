@@ -7,7 +7,7 @@
 4. 🧸 麗嬰國際官網 (funbox_tw)
 5. 🎯 童無忌玩具 (twj_toys)
 6. 📚 誠品線上 (eslite)
-7. 🦐 蝦皮 Funbox (shopee)
+7. 🦐 fun box 玩具旗艦店 (shopee)
 專為 Render.com / Linux 雲端環境優化，連線池複用、前段串流快速提取，0 耗 CPU。
 """
 
@@ -113,12 +113,12 @@ STORE_CONFIG = {
     },
     "shopee": {
         "key": "shopee",
-        "name": "蝦皮 funbox 特賣會",
-        "short_name": "蝦皮 Funbox",
+        "name": "fun box 玩具旗艦店",
+        "short_name": "fun box 玩具旗艦店",
         "icon": "fa-solid fa-shrimp",
         "flag": "🦐",
         "color": "#f97316",
-        "btn_text": "🦐 蝦皮特賣會直達",
+        "btn_text": "🦐 蝦皮旗艦店直達",
         "default_url": "https://shopee.tw/funbox5120",
         "id_label": "蝦皮商品網址或代號",
         "id_placeholder": "例如: https://shopee.tw/product/285705541/... 或 -i.285705541.{itemid}",
@@ -1775,7 +1775,7 @@ class EsliteChecker:
 
 
 # =========================================================================
-# 7. Shopee Checker (蝦皮 Funbox / 蝦皮商品，curl_cffi 繞過 Cloudflare/BFF)
+# 7. Shopee Checker (fun box 玩具旗艦店 / 蝦皮商品，curl_cffi 繞過 Cloudflare/BFF)
 # =========================================================================
 
 class ShopeeChecker:
@@ -1810,7 +1810,7 @@ class ShopeeChecker:
                     "price": "-",
                     "in_stock": False,
                     "is_official": True,
-                    "seller": "funbox 特賣會 (蝦皮官方)",
+                    "seller": "fun box 玩具旗艦店",
                     "url": f"https://shopee.tw/search?keyword={raw_text}&shop=285705541",
                     "status_text": "⚪ 尚未上架 (待突襲發布)"
                 }
@@ -1900,7 +1900,7 @@ class ShopeeChecker:
             "price": price_str,
             "in_stock": in_stock,
             "is_official": "funbox" in url.lower() or "285705541" in url,
-            "seller": "funbox 特賣會 (蝦皮官方)" if ("funbox" in url.lower() or "285705541" in url) else "蝦皮賣家",
+            "seller": "fun box 玩具旗艦店" if ("funbox" in url.lower() or "285705541" in url) else "蝦皮賣家",
             "url": url,
             "status_text": status_desc
         }
@@ -2178,7 +2178,7 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                             "price": price_str,
                             "url": prod_url,
                             "item_id": f"{shop_id}_{item_id}",
-                            "seller": "funbox 特賣會 (蝦皮官方)",
+                            "seller": "fun box 玩具旗艦店",
                             "is_official": True,
                             "in_stock": True
                         })

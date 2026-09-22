@@ -1,6 +1,6 @@
 """
 戰鬥陀螺 全通路雲端極速監控 Web 服務 (FastAPI + LINE Messaging API Webhook)
-支援 7 大賣場：Amazon Japan / PChome 24h / M.M小舖 / 麗嬰官網 / 童無忌 / 誠品線上 / 蝦皮 Funbox
+支援 7 大賣場：Amazon Japan / PChome 24h / M.M小舖 / 麗嬰官網 / 童無忌 / 誠品線上 / fun box 玩具旗艦店
 專為 Render.com 打造，提供手機分頁儀表板、各賣場獨立 Discord Webhook & 推播開關、LINE 雙向遙控與 24H 背景自動推播。
 """
 
