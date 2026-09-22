@@ -18,6 +18,7 @@ import time
 import threading
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional, List
+import urllib.parse
 
 import random
 import requests
@@ -2088,6 +2089,13 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                 for h in data.get("hits", {}).get("hit", []):
                     f = h.get("fields", {})
                     name = f.get("name") or ""
+                    # 排除非陀螺雜誌/書籍/收納盒
+                    name_low = name.lower()
+                    if any(b in name_low for b in ["tomica", "多美", "小車", "小汽車", "模型車", "四驅車", "海綿", "不含陀螺", "紙製收納盒", "收納盒", "收納包", "陀螺箱", "雜誌", "月刊", "コミック", "コロコロ"]):
+                        continue
+                    if not any(w in name_low for w in ["戰鬥陀螺", "陀螺", "beyblade", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0"]):
+                        continue
+
                     price = f.get("final_price") or f.get("retail_price") or 0
                     sn = f.get("eslite_sn") or ""
                     stock = f.get("stock", 0)
@@ -2126,15 +2134,27 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
             if r.status_code == 200:
                 found_slugs = re.findall(r'href=[\'"]/products/([^\'"?#]+)[\'"]', r.text)
                 seen_slugs = set()
-                for slug in found_slugs[:30]:
-                    if slug in seen_slugs:
+                # 預先過濾：徹底排除 Tomica 多美小汽車、模型車、雜誌、非陀螺配件
+                filtered_slugs = []
+                for slug in found_slugs:
+                    decoded = urllib.parse.unquote(slug).lower()
+                    if any(b in decoded for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒"]):
                         continue
-                    seen_slugs.add(slug)
+                    if any(w in decoded for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
+                        if slug not in seen_slugs:
+                            seen_slugs.add(slug)
+                            filtered_slugs.append(slug)
+
+                for slug in filtered_slugs[:25]:
                     res = CyberbizChecker.check_prod(slug, store_key=store_key)
                     if res.get("ok"):
+                        title = res.get("title", slug)
+                        title_low = title.lower()
+                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒"]):
+                            continue
                         results.append({
                             "store": store_key,
-                            "title": res.get("title", slug),
+                            "title": title,
                             "price": res.get("price", "未標示"),
                             "url": res.get("url", f"https://www.twj.tw/products/{slug}" if store_key == "twj_toys" else f"https://shop.funbox.com.tw/products/{slug}"),
                             "item_id": slug,
@@ -2172,6 +2192,11 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
                     for it in items:
                         name = it.get("name") or it.get("title") or ""
+                        name_low = name.lower()
+                        if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒", "樂高", "lego"]):
+                            continue
+                        if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
+                            continue
                         price_val = it.get("price") or 0
                         if price_val > 100000:
                             price_str = f"NT$ {int(price_val / 100000):,}"
@@ -2208,9 +2233,13 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     seen_ids.add(item_id)
                     res = MMShopChecker.check_item(item_id)
                     if res.get("ok"):
+                        title = res.get("title", item_id)
+                        title_low = title.lower()
+                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "海綿", "不含陀螺", "收納盒", "收納包", "陀螺箱", "戰鬥盒", "紙製收納盒"]):
+                            continue
                         results.append({
                             "store": "mm_shop",
-                            "title": res.get("title", item_id),
+                            "title": title,
                             "price": res.get("price", "未標示"),
                             "url": res.get("url", f"https://mmtoyshop.com/item/{item_id}"),
                             "item_id": item_id,
@@ -2236,6 +2265,18 @@ def match_product_with_stealth_catalog(
 
     title_clean = product_title.strip()
     title_upper = title_clean.upper()
+    title_low = title_clean.lower()
+
+    # 嚴格排除 Tomica 多美小汽車、模型車、非陀螺配件、包材與雜誌
+    NON_BEYBLADE_TERMS = [
+        "tomica", "多美", "小汽車", "小車", "模型車", "迷你四驅", "四驅車",
+        "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王",
+        "海綿", "不含陀螺", "紙製收納盒", "收納盒", "收納包", "陀螺箱", "戰鬥盒",
+        "巨無霸貨機", "飛機", "救護車", "消防車", "變色壽司", "貼紙機", "轉蛋貼紙機",
+        "樂高", "lego", "コミック", "コロコロ", "月刊", "雜誌"
+    ]
+    if any(term in title_low for term in NON_BEYBLADE_TERMS):
+        return None
 
     # 必須為 Beyblade X 相關商品或包含型號代碼 (嚴格排除 Tomica 小車、玩具車、其他無關模型)
     has_beyblade_mark = any(k in title_clean for k in ["戰鬥陀螺", "陀螺", "Beyblade", "BEYBLADE"])

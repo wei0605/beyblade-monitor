@@ -548,26 +548,6 @@
     },
     {
       "store": "shopee",
-      "asin": "BX-12",
-      "code": "BX-12",
-      "series": "BX",
-      "name": "BX-12 3V3 對戰收納盒",
-      "keywords": [
-        "bx-12",
-        "bx12"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shopee.tw/search?keyword=BX-12&shop=285705541",
-      "direct_url": "https://shopee.tw/search?keyword=BX-12&shop=285705541",
-      "seller": "shopee",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "shopee",
       "asin": "BX-13",
       "code": "BX-13",
       "series": "BX",
@@ -802,26 +782,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://shopee.tw/search?keyword=BX-24&shop=285705541",
       "direct_url": "https://shopee.tw/search?keyword=BX-24&shop=285705541",
-      "seller": "shopee",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "shopee",
-      "asin": "BX-25",
-      "code": "BX-25",
-      "series": "BX",
-      "name": "BX-25 專業收納包",
-      "keywords": [
-        "bx-25",
-        "bx25"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shopee.tw/search?keyword=BX-25&shop=285705541",
-      "direct_url": "https://shopee.tw/search?keyword=BX-25&shop=285705541",
       "seller": "shopee",
       "enabled": true,
       "is_shelf_product": false
@@ -1168,26 +1128,6 @@
     },
     {
       "store": "shopee",
-      "asin": "BX-43",
-      "code": "BX-43",
-      "series": "BX",
-      "name": "BX-43 專業收納包 白色版",
-      "keywords": [
-        "bx-43",
-        "bx43"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shopee.tw/search?keyword=BX-43&shop=285705541",
-      "direct_url": "https://shopee.tw/search?keyword=BX-43&shop=285705541",
-      "seller": "shopee",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "shopee",
       "asin": "BX-44",
       "code": "BX-44",
       "series": "BX",
@@ -1342,26 +1282,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://shopee.tw/search?keyword=BX-56&shop=285705541",
       "direct_url": "https://shopee.tw/search?keyword=BX-56&shop=285705541",
-      "seller": "shopee",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "shopee",
-      "asin": "BX-57",
-      "code": "BX-57",
-      "series": "BX",
-      "name": "BX-57 3V3 對戰收納盒 黑色版",
-      "keywords": [
-        "bx-57",
-        "bx57"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shopee.tw/search?keyword=BX-57&shop=285705541",
-      "direct_url": "https://shopee.tw/search?keyword=BX-57&shop=285705541",
       "seller": "shopee",
       "enabled": true,
       "is_shelf_product": false
@@ -4541,19 +4461,6 @@
     },
     {
       "store": "twj_toys",
-      "asin": "新款-戰鬥盒-3g-戰鬥盒-戰鬥陀螺-對戰用-3-vs-3-bx-12-bx-12-bx12",
-      "name": "新款-戰鬥盒-3g-戰鬥盒-戰鬥陀螺-對戰用-3-vs-3-bx-12-bx-12-bx12",
-      "price": "NT$ 260",
-      "last_price": "NT$ 260",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.twj.tw/products/%E6%96%B0%E6%AC%BE-%E6%88%B0%E9%AC%A5%E7%9B%92-3g-%E6%88%B0%E9%AC%A5%E7%9B%92-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-%E5%B0%8D%E6%88%B0%E7%94%A8-3-vs-3-bx-12-bx-12-bx12",
-      "direct_url": "https://www.twj.tw/products/%E6%96%B0%E6%AC%BE-%E6%88%B0%E9%AC%A5%E7%9B%92-3g-%E6%88%B0%E9%AC%A5%E7%9B%92-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-%E5%B0%8D%E6%88%B0%E7%94%A8-3-vs-3-bx-12-bx-12-bx12",
-      "seller": "童無忌玩具",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "twj_toys",
       "asin": "takara-tomy-戰鬥陀螺-bx-00-烈焰飛鳳s-3-80tbeyblade-x｜4904810910503",
       "name": "takara-tomy-戰鬥陀螺-bx-00-烈焰飛鳳s-3-80tbeyblade-x｜4904810910503",
       "price": "NT$ 350",
@@ -4561,19 +4468,6 @@
       "last_status": "🟢 現貨在庫",
       "url": "https://www.twj.tw/products/takara-tomy-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-bx-00-%E7%83%88%E7%84%B0%E9%A3%9B%E9%B3%B3s-3-80tbeyblade-x%EF%BD%9C4904810910503",
       "direct_url": "https://www.twj.tw/products/takara-tomy-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-bx-00-%E7%83%88%E7%84%B0%E9%A3%9B%E9%B3%B3s-3-80tbeyblade-x%EF%BD%9C4904810910503",
-      "seller": "童無忌玩具",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "twj_toys",
-      "asin": "組合販售bx-57-3v3對戰收納盒-黑色版＋隨機多美小汽車1台-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
-      "name": "組合販售bx-57-3v3對戰收納盒-黑色版＋隨機多美小汽車1台-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
-      "price": "NT$ 530",
-      "last_price": "NT$ 530",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.twj.tw/products/%E7%B5%84%E5%90%88%E8%B2%A9%E5%94%AEbx-57-3v3%E5%B0%8D%E6%88%B0%E6%94%B6%E7%B4%8D%E7%9B%92-%E9%BB%91%E8%89%B2%E7%89%88%EF%BC%8B%E9%9A%A8%E6%A9%9F%E5%A4%9A%E7%BE%8E%E5%B0%8F%E6%B1%BD%E8%BB%8A1%E5%8F%B0-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-beyblade-x-beyblade",
-      "direct_url": "https://www.twj.tw/products/%E7%B5%84%E5%90%88%E8%B2%A9%E5%94%AEbx-57-3v3%E5%B0%8D%E6%88%B0%E6%94%B6%E7%B4%8D%E7%9B%92-%E9%BB%91%E8%89%B2%E7%89%88%EF%BC%8B%E9%9A%A8%E6%A9%9F%E5%A4%9A%E7%BE%8E%E5%B0%8F%E6%B1%BD%E8%BB%8A1%E5%8F%B0-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-beyblade-x-beyblade",
       "seller": "童無忌玩具",
       "enabled": false,
       "is_shelf_product": true
@@ -4600,19 +4494,6 @@
       "last_status": "🟢 現貨在庫",
       "url": "https://www.twj.tw/products/20268beyblade-x-ux-21-%E6%83%A1%E9%AD%94%E5%86%A5%E7%95%8C%E6%94%B9%E9%80%A0%E7%B5%84-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-takara-tomy%E6%AD%A3%E7%89%88",
       "direct_url": "https://www.twj.tw/products/20268beyblade-x-ux-21-%E6%83%A1%E9%AD%94%E5%86%A5%E7%95%8C%E6%94%B9%E9%80%A0%E7%B5%84-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-takara-tomy%E6%AD%A3%E7%89%88",
-      "seller": "童無忌玩具",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "twj_toys",
-      "asin": "bx-25-專業收納包-黑色版-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
-      "name": "bx-25-專業收納包-黑色版-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
-      "price": "NT$ 850",
-      "last_price": "NT$ 850",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.twj.tw/products/bx-25-%E5%B0%88%E6%A5%AD%E6%94%B6%E7%B4%8D%E5%8C%85-%E9%BB%91%E8%89%B2%E7%89%88-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-beyblade-x-beyblade",
-      "direct_url": "https://www.twj.tw/products/bx-25-%E5%B0%88%E6%A5%AD%E6%94%B6%E7%B4%8D%E5%8C%85-%E9%BB%91%E8%89%B2%E7%89%88-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-beyblade-x-beyblade",
       "seller": "童無忌玩具",
       "enabled": false,
       "is_shelf_product": true
@@ -4658,19 +4539,6 @@
     },
     {
       "store": "twj_toys",
-      "asin": "戰鬥陀螺-x-beyblade-x-童無忌-陀螺箱-通用版612版本-戰鬥陀螺-x-戰鬥陀螺",
-      "name": "戰鬥陀螺-x-beyblade-x-童無忌-陀螺箱-通用版612版本-戰鬥陀螺-x-戰鬥陀螺",
-      "price": "NT$ 2,580",
-      "last_price": "NT$ 2,580",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.twj.tw/products/%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-beyblade-x-%E7%AB%A5%E7%84%A1%E5%BF%8C-%E9%99%80%E8%9E%BA%E7%AE%B1-%E9%80%9A%E7%94%A8%E7%89%88612%E7%89%88%E6%9C%AC-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA",
-      "direct_url": "https://www.twj.tw/products/%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-beyblade-x-%E7%AB%A5%E7%84%A1%E5%BF%8C-%E9%99%80%E8%9E%BA%E7%AE%B1-%E9%80%9A%E7%94%A8%E7%89%88612%E7%89%88%E6%9C%AC-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-x-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA",
-      "seller": "童無忌玩具",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "twj_toys",
       "asin": "takara-tomy-戰鬥陀螺-bx-50-天堂日輪隨機強化組beyblade-x｜4904810084174",
       "name": "takara-tomy-戰鬥陀螺-bx-50-天堂日輪隨機強化組beyblade-x｜4904810084174",
       "price": "NT$ 800",
@@ -4678,19 +4546,6 @@
       "last_status": "🟢 現貨在庫",
       "url": "https://www.twj.tw/products/takara-tomy-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-bx-50-%E5%A4%A9%E5%A0%82%E6%97%A5%E8%BC%AA%E9%9A%A8%E6%A9%9F%E5%BC%B7%E5%8C%96%E7%B5%84beyblade-x%EF%BD%9C4904810084174",
       "direct_url": "https://www.twj.tw/products/takara-tomy-%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-bx-50-%E5%A4%A9%E5%A0%82%E6%97%A5%E8%BC%AA%E9%9A%A8%E6%A9%9F%E5%BC%B7%E5%8C%96%E7%B5%84beyblade-x%EF%BD%9C4904810084174",
-      "seller": "童無忌玩具",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "twj_toys",
-      "asin": "戰鬥陀螺-bx12專用-eva雷射切割海綿-紅紫藍-三個一組-不含陀螺跟對戰盒",
-      "name": "戰鬥陀螺-bx12專用-eva雷射切割海綿-紅紫藍-三個一組-不含陀螺跟對戰盒",
-      "price": "NT$ 210",
-      "last_price": "NT$ 210",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.twj.tw/products/%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-bx12%E5%B0%88%E7%94%A8-eva%E9%9B%B7%E5%B0%84%E5%88%87%E5%89%B2%E6%B5%B7%E7%B6%BF-%E7%B4%85%E7%B4%AB%E8%97%8D-%E4%B8%89%E5%80%8B%E4%B8%80%E7%B5%84-%E4%B8%8D%E5%90%AB%E9%99%80%E8%9E%BA%E8%B7%9F%E5%B0%8D%E6%88%B0%E7%9B%92",
-      "direct_url": "https://www.twj.tw/products/%E6%88%B0%E9%AC%A5%E9%99%80%E8%9E%BA-bx12%E5%B0%88%E7%94%A8-eva%E9%9B%B7%E5%B0%84%E5%88%87%E5%89%B2%E6%B5%B7%E7%B6%BF-%E7%B4%85%E7%B4%AB%E8%97%8D-%E4%B8%89%E5%80%8B%E4%B8%80%E7%B5%84-%E4%B8%8D%E5%90%AB%E9%99%80%E8%9E%BA%E8%B7%9F%E5%B0%8D%E6%88%B0%E7%9B%92",
       "seller": "童無忌玩具",
       "enabled": false,
       "is_shelf_product": true
@@ -4772,13 +4627,15 @@
       ],
       "is_00": false,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BX-50",
-      "direct_url": "https://www.twj.tw/search?q=BX-50",
+      "last_price": "NT$ 800",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-50-天堂日輪隨機強化組beyblade-x｜4904810084174",
+      "direct_url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-50-天堂日輪隨機強化組beyblade-x｜4904810084174",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -4852,13 +4709,15 @@
       ],
       "is_00": false,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=UX-20",
-      "direct_url": "https://www.twj.tw/search?q=UX-20",
+      "last_price": "NT$ 9,999",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/takara-tomy-beyblade-x-戰鬥陀螺-ux-20-榮耀武神-lfglory-valkyrie-lfstarter-入門組｜4904810096139",
+      "direct_url": "https://www.twj.tw/products/takara-tomy-beyblade-x-戰鬥陀螺-ux-20-榮耀武神-lfglory-valkyrie-lfstarter-入門組｜4904810096139",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -4872,13 +4731,15 @@
       ],
       "is_00": false,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=UX-21",
-      "direct_url": "https://www.twj.tw/search?q=UX-21",
+      "last_price": "NT$ 895",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/20268beyblade-x-ux-21-惡魔冥界改造組-戰鬥陀螺-takara-tomy正版",
+      "direct_url": "https://www.twj.tw/products/20268beyblade-x-ux-21-惡魔冥界改造組-戰鬥陀螺-takara-tomy正版",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -5096,26 +4957,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://www.twj.tw/search?q=BX-11",
       "direct_url": "https://www.twj.tw/search?q=BX-11",
-      "seller": "twj_toys",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "twj_toys",
-      "asin": "BX-12",
-      "code": "BX-12",
-      "series": "BX",
-      "name": "BX-12 3V3 對戰收納盒",
-      "keywords": [
-        "bx-12",
-        "bx12"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BX-12",
-      "direct_url": "https://www.twj.tw/search?q=BX-12",
       "seller": "twj_toys",
       "enabled": true,
       "is_shelf_product": false
@@ -5356,26 +5197,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://www.twj.tw/search?q=BX-24",
       "direct_url": "https://www.twj.tw/search?q=BX-24",
-      "seller": "twj_toys",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "twj_toys",
-      "asin": "BX-25",
-      "code": "BX-25",
-      "series": "BX",
-      "name": "BX-25 專業收納包",
-      "keywords": [
-        "bx-25",
-        "bx25"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BX-25",
-      "direct_url": "https://www.twj.tw/search?q=BX-25",
       "seller": "twj_toys",
       "enabled": true,
       "is_shelf_product": false
@@ -5722,26 +5543,6 @@
     },
     {
       "store": "twj_toys",
-      "asin": "BX-43",
-      "code": "BX-43",
-      "series": "BX",
-      "name": "BX-43 專業收納包 白色版",
-      "keywords": [
-        "bx-43",
-        "bx43"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BX-43",
-      "direct_url": "https://www.twj.tw/search?q=BX-43",
-      "seller": "twj_toys",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "twj_toys",
       "asin": "BX-44",
       "code": "BX-44",
       "series": "BX",
@@ -5899,28 +5700,6 @@
       "seller": "twj_toys",
       "enabled": true,
       "is_shelf_product": false
-    },
-    {
-      "store": "twj_toys",
-      "asin": "BX-57",
-      "code": "BX-57",
-      "series": "BX",
-      "name": "BX-57 3V3 對戰收納盒 黑色版",
-      "keywords": [
-        "bx-57",
-        "bx57"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "NT$ 530",
-      "last_status": "🟢 突襲上架現貨！",
-      "url": "https://www.twj.tw/products/組合販售bx-57-3v3對戰收納盒-黑色版＋隨機多美小汽車1台-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
-      "direct_url": "https://www.twj.tw/products/組合販售bx-57-3v3對戰收納盒-黑色版＋隨機多美小汽車1台-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
-      "seller": "twj_toys",
-      "enabled": true,
-      "is_shelf_product": false,
-      "last_seller": "童無忌玩具",
-      "last_time": "16:18:20"
     },
     {
       "store": "twj_toys",
@@ -6274,13 +6053,15 @@
       ],
       "is_00": false,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=CX-18",
-      "direct_url": "https://www.twj.tw/search?q=CX-18",
+      "last_price": "NT$ 350",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-cx-18-腕龍鞭打-隨機強化組-takara-tomy-正版",
+      "direct_url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-cx-18-腕龍鞭打-隨機強化組-takara-tomy-正版",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -6676,13 +6457,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXA-01",
-      "direct_url": "https://www.twj.tw/search?q=BXA-01",
+      "last_price": "NT$ 350",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/20268beyblade-x-bx-00-蒼龍神劍3-60f-v2-takara-tomy正版",
+      "direct_url": "https://www.twj.tw/products/20268beyblade-x-bx-00-蒼龍神劍3-60f-v2-takara-tomy正版",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -7012,13 +6795,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXC-13",
-      "direct_url": "https://www.twj.tw/search?q=BXC-13",
+      "last_price": "NT$ 800",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/2026戰鬥陀螺-beyblade-x-cx-00-雄鹿鹿角-b2-60d-金屬塗層橘色-b4-limited-takara-tomy正版",
+      "direct_url": "https://www.twj.tw/products/2026戰鬥陀螺-beyblade-x-cx-00-雄鹿鹿角-b2-60d-金屬塗層橘色-b4-limited-takara-tomy正版",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -7278,13 +7063,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXG-39-01",
-      "direct_url": "https://www.twj.tw/search?q=BXG-39-01",
+      "last_price": "NT$ 19,057",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/beyblade-x-dmmくじ-vol3-戰鬥陀螺一番賞-第三彈",
+      "direct_url": "https://www.twj.tw/products/beyblade-x-dmmくじ-vol3-戰鬥陀螺一番賞-第三彈",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:20"
     },
     {
       "store": "twj_toys",
@@ -8025,13 +7812,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXG-01",
-      "direct_url": "https://www.twj.tw/search?q=BXG-01",
+      "last_price": "NT$ 350",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-00-烈焰飛鳳s-3-80tbeyblade-x｜4904810910503",
+      "direct_url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-00-烈焰飛鳳s-3-80tbeyblade-x｜4904810910503",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -8091,13 +7880,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXG-04",
-      "direct_url": "https://www.twj.tw/search?q=BXG-04",
+      "last_price": "NT$ 350",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bxg-04-銀牙烈虎sbeyblade-x｜4904810930341",
+      "direct_url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bxg-04-銀牙烈虎sbeyblade-x｜4904810930341",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:20"
     },
     {
       "store": "twj_toys",
@@ -8401,13 +8192,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXG-22",
-      "direct_url": "https://www.twj.tw/search?q=BXG-22",
+      "last_price": "NT$ 385",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-x-b-00-龍騎士s",
+      "direct_url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-x-b-00-龍騎士s",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -8789,13 +8582,15 @@
       ],
       "is_00": true,
       "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.twj.tw/search?q=BXG-47",
-      "direct_url": "https://www.twj.tw/search?q=BXG-47",
+      "last_price": "NT$ 1,045",
+      "last_status": "🟢 突襲上架現貨！",
+      "url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-00-暴風天馬-3-70rabeyblade-x｜4904810096504",
+      "direct_url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-00-暴風天馬-3-70rabeyblade-x｜4904810096504",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "last_seller": "童無忌玩具",
+      "last_time": "16:40:19"
     },
     {
       "store": "twj_toys",
@@ -9097,32 +8892,6 @@
     },
     {
       "store": "eslite",
-      "asin": "2682792256001",
-      "name": "BEYBLADE X 4 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2682792256001",
-      "direct_url": "https://www.eslite.com/product/2682792256001",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2683101410008",
-      "name": "BEYBLADE X 7 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2683101410008",
-      "direct_url": "https://www.eslite.com/product/2683101410008",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
       "asin": "2683180687001",
       "name": "Beyblade X, Vol. 4",
       "price": "NT$ 414",
@@ -9130,32 +8899,6 @@
       "last_status": "⚪ 尚無庫存",
       "url": "https://www.eslite.com/product/2683180687001",
       "direct_url": "https://www.eslite.com/product/2683180687001",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682999914001",
-      "name": "コロコロコミック (11月/2025/附BEYBLADE X紙製收納盒卡片組&別冊&貼紙)",
-      "price": "NT$ 261",
-      "last_price": "NT$ 261",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2682999914001",
-      "direct_url": "https://www.eslite.com/product/2682999914001",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2683101411005",
-      "name": "BEYBLADE X 8 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2683101411005",
-      "direct_url": "https://www.eslite.com/product/2683101411005",
       "seller": "誠品線上 (Eslite)",
       "enabled": false,
       "is_shelf_product": true
@@ -9188,45 +8931,6 @@
     },
     {
       "store": "eslite",
-      "asin": "2683190928002",
-      "name": "BEYBLADE X 9 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2683190928002",
-      "direct_url": "https://www.eslite.com/product/2683190928002",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682792254007",
-      "name": "BEYBLADE X 1 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2682792254007",
-      "direct_url": "https://www.eslite.com/product/2682792254007",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682882647009",
-      "name": "コロコロコミック (6月/2025/附名偵探柯南卡片&BEYBLADE X別冊&海報&卡片組)",
-      "price": "NT$ 261",
-      "last_price": "NT$ 261",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2682882647009",
-      "direct_url": "https://www.eslite.com/product/2682882647009",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
       "asin": "2683226122008",
       "name": "Beyblade X, Vol. 1",
       "price": "NT$ 460",
@@ -9234,58 +8938,6 @@
       "last_status": "🟢 現貨在庫",
       "url": "https://www.eslite.com/product/2683226122008",
       "direct_url": "https://www.eslite.com/product/2683226122008",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682946439007",
-      "name": "BEYBLADE X 5 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2682946439007",
-      "direct_url": "https://www.eslite.com/product/2682946439007",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682792253000",
-      "name": "BEYBLADE X 2 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2682792253000",
-      "direct_url": "https://www.eslite.com/product/2682792253000",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682792255004",
-      "name": "BEYBLADE X 3 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2682792255004",
-      "direct_url": "https://www.eslite.com/product/2682792255004",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682946442007",
-      "name": "BEYBLADE X 6 コロコロコミックススペシャル",
-      "price": "NT$ 283",
-      "last_price": "NT$ 283",
-      "last_status": "🟢 現貨在庫",
-      "url": "https://www.eslite.com/product/2682946442007",
-      "direct_url": "https://www.eslite.com/product/2682946442007",
       "seller": "誠品線上 (Eslite)",
       "enabled": false,
       "is_shelf_product": true
@@ -9357,19 +9009,6 @@
     },
     {
       "store": "eslite",
-      "asin": "2683125336001",
-      "name": "コロコロイチバン! (6月/7月/合併号/2026/附名偵探柯南別冊&小報&戰鬥陀螺紙製收納盒&支援寶可夢劵)",
-      "price": "NT$ 540",
-      "last_price": "NT$ 540",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2683125336001",
-      "direct_url": "https://www.eslite.com/product/2683125336001",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
       "asin": "2682984908008",
       "name": "戰鬥陀螺X (2) (電子書)",
       "price": "NT$ 105",
@@ -9377,45 +9016,6 @@
       "last_status": "🟢 現貨在庫",
       "url": "https://www.eslite.com/product/2682984908008",
       "direct_url": "https://www.eslite.com/product/2682984908008",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682592487001",
-      "name": "コロコロコミック (8月/2024/附戰鬥陀螺紙製收納盒&卡片&漫畫別冊)",
-      "price": "NT$ 243",
-      "last_price": "NT$ 243",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2682592487001",
-      "direct_url": "https://www.eslite.com/product/2682592487001",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682848098005",
-      "name": "コロコロイチバン! (5月/2025/附戰鬥陀螺紙製收納盒&星之卡比月曆&別冊&海報)",
-      "price": "NT$ 481",
-      "last_price": "NT$ 481",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2682848098005",
-      "direct_url": "https://www.eslite.com/product/2682848098005",
-      "seller": "誠品線上 (Eslite)",
-      "enabled": false,
-      "is_shelf_product": true
-    },
-    {
-      "store": "eslite",
-      "asin": "2682635259008",
-      "name": "コロコロイチバン! (11月/2024/附星之卡比徽章&寶可夢FRIENDA卡&決鬥大師集卡片&戰鬥陀螺貼紙&寶可夢別冊",
-      "price": "NT$ 515",
-      "last_price": "NT$ 515",
-      "last_status": "⚪ 尚無庫存",
-      "url": "https://www.eslite.com/product/2682635259008",
-      "direct_url": "https://www.eslite.com/product/2682635259008",
       "seller": "誠品線上 (Eslite)",
       "enabled": false,
       "is_shelf_product": true
@@ -9814,26 +9414,6 @@
     },
     {
       "store": "eslite",
-      "asin": "BX-12",
-      "code": "BX-12",
-      "series": "BX",
-      "name": "BX-12 3V3 對戰收納盒",
-      "keywords": [
-        "bx-12",
-        "bx12"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.eslite.com/search?keyword=BX-12",
-      "direct_url": "https://www.eslite.com/search?keyword=BX-12",
-      "seller": "eslite",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "eslite",
       "asin": "BX-13",
       "code": "BX-13",
       "series": "BX",
@@ -10068,26 +9648,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://www.eslite.com/search?keyword=BX-24",
       "direct_url": "https://www.eslite.com/search?keyword=BX-24",
-      "seller": "eslite",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "eslite",
-      "asin": "BX-25",
-      "code": "BX-25",
-      "series": "BX",
-      "name": "BX-25 專業收納包",
-      "keywords": [
-        "bx-25",
-        "bx25"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.eslite.com/search?keyword=BX-25",
-      "direct_url": "https://www.eslite.com/search?keyword=BX-25",
       "seller": "eslite",
       "enabled": true,
       "is_shelf_product": false
@@ -10434,26 +9994,6 @@
     },
     {
       "store": "eslite",
-      "asin": "BX-43",
-      "code": "BX-43",
-      "series": "BX",
-      "name": "BX-43 專業收納包 白色版",
-      "keywords": [
-        "bx-43",
-        "bx43"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.eslite.com/search?keyword=BX-43",
-      "direct_url": "https://www.eslite.com/search?keyword=BX-43",
-      "seller": "eslite",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "eslite",
       "asin": "BX-44",
       "code": "BX-44",
       "series": "BX",
@@ -10608,26 +10148,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://www.eslite.com/search?keyword=BX-56",
       "direct_url": "https://www.eslite.com/search?keyword=BX-56",
-      "seller": "eslite",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "eslite",
-      "asin": "BX-57",
-      "code": "BX-57",
-      "series": "BX",
-      "name": "BX-57 3V3 對戰收納盒 黑色版",
-      "keywords": [
-        "bx-57",
-        "bx57"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://www.eslite.com/search?keyword=BX-57",
-      "direct_url": "https://www.eslite.com/search?keyword=BX-57",
       "seller": "eslite",
       "enabled": true,
       "is_shelf_product": false
@@ -14173,26 +13693,6 @@
     },
     {
       "store": "funbox_tw",
-      "asin": "BX-12",
-      "code": "BX-12",
-      "series": "BX",
-      "name": "BX-12 3V3 對戰收納盒",
-      "keywords": [
-        "bx-12",
-        "bx12"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shop.funbox.com.tw/search?q=BX-12",
-      "direct_url": "https://shop.funbox.com.tw/search?q=BX-12",
-      "seller": "funbox_tw",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "funbox_tw",
       "asin": "BX-13",
       "code": "BX-13",
       "series": "BX",
@@ -14427,26 +13927,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://shop.funbox.com.tw/search?q=BX-24",
       "direct_url": "https://shop.funbox.com.tw/search?q=BX-24",
-      "seller": "funbox_tw",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "funbox_tw",
-      "asin": "BX-25",
-      "code": "BX-25",
-      "series": "BX",
-      "name": "BX-25 專業收納包",
-      "keywords": [
-        "bx-25",
-        "bx25"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shop.funbox.com.tw/search?q=BX-25",
-      "direct_url": "https://shop.funbox.com.tw/search?q=BX-25",
       "seller": "funbox_tw",
       "enabled": true,
       "is_shelf_product": false
@@ -14793,26 +14273,6 @@
     },
     {
       "store": "funbox_tw",
-      "asin": "BX-43",
-      "code": "BX-43",
-      "series": "BX",
-      "name": "BX-43 專業收納包 白色版",
-      "keywords": [
-        "bx-43",
-        "bx43"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shop.funbox.com.tw/search?q=BX-43",
-      "direct_url": "https://shop.funbox.com.tw/search?q=BX-43",
-      "seller": "funbox_tw",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "funbox_tw",
       "asin": "BX-44",
       "code": "BX-44",
       "series": "BX",
@@ -14967,26 +14427,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://shop.funbox.com.tw/search?q=BX-56",
       "direct_url": "https://shop.funbox.com.tw/search?q=BX-56",
-      "seller": "funbox_tw",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "funbox_tw",
-      "asin": "BX-57",
-      "code": "BX-57",
-      "series": "BX",
-      "name": "BX-57 3V3 對戰收納盒 黑色版",
-      "keywords": [
-        "bx-57",
-        "bx57"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://shop.funbox.com.tw/search?q=BX-57",
-      "direct_url": "https://shop.funbox.com.tw/search?q=BX-57",
       "seller": "funbox_tw",
       "enabled": true,
       "is_shelf_product": false
@@ -18480,26 +17920,6 @@
     },
     {
       "store": "pchome",
-      "asin": "BX-12",
-      "code": "BX-12",
-      "series": "BX",
-      "name": "BX-12 3V3 對戰收納盒",
-      "keywords": [
-        "bx-12",
-        "bx12"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-12",
-      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-12",
-      "seller": "pchome",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "pchome",
       "asin": "BX-13",
       "code": "BX-13",
       "series": "BX",
@@ -18734,26 +18154,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-24",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-24",
-      "seller": "pchome",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "pchome",
-      "asin": "BX-25",
-      "code": "BX-25",
-      "series": "BX",
-      "name": "BX-25 專業收納包",
-      "keywords": [
-        "bx-25",
-        "bx25"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-25",
-      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-25",
       "seller": "pchome",
       "enabled": true,
       "is_shelf_product": false
@@ -19100,26 +18500,6 @@
     },
     {
       "store": "pchome",
-      "asin": "BX-43",
-      "code": "BX-43",
-      "series": "BX",
-      "name": "BX-43 專業收納包 白色版",
-      "keywords": [
-        "bx-43",
-        "bx43"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-43",
-      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-43",
-      "seller": "pchome",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "pchome",
       "asin": "BX-44",
       "code": "BX-44",
       "series": "BX",
@@ -19274,26 +18654,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-56",
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-56",
-      "seller": "pchome",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "pchome",
-      "asin": "BX-57",
-      "code": "BX-57",
-      "series": "BX",
-      "name": "BX-57 3V3 對戰收納盒 黑色版",
-      "keywords": [
-        "bx-57",
-        "bx57"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-57",
-      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-57",
       "seller": "pchome",
       "enabled": true,
       "is_shelf_product": false
@@ -22787,26 +22147,6 @@
     },
     {
       "store": "mm_shop",
-      "asin": "BX-12",
-      "code": "BX-12",
-      "series": "BX",
-      "name": "BX-12 3V3 對戰收納盒",
-      "keywords": [
-        "bx-12",
-        "bx12"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://mmtoyshop.com/search?q=BX-12",
-      "direct_url": "https://mmtoyshop.com/search?q=BX-12",
-      "seller": "mm_shop",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "mm_shop",
       "asin": "BX-13",
       "code": "BX-13",
       "series": "BX",
@@ -23041,26 +22381,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://mmtoyshop.com/search?q=BX-24",
       "direct_url": "https://mmtoyshop.com/search?q=BX-24",
-      "seller": "mm_shop",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "mm_shop",
-      "asin": "BX-25",
-      "code": "BX-25",
-      "series": "BX",
-      "name": "BX-25 專業收納包",
-      "keywords": [
-        "bx-25",
-        "bx25"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://mmtoyshop.com/search?q=BX-25",
-      "direct_url": "https://mmtoyshop.com/search?q=BX-25",
       "seller": "mm_shop",
       "enabled": true,
       "is_shelf_product": false
@@ -23407,26 +22727,6 @@
     },
     {
       "store": "mm_shop",
-      "asin": "BX-43",
-      "code": "BX-43",
-      "series": "BX",
-      "name": "BX-43 專業收納包 白色版",
-      "keywords": [
-        "bx-43",
-        "bx43"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://mmtoyshop.com/search?q=BX-43",
-      "direct_url": "https://mmtoyshop.com/search?q=BX-43",
-      "seller": "mm_shop",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "mm_shop",
       "asin": "BX-44",
       "code": "BX-44",
       "series": "BX",
@@ -23581,26 +22881,6 @@
       "last_status": "⚪ 待命中 (尚未上架)",
       "url": "https://mmtoyshop.com/search?q=BX-56",
       "direct_url": "https://mmtoyshop.com/search?q=BX-56",
-      "seller": "mm_shop",
-      "enabled": true,
-      "is_shelf_product": false
-    },
-    {
-      "store": "mm_shop",
-      "asin": "BX-57",
-      "code": "BX-57",
-      "series": "BX",
-      "name": "BX-57 3V3 對戰收納盒 黑色版",
-      "keywords": [
-        "bx-57",
-        "bx57"
-      ],
-      "is_00": false,
-      "price": "-",
-      "last_price": "-",
-      "last_status": "⚪ 待命中 (尚未上架)",
-      "url": "https://mmtoyshop.com/search?q=BX-57",
-      "direct_url": "https://mmtoyshop.com/search?q=BX-57",
       "seller": "mm_shop",
       "enabled": true,
       "is_shelf_product": false
