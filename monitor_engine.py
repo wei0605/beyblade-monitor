@@ -2267,19 +2267,28 @@ def match_product_with_stealth_catalog(
     title_upper = title_clean.upper()
     title_low = title_clean.lower()
 
-    # 嚴格排除 Tomica 多美小汽車、模型車、非陀螺配件、包材與雜誌
+    # 嚴格排除 Tomica 多美小汽車、模型車、非陀螺配件、包材與雜誌 (包含中日文)
     NON_BEYBLADE_TERMS = [
+        # 中文排除詞
         "tomica", "多美", "小汽車", "小車", "模型車", "迷你四驅", "四驅車",
         "超人力霸王", "奧特曼", "小美樂", "莉卡", "特攻隊", "魔動王",
         "海綿", "不含陀螺", "紙製收納盒", "收納盒", "收納包", "陀螺箱", "戰鬥盒",
         "巨無霸貨機", "飛機", "救護車", "消防車", "變色壽司", "貼紙機", "轉蛋貼紙機",
-        "樂高", "lego", "コミック", "コロコロ", "月刊", "雜誌"
+        "樂高", "lego", "コミック", "コロコロ", "月刊", "雜誌", "漫畫",
+        # 日文排除詞 (發射器、握把、收納盒、貼紙等周邊)
+        "トミカ", "ミニ四駆", "ウルトラマン", "リカちゃん", "メルちゃん", "トランスフォーマー",
+        "ランチャー", "グリップ", "ワインダー", "バトルパス",
+        "ギアケース", "デッキケース", "バッグ", "ボックス", "スポンジ", "ステッカー"
     ]
     if any(term in title_low for term in NON_BEYBLADE_TERMS):
         return None
 
+    # 日文「シール」單獨判斷，避免誤擋「シールド」(Shield/盾型陀螺)
+    if "シール" in title_clean and "シールド" not in title_clean:
+        return None
+
     # 必須為 Beyblade X 相關商品或包含型號代碼 (嚴格排除 Tomica 小車、玩具車、其他無關模型)
-    has_beyblade_mark = any(k in title_clean for k in ["戰鬥陀螺", "陀螺", "Beyblade", "BEYBLADE"])
+    has_beyblade_mark = any(k in title_clean for k in ["戰鬥陀螺", "陀螺", "Beyblade", "BEYBLADE", "ベイブレード"])
     has_model_code = bool(re.search(r'\b(?:BX|UX|CX|BXG|BXH|BXC|BXA)[-_]?\d{1,3}', title_upper))
     if not has_beyblade_mark and not has_model_code:
         return None

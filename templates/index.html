@@ -1895,8 +1895,9 @@
       const inStockItems = storeItems.filter(it => it.is_shelf_product || (it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('突襲上架'))));
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
 
-      // Non-Amazon stores: HIDE waiting stealth models from main list by default, show in stealth modal!
-      if (isNonAmazon && !showAllStealthCards) {
+      // 收合未上架/待命型號至防突襲彈窗總庫，保持主畫面乾淨 (適用包含 Amazon 在內的所有賣場)
+      const shouldFoldStealth = !showAllStealthCards && (storeItems.length > inStockItems.length);
+      if (shouldFoldStealth) {
         if (inStockItems.length === 0) {
           container.innerHTML = `
             <div class="stealth-standby-banner">
@@ -1929,7 +1930,7 @@
         }
       }
 
-      let displayList = (isNonAmazon && !showAllStealthCards) ? inStockItems : storeItems;
+      let displayList = shouldFoldStealth ? inStockItems : storeItems;
       if (filterInStockOnly) {
         displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家')));
       }
@@ -2005,10 +2006,10 @@
     function openStealthModal(storeKey) {
       if (storeKey) {
         currentStealthStore = storeKey;
-      } else if (currentStoreTab && currentStoreTab !== 'amazon_jp') {
+      } else if (currentStoreTab) {
         currentStealthStore = currentStoreTab;
       } else {
-        currentStealthStore = 'shopee';
+        currentStealthStore = 'amazon_jp';
       }
       populateStealthStoreSelect();
       renderStealthModalItems();
@@ -2024,7 +2025,6 @@
       if (!sel) return;
       sel.innerHTML = '';
       Object.keys(storesConfig).forEach(k => {
-        if (k === 'amazon_jp') return; // 防突襲清單庫專屬非 Amazon 賣場
         const cfg = storesConfig[k];
         const opt = document.createElement('option');
         opt.value = k;
@@ -2161,12 +2161,18 @@
           const buyUrl = getItemUrl(it, currentStealthStore);
 
           card.className = `stealth-item-row ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
+          const kwsHtml = (it.keywords && it.keywords.length > 0)
+            ? `<div style="font-size: 11px; color: #64748b; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><i class="fa-solid fa-tags" style="font-size: 10px; margin-right: 3px; color: #38bdf8;"></i>${escapeHtml(it.keywords.slice(0, 5).join(', '))}</div>`
+            : '';
+          const actionBtnText = (currentStealthStore === 'amazon_jp') ? '⚡ 官方直達' : '前往搜尋';
+
           card.innerHTML = `
             <div class="stealth-item-header">
               <span class="stealth-model-badge ${badgeClass}">${escapeHtml(it.asin || it.code || '-')}</span>
               <span style="font-size: 11px; color: #94a3b8;">#${getModelSortNum(it)}</span>
             </div>
             <div class="stealth-item-title">${escapeHtml(it.name)}</div>
+            ${kwsHtml}
             <div class="stealth-item-status-row">
               ${isInStock ? `
                 <span class="badge-stock"><i class="fa-solid fa-circle-check"></i> ${escapeHtml(it.last_status || '現貨有貨')} (${escapeHtml(it.last_price || '-')})</span>
@@ -2177,7 +2183,7 @@
             </div>
             <div class="stealth-item-actions">
               <a href="${buyUrl}" target="_blank" class="btn-stealth-link">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> 前往搜尋
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> ${actionBtnText}
               </a>
               <button class="btn-stealth-toggle ${isEnabled ? 'enabled' : 'disabled'}" onclick="toggleModalItem(${it.originalIndex})">
                 ${isEnabled ? '☑ 監控中' : '☐ 略過'}
