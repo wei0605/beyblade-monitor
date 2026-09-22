@@ -322,7 +322,7 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
             elif new_hit_count > 0 or (hit_count > 0 and is_manual):
                 state.add_log(f"🎉 [{s_name}] 本次掃描捕獲 {new_hit_count if not is_manual else hit_count} 件防突襲陀螺上架！", "SUCCESS")
         except Exception as e:
-            state.add_log(f"[{s_name}] 最新上架雷達掃描異常: {str(e)[:35]}", "WARNING")
+            logger.warning(f"[{s_name}] 最新上架雷達掃描異常: {e}")
 
     # 更新防突襲雷達全域即時看板狀態
     now_gmt8 = get_now_gmt8().strftime("%H:%M:%S")
@@ -411,16 +411,21 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
                 stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
                 time.sleep(stagger)
 
+        in_stock_hits = 0
         for f in concurrent.futures.as_completed(futures):
             if state.stop_event.is_set():
                 break
             result = f.result()
             if result:
                 idx, item, res = result
-                handle_result(idx, item, res, is_manual=is_manual)
+                if handle_result(idx, item, res, is_manual=is_manual):
+                    in_stock_hits += 1
 
     dt = time.time() - t0
-    state.add_log(f"⚡ [{s_name}] 價格檢查完成 (耗時 {dt:.2f} 秒)", "SUCCESS" if is_manual else "INFO")
+    if in_stock_hits > 0:
+        state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨！", "SUCCESS")
+    else:
+        state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨", "INFO")
     gc.collect()
 
 
@@ -511,15 +516,12 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     s_settings = state.config.get("store_settings", {}).get(store, {})
     store_notify_enabled = s_settings.get("enable_notifications", True)
 
-    if res.get("status_note"):
-        state.add_log(f"[{store_short} - {name}] ℹ️ {res['status_note']}", "INFO")
-
     if not res.get("ok"):
         msg = res.get("msg", "檢測異常")
         item["last_status"] = msg
         item["last_time"] = now_str
-        state.add_log(f"[{store_short} - {name}] 檢查失敗: {msg}", "WARNING")
-        return
+        # 依使用者指示：檢查失敗不寫入監控日誌中，避免洗版
+        return False
 
     price = res.get("price", "-")
     seller = res.get("seller", "-")
@@ -581,6 +583,8 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
             trigger_notifications(item, name, asin, notify_price, seller, notify_url)
         else:
             state.add_log(f"🔕 [{store_short}] 已關閉推播通知，已略過本次推播", "INFO")
+
+    return bool(in_stock)
 
 
 def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: str, url: str):
