@@ -626,7 +626,12 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
             status_text = res.get("status_text") or "🟢 平台現貨開放！"
             is_alert_worthy = True
     else:
-        if res.get("status_text"):
+        if store == "amazon_jp":
+            if res.get("no_featured_offer", False) or (third_party_price and third_party_price != "-"):
+                status_text = "⚪ 官方缺貨中 (僅轉賣選項)"
+            else:
+                status_text = "⚪ 官方缺貨中 / 暫無庫存"
+        elif res.get("status_text"):
             status_text = res["status_text"]
         elif res.get("no_featured_offer", False):
             status_text = "⚪ 官方缺貨中 (僅轉賣選項)"
@@ -1185,12 +1190,28 @@ async def api_stop():
 
 
 @app.post("/api/toggle_item")
-async def api_toggle_item(index: int = Query(...)):
+async def api_toggle_item(index: int = Query(...), background_tasks: BackgroundTasks = None):
     items = state.config.get("items", [])
     if 0 <= index < len(items):
-        items[index]["enabled"] = not items[index].get("enabled", True)
+        new_val = not items[index].get("enabled", True)
+        items[index]["enabled"] = new_val
         state.save_config()
-        state.add_log(f"已切換商品狀態: {items[index].get('name')}", "INFO")
+        name = items[index].get('name')
+        state.add_log(f"已{'開啟' if new_val else '暫停'}監控: {name}", "INFO")
+
+        # 若切換為開啟監控，背景立即非同步發動單筆即時查價，卡片立刻獲得最新報價
+        if new_val:
+            target_item = items[index]
+            def _check_toggled():
+                res = check_store_item(target_item)
+                handle_result(index, target_item, res, is_manual=True)
+                state.save_config()
+
+            if background_tasks:
+                background_tasks.add_task(_check_toggled)
+            else:
+                threading.Thread(target=_check_toggled, daemon=True).start()
+
         return {"ok": True, "enabled": items[index]["enabled"]}
     return {"ok": False, "msg": "無效索引"}
 
