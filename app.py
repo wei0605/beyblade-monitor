@@ -289,12 +289,20 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
                     state.seen_stealth_urls.add(alert_key)
 
                     now_str = get_now_gmt8().strftime("%H:%M:%S")
-                    target_item["last_status"] = "🟢 突襲上架現貨！"
+                    is_in_stock = bool(prod.get("in_stock", False))
                     target_item["last_price"] = prod_price
                     target_item["last_seller"] = prod_seller
                     target_item["last_time"] = now_str
                     target_item["url"] = prod_url
                     target_item["direct_url"] = prod_url
+
+                    if not is_in_stock:
+                        target_item["last_status"] = "⚪ 已售完 (無庫存)"
+                        state.save_config()
+                        continue
+
+                    # 只有真正有庫存/現貨時，才標記現貨並推播通知
+                    target_item["last_status"] = "🟢 突襲上架現貨！"
                     state.save_config()
 
                     hit_count += 1
@@ -302,7 +310,7 @@ def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False
                         new_hit_count += 1
                         total_new_hits += 1
                     if is_new_discovery or is_manual:
-                        state.add_log(f"🚨【突襲上架發現！】[{s_name}] 命中型號 {matched_model}！品名: {title[:28]} 售價: {prod_price}", "SUCCESS")
+                        state.add_log(f"🚨【突襲上架發現！】[{s_name}] 命中型號 {matched_model}（現貨）！品名: {title[:28]} 售價: {prod_price}", "SUCCESS")
                         item_display_name = f"BEYBLADE X {matched_model} ({title[:25]})" if matched_model not in title else title[:35]
                         trigger_notifications(target_item, item_display_name, matched_model, prod_price, prod_seller, prod_url)
                         state.in_stock_state[f"{s_key}_{matched_model}"] = True

@@ -1628,8 +1628,12 @@ class CyberbizChecker:
         else:
             title_m = re.search(r"<title>(.*?)</title>", html)
             title = title_m.group(1).strip() if title_m else slug
-            in_stock = ("加入購物車" in html) and ("已售完" not in html and "缺貨" not in html)
+            in_stock = ("加入購物車" in html) and ("已售完" not in html and "缺貨" not in html and "庫存不足" not in html)
             price_str = "未標示"
+
+        # 二次校驗：若頁面出現「已售完」、「庫存不足」或「貨到通知我」，強制判斷為無庫存
+        if any(sold_out in html for sold_out in ["已售完", "庫存不足", "貨到通知我", "缺貨"]):
+            in_stock = False
 
         return {
             "ok": True,

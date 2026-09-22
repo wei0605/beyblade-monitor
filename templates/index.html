@@ -910,8 +910,8 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label"><i class="fa-brands fa-amazon" style="color: #f59e0b;"></i> Amazon 每項商品檢查間隔 (秒，預設 0.6 秒):</label>
-        <input type="number" id="settingAmazonInterval" class="form-input" step="0.1" min="0.1" max="10" value="0.6">
+        <label class="form-label"><i class="fa-brands fa-amazon" style="color: #f59e0b;"></i> Amazon 每項商品檢查間隔 (秒，預設 1.5 秒):</label>
+        <input type="number" id="settingAmazonInterval" class="form-input" step="0.1" min="0.1" max="10" value="1.5">
         <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block;">
           每項 Amazon 商品檢查的緩衝間隔，避免頻繁請求觸發 503 或 CAPTCHA 驗證碼。
         </span>
@@ -1435,7 +1435,7 @@
           if (document.getElementById('settingStealthScanInterval')) {
             document.getElementById('settingStealthScanInterval').value = data.stealth_scan_interval !== undefined ? data.stealth_scan_interval : 60;
           }
-          document.getElementById('settingAmazonInterval').value = data.amazon_item_interval !== undefined ? data.amazon_item_interval : 0.6;
+          document.getElementById('settingAmazonInterval').value = data.amazon_item_interval !== undefined ? data.amazon_item_interval : 1.5;
 
           if (document.getElementById('settingAmazonJitter')) {
             document.getElementById('settingAmazonJitter').checked = (data.amazon_jitter !== false);
@@ -1699,7 +1699,7 @@
         const isNotifyOn = sSet.enable_notifications !== false;
         const hookUrl = sSet.discord_webhook || '';
         const isAmazon = (k === 'amazon_jp');
-        const amazonIntervalVal = sSet.item_interval_seconds !== undefined ? sSet.item_interval_seconds : (document.getElementById('settingAmazonInterval')?.value || 0.6);
+        const amazonIntervalVal = sSet.item_interval_seconds !== undefined ? sSet.item_interval_seconds : (document.getElementById('settingAmazonInterval')?.value || 1.5);
 
         const card = document.createElement('div');
         card.className = 'store-card-config';
@@ -2324,7 +2324,7 @@
     }
 
     async function saveSettings() {
-      const amazonInterval = parseFloat(document.getElementById('settingAmazonInterval').value) || 0.6;
+      const amazonInterval = parseFloat(document.getElementById('settingAmazonInterval').value) || 1.5;
       const amazonJitter = document.getElementById('settingAmazonJitter') ? document.getElementById('settingAmazonJitter').checked : true;
       const amazonPlaywright = document.getElementById('settingAmazonPlaywright') ? document.getElementById('settingAmazonPlaywright').checked : false;
 
@@ -2341,7 +2341,7 @@
           enable_monitoring: monChk ? monChk.checked : true,
           enable_notifications: notChk ? notChk.checked : true,
           discord_webhook: hook ? hook.value.trim() : "",
-          item_interval_seconds: ivalInput ? (parseFloat(ivalInput.value) || 0.6) : (k === 'amazon_jp' ? amazonInterval : 0.6),
+          item_interval_seconds: ivalInput ? (parseFloat(ivalInput.value) || (k === 'amazon_jp' ? 1.5 : 3.0)) : (k === 'amazon_jp' ? amazonInterval : 3.0),
           enable_jitter: jitChk ? jitChk.checked : (k === 'amazon_jp' ? amazonJitter : true),
           use_playwright: pwChk ? pwChk.checked : (k === 'amazon_jp' ? amazonPlaywright : false)
         };

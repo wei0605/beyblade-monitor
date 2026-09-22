@@ -8,14 +8,14 @@
   "desktop_notification": true,
   "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
   "line_token": "2011679626:4f5958263e42dfbd8f5b49d8d7f6c9c9",
-  "amazon_item_interval": 0.6,
+  "amazon_item_interval": 1.5,
   "stealth_scan_interval": 60,
   "store_settings": {
     "amazon_jp": {
       "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
-      "item_interval_seconds": 0.6,
+      "item_interval_seconds": 1.5,
       "enable_jitter": true,
       "use_playwright": false
     },
@@ -59,12 +59,12 @@
       "enable_monitoring": true,
       "enable_notifications": true,
       "discord_webhook": "https://ptb.discord.com/api/webhooks/1551220966095331428/zc_55Lk-VwOhTspPFMFZIQZYnilmzX1UOpaXMINpaqQEtsIZDnJLfngMSvEdYenMY4VC",
-      "item_interval_seconds": 0.6
+      "item_interval_seconds": 1.5
     }
   },
   "items": [
     {
-      "enabled": true,
+      "enabled": false,
       "name": "UX-15 シャークスケイルデッキセット",
       "asin": "B0FH4FD9NB",
       "note": "鯊魚利刃牌組套裝",
@@ -78,7 +78,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BX-52 スターター (待公布頁面)",
       "asin": "B0HJ783F18",
       "note": "官方公布 ASIN/網址後請點編輯填入",
@@ -92,7 +92,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BX-53 オールインワンセット (待公布頁面)",
       "asin": "B0HJ75X3PN",
       "note": "官方公布 ASIN/網址後請點編輯填入",
@@ -106,7 +106,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "UX-17 メテオドラグーン (測試對照品)",
       "asin": "B0G1QZR681",
       "note": "測試商品用",
@@ -120,7 +120,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BEYBLADE X UX-20",
       "asin": "B0H4PPV8MR",
       "note": "",
@@ -134,7 +134,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BEYBLADE X UX-21",
       "asin": "B0H861Y9Y3",
       "note": "",
@@ -148,7 +148,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "Beyblade X UX-17",
       "asin": "B0G1QZR681",
       "note": "",
@@ -162,7 +162,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BEYBLADE X UX-19",
       "asin": "B0GS4F6977",
       "note": "",
@@ -176,7 +176,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BEYBLADE X BX-48",
       "asin": "B0GG8QM8YS",
       "note": "",
@@ -190,7 +190,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BEYBLADE X UX-06",
       "asin": "B0D91K2WMS",
       "note": "",
@@ -204,7 +204,7 @@
       "keywords": []
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "BEYBLADE X CX-05",
       "asin": "B0F12RK1F4",
       "note": "",
@@ -391,12 +391,12 @@
       "name": "takara-tomy-戰鬥陀螺-bxg-04-銀牙烈虎sbeyblade-x｜4904810930341",
       "price": "NT$ 350",
       "last_price": "NT$ 350",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bxg-04-銀牙烈虎sbeyblade-x｜4904810930341",
       "direct_url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bxg-04-銀牙烈虎sbeyblade-x｜4904810930341",
       "seller": "童無忌玩具",
       "enabled": true,
-      "is_shelf_product": true,
+      "is_shelf_product": false,
       "keywords": [],
       "last_seller": "童無忌玩具",
       "last_time": "17:06:07"
@@ -713,7 +713,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H4PM8QCF?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H4PM8QCF?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-50 ランダムブースターVol.11",
       "name_zh": "BX-50 隨機強化組 Vol.11"
@@ -727,7 +727,8 @@
       "keywords": [
         "bx52",
         "ラスタードラグーン",
-        "bx-52"
+        "bx-52",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -736,10 +737,11 @@
       "url": "https://www.amazon.co.jp/dp/B0HJ783F18?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HJ783F18?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-52 ラスタードラグーン6-60LC",
-      "name_zh": "BX-52 光輝龍騎士 6-60LC"
+      "name_zh": "BX-52 光輝龍騎士 6-60LC",
+      "jan": "4904810085553"
     },
     {
       "store": "amazon_jp",
@@ -750,7 +752,8 @@
       "keywords": [
         "オールインワンセット",
         "bx-53",
-        "bx53"
+        "bx53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -759,10 +762,11 @@
       "url": "https://www.amazon.co.jp/dp/B0HJ75X3PN?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HJ75X3PN?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-53 オールインワンセット",
-      "name_zh": "BX-53 多合一套組"
+      "name_zh": "BX-53 多合一套組",
+      "jan": "4904810073734"
     },
     {
       "store": "amazon_jp",
@@ -784,7 +788,7 @@
       "url": "https://www.amazon.co.jp/dp/B00JDPMG46?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B00JDPMG46?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-00 ドランバスター1-60A メタルコート:レッド",
       "name_zh": "UX-00 蒼龍爆刃 1-60A 金屬塗層:火紅"
@@ -809,7 +813,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F9ZK48MJ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F9ZK48MJ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-00 ドランアークS 2-70K メタルコート:ブルー",
       "name_zh": "CX-00 蒼龍至尊 S2-70K 金屬塗層:水藍"
@@ -833,7 +837,7 @@
       "url": "https://www.amazon.co.jp/dp/B0HCXR5PWS?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HCXR5PWS?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-19 ランダムブースター クロコトレッドセレクト",
       "name_zh": "CX-19 鱷魚裂甲隨機強化組"
@@ -856,7 +860,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H4PPV8MR?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H4PPV8MR?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-20 グローリーワルキューレ LF",
       "name_zh": "UX-20 榮耀武神 LF"
@@ -879,7 +883,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H861Y9Y3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H861Y9Y3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-21 ヘルズネザーデッキセット",
       "name_zh": "UX-21 惡魔冥界對戰組"
@@ -902,7 +906,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52R16P1?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52R16P1?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-01 ドランソード3-60F",
       "name_zh": "BX-01 蒼龍神劍3-60F"
@@ -925,7 +929,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52C4L3T?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52C4L3T?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-02 ヘルズサイズ4-60T",
       "name_zh": "BX-02 惡魔紅鐮4-60T"
@@ -948,7 +952,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52TTRDX?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52TTRDX?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-03 ウィザードアロー4-80B",
       "name_zh": "BX-03 魔導幻箭4-80B"
@@ -971,7 +975,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52S6SNN?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52S6SNN?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-04 ナイトシールド3-80N",
       "name_zh": "BX-04 騎士重盾3-80N"
@@ -994,7 +998,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52ZRXBD?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52ZRXBD?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-05 ウィザードアロー4-80B",
       "name_zh": "BX-05 魔導幻箭4-80B"
@@ -1017,7 +1021,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C531R5L1?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C531R5L1?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-06 ナイトシールド3-80N",
       "name_zh": "BX-06 騎士重盾3-80N"
@@ -1040,7 +1044,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52N5492?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52N5492?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-07 スタートダッシュセット",
       "name_zh": "BX-07 極限激戰初始組"
@@ -1063,7 +1067,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52KJB9K?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52KJB9K?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-08 3on3デッキセット",
       "name_zh": "BX-08 3on3 改造組"
@@ -1086,7 +1090,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CBLL5WHH?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CBLL5WHH?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-13 ナイトランス4-80HN",
       "name_zh": "BX-13 騎士長槍4-80HN"
@@ -1109,7 +1113,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CDW4X95V?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CDW4X95V?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-14 ランダムブースターVol.1",
       "name_zh": "BX-14 隨機強化組 Vol.1"
@@ -1132,7 +1136,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CHR9SD9Z?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CHR9SD9Z?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-15 レオンクロー5-60P",
       "name_zh": "BX-15 雄獅獵爪5-60P"
@@ -1156,7 +1160,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CHRB3TQH?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CHRB3TQH?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-16 ランダムブースター ヴァイパーテイルセレクト",
       "name_zh": "BX-16 王蛇鞭尾隨機強化組"
@@ -1179,7 +1183,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CHR9TB2G?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CHR9TB2G?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-17 バトルエントリーセット",
       "name_zh": "BX-17 對戰入門組"
@@ -1202,7 +1206,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CKQT37TB?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CKQT37TB?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-19 ライノホーン3-80S",
       "name_zh": "BX-19 戰犀重角3-80S"
@@ -1225,7 +1229,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CKQSX6CS?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CKQSX6CS?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-20 ドランダガーデッキセット",
       "name_zh": "BX-20 蒼龍利刃改造組"
@@ -1248,7 +1252,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CKQTC5S8?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CKQTC5S8?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-21 ヘルズチェインデッキセット",
       "name_zh": "BX-21 惡魔鎖鏈改造組"
@@ -1272,7 +1276,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CMZRS74H?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CMZRS74H?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-22 ドランソード3-60F エントリーパッケージ",
       "name_zh": "BX-22 蒼龍神劍3-60F 入門組"
@@ -1295,7 +1299,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CMZSRJ3Q?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CMZSRJ3Q?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-23 フェニックスウイング9-60GF",
       "name_zh": "BX-23 鳳凰飛翼9-60GF 金屬塗層:火紅"
@@ -1318,7 +1322,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CMZRMKPG?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CMZRMKPG?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-24 ランダムブースターVol.2",
       "name_zh": "BX-24 隨機強化組 Vol.2"
@@ -1341,7 +1345,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CRQWFX9R?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CRQWFX9R?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-26 ユニコーンスティング5-60GP",
       "name_zh": "BX-26 幻獸刺心5-60GP"
@@ -1365,7 +1369,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CRQVY5ZX?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CRQVY5ZX?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-27 ランダムブースター スフィンクスカウルセレクト",
       "name_zh": "BX-27 魔獸護甲隨機強化組"
@@ -1388,7 +1392,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CZX8ZMGG?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CZX8ZMGG?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-31 ランダムブースターVol.3",
       "name_zh": "BX-31 隨機強化組 Vol.3"
@@ -1411,7 +1415,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D3TG743N?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D3TG743N?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-33 ヴァイスタイガー3-60U",
       "name_zh": "BX-33 皓戰猛虎3-60U"
@@ -1434,7 +1438,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D6MZB1VF?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D6MZB1VF?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-34 コバルトドラグーン2-60C",
       "name_zh": "BX-34 蒼穹龍騎士2-60C"
@@ -1457,7 +1461,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D6ML5D1N?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D6ML5D1N?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-35 ランダムブースターVol.4",
       "name_zh": "BX-35 隨機強化組 Vol.4"
@@ -1481,7 +1485,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DC66WCDV?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DC66WCDV?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-36 ランダムブースター ホエールウェーブセレクト",
       "name_zh": "BX-36 巨鯨怒濤隨機強化組"
@@ -1504,7 +1508,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DGFZ6WR2?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DGFZ6WR2?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-37 ダブルエクストリームスタジアムセット",
       "name_zh": "BX-37 雙重極限衝擊戰鬥盤豪華組"
@@ -1527,7 +1531,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DJQQ38TG?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DJQQ38TG?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-38 クリムゾンガルーダ4-70TP",
       "name_zh": "BX-38 赫燃天鳳4-70TP"
@@ -1551,7 +1555,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DSKDBFTD?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DSKDBFTD?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-39 ランダムブースター シェルタードレイクセレクト",
       "name_zh": "BX-39 護城龍神隨機強化組"
@@ -1574,7 +1578,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F89Y6XQ1?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F89Y6XQ1?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-44 トリケラプレスM-85BS",
       "name_zh": "BX-44 三角強襲M-85BS"
@@ -1597,7 +1601,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FH4FF4NJ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FH4FF4NJ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-45 サムライカリバー6-70M",
       "name_zh": "BX-45 武士魂斬6-70M"
@@ -1620,7 +1624,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FNM2MZDB?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FNM2MZDB?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-46 バトルエントリーセット∞",
       "name_zh": "BX-46 無限衝擊對戰組"
@@ -1643,7 +1647,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GG8QM8YS?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GG8QM8YS?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-48 ランダムブースターVol.9",
       "name_zh": "BX-48 隨機強化組 Vol.9"
@@ -1666,7 +1670,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GS4M7T5B?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GS4M7T5B?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-49 ドランストライク4-50FF",
       "name_zh": "BX-49 蒼龍突擊4-50FF"
@@ -1689,7 +1693,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWS7DDK4?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWS7DDK4?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-01 ドランブレイブS6-60V",
       "name_zh": "CX-01 蒼龍勇氣S6-60V"
@@ -1712,7 +1716,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWSRHP7J?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWSRHP7J?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-02 ウィザードアークR4-55LO",
       "name_zh": "CX-02 魔導至尊R4-55LO"
@@ -1735,7 +1739,7 @@
       "url": "https://www.amazon.co.jp/dp/B001DR87UE?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B001DR87UE?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-03 ペルセウスダークB6-80W",
       "name_zh": "CX-03 英仙幽冥B6-80W"
@@ -1758,7 +1762,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWS1N4ZX?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWS1N4ZX?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-04 バトルエントリーセットC",
       "name_zh": "CX-04 極限衝擊對戰組C"
@@ -1781,7 +1785,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F12RK1F4?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F12RK1F4?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-05 ランダムブースターVol.6",
       "name_zh": "CX-05 隨機強化組 Vol.6"
@@ -1805,7 +1809,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F47D97BR?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F47D97BR?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-06 ランダムブースター フォックスブラッシュセレクト",
       "name_zh": "CX-06 極狐九尾隨機強化組"
@@ -1828,7 +1832,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FCLJ67NK?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FCLJ67NK?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-07 ペガサスブラストATr",
       "name_zh": "CX-07 天馬爆擊ATr 金屬塗層:碧綠"
@@ -1851,7 +1855,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FCLZGNXC?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FCLZGNXC?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-08 ランダムブースターVol.7",
       "name_zh": "CX-08 隨機強化組 Vol.7"
@@ -1874,7 +1878,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FLCFNPF2?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FLCFNPF2?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-09 ソルエクリプスD5-70TK",
       "name_zh": "CX-09 焰神滅世D5-70TK"
@@ -1897,7 +1901,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FV74J4H5?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FV74J4H5?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-10 ウルフハントF0-60DB",
       "name_zh": "CX-10 銀狼狩獵F0-60DB"
@@ -1920,7 +1924,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FV6Y4MH4?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FV6Y4MH4?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-11 エンペラーマイトデッキセット",
       "name_zh": "CX-11 帝王威能改造組"
@@ -1943,7 +1947,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GG8V3N79?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GG8V3N79?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-12 フェニックスフレアZ9-80WW",
       "name_zh": "CX-12 鳳凰閃焰Z 9-80WW 金屬塗層:火紅"
@@ -1966,7 +1970,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GMF1DTFB?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GMF1DTFB?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-13 バハムートブリッツBK1-50I",
       "name_zh": "CX-13 龍王閃擊BK1-50I"
@@ -1989,7 +1993,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GMDYS21K?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GMDYS21K?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-14 ナイトフォートレスGV8-70UN",
       "name_zh": "CX-14 騎士堡壘 GV8-70UN"
@@ -2012,7 +2016,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GMFHY6ZV?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GMFHY6ZV?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-15 ラグナレイジFE4-55Y",
       "name_zh": "CX-15 邪神狂怒FE4-55Y"
@@ -2035,7 +2039,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GMF7QZQB?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GMF7QZQB?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-16 スタートダッシュセットC",
       "name_zh": "CX-16 X極限衝擊套組C"
@@ -2058,7 +2062,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GWKWBXH3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GWKWBXH3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-17 ランダムブースターVol.10",
       "name_zh": "CX-17 隨機強化組 Vol.10"
@@ -2082,7 +2086,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H1B5QDJK?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H1B5QDJK?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-18 ランダムブースター ランダムブースターブラキオウィップセレクト",
       "name_zh": "CX-18 腕龍鞭打隨機強化組"
@@ -2105,7 +2109,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV7HF3W6?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV7HF3W6?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-01 ドランバスター1-60A",
       "name_zh": "UX-01 蒼龍爆刃1-60A"
@@ -2128,7 +2132,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV7LNQB8?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV7LNQB8?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-02 ヘルズハンマー3-70H",
       "name_zh": "UX-02 惡魔重錘3-70H"
@@ -2151,7 +2155,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV7D5B6K?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV7D5B6K?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-03 ウィザードロッド5-70DB",
       "name_zh": "UX-03 魔導神杖5-70DB"
@@ -2174,7 +2178,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV7LP2M3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV7LP2M3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-04 バトルエントリーセットU",
       "name_zh": "UX-04 極限衝擊對戰組U"
@@ -2198,7 +2202,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D1B1CT2J?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D1B1CT2J?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-05 ランダムブースター シノビシャドウセレクト",
       "name_zh": "UX-05 忍者闇影隨機強化組"
@@ -2221,7 +2225,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D91K2WMS?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D91K2WMS?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-06 レオンクレスト7-60GN",
       "name_zh": "UX-06 雄獅巔峰7-60GN"
@@ -2244,7 +2248,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D91KGT5R?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D91KGT5R?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-07 フェニックスラダーデッキセット",
       "name_zh": "UX-07 鳳凰尾翼改造組"
@@ -2267,7 +2271,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DGFZND26?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DGFZND26?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-08 シルバーウルフ3-80FB",
       "name_zh": "UX-08 霜輝銀狼3-80FB"
@@ -2290,7 +2294,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DJQQDFPS?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DJQQDFPS?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-09 サムライセイバー2-70L",
       "name_zh": "UX-09 武士星劍2-70L"
@@ -2313,7 +2317,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DJQN3329?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DJQN3329?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-10 カスタマイズセットU",
       "name_zh": "UX-10 騎士圓甲改造組"
@@ -2336,7 +2340,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DMSQ57X5?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DMSQ57X5?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-11 インパクトドレイク9-60LR",
       "name_zh": "UX-11 衝擊龍神9-60LR"
@@ -2359,7 +2363,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DMS96VW3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DMS96VW3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-12 ランダムブースターVol.5",
       "name_zh": "UX-12 隨機強化組 Vol.5"
@@ -2382,7 +2386,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DSKBG6VF?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DSKBG6VF?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-13 ゴーレムロック1-60UN ",
       "name_zh": "UX-13 魔像奇岩1-60UN"
@@ -2405,7 +2409,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F47G3QJT?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F47G3QJT?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-14 スコーピオスピア0-70Z",
       "name_zh": "UX-14 天蠍長矛0-70Z"
@@ -2428,7 +2432,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FH4FD9NB?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FH4FD9NB?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-15 シャークスケイルデッキセット",
       "name_zh": "UX-15 鮫鯊狂鱗改造組"
@@ -2452,7 +2456,7 @@
       "url": "https://www.amazon.co.jp/dp/B07XBR36N3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B07XBR36N3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-16 ランダムブースター クロックミラージュセレクト",
       "name_zh": "UX-16 時鐘幻象隨機強化組"
@@ -2475,7 +2479,7 @@
       "url": "https://www.amazon.co.jp/dp/B0G1QZR681?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0G1QZR681?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-17 メテオドラグーン3-70J",
       "name_zh": "UX-17 隕星龍騎士3-70J 金屬塗層:白色"
@@ -2498,7 +2502,7 @@
       "url": "https://www.amazon.co.jp/dp/B0G1R71G2F?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0G1R71G2F?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-18 ランダムブースターVol.8",
       "name_zh": "UX-18 隨機強化組 Vol.8"
@@ -2521,7 +2525,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GS4F6977?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GS4F6977?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "amazon_jp",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-19 バレットグリフォンH",
       "name_zh": "UX-19 彈丸獅鷲H"
@@ -2545,7 +2549,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CP89BDKT?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CP89BDKT?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 フェニックスフェザー3-60F",
       "name_zh": "BX-00 鳳凰翔羽 3-60F"
@@ -2570,7 +2574,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CQZ2VBKZ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CQZ2VBKZ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 スペシャルクロスベイ ヘルズサイズ3-80F",
       "name_zh": "BX-00 特別合體陀螺 地獄鐮刀 3-80F"
@@ -2596,7 +2600,7 @@
       "url": "https://www.amazon.co.jp/dp/B00JVH4DPQ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B00JVH4DPQ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ドランソード メタルコート:ブルー",
       "name_zh": "BX-00 蒼龍神劍 金屬塗層:藍"
@@ -2622,7 +2626,7 @@
       "url": "https://www.amazon.co.jp/dp/B00N51Y4LM?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B00N51Y4LM?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 フェニックスウイング9-80DB メタルコート:ネイビー",
       "name_zh": "BX-00 鳳凰飛翼 9-80DB"
@@ -2648,7 +2652,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DRDN44KT?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DRDN44KT?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 クロコクランチ2-60Q メタルコート:グリーン",
       "name_zh": "BX-00 鱷魚粉碎 2-60Q 金屬塗層:綠"
@@ -2674,7 +2678,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWNKCVF6?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWNKCVF6?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 フェニックスフェザー メタルコート:オレンジ",
       "name_zh": "BX-00 鳳凰翔羽 金屬塗層:橘"
@@ -2700,7 +2704,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F6FDSYDZ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F6FDSYDZ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 サムライスチール5-70GF メタルコート:ホワイト",
       "name_zh": "BX-00 武士鋼鐵 5-70GF 金屬塗層:白"
@@ -2726,7 +2730,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DV9Y94RG?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DV9Y94RG?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-00 サムライセイバー2-70L メタルコート:オレンジ",
       "name_zh": "UX-00 武士星劍 2-70L 金屬塗層:橘"
@@ -2750,7 +2754,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FXY57TTF?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FXY57TTF?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-00 オロチクラスタ6-60LF",
       "name_zh": "UX-00 大蛇簇擁 6-60LF"
@@ -2776,7 +2780,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GKHRVXJP?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GKHRVXJP?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ドランソード メタルコート:レッド",
       "name_zh": "BX-00 蒼龍神劍 金屬塗層:紅"
@@ -2802,7 +2806,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GVL5T5XR?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GVL5T5XR?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-00 バハムートブリッツBK 1-50I メタルコート:イエロー",
       "name_zh": "CX-00 龍王閃擊 BK1-50I 金屬塗層:黃"
@@ -2828,7 +2832,7 @@
       "url": "https://www.amazon.co.jp/dp/B0HBCZLJ2R?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HBCZLJ2R?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-00 クロックミラージュ4-55S メタルコート:ブラック 運命の巻戻士ver.",
       "name_zh": "UX-00 時鐘幻象 4-55S 金屬塗層:闇黑 命運的倒帶士版"
@@ -2854,7 +2858,7 @@
       "url": "https://www.amazon.co.jp/dp/B0HHCK2LDH?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HHCK2LDH?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-00 キッドハントK4-70TK メタルコート:ホワイト",
       "name_zh": "CX-00 基德狩獵 K4-70TK 金屬塗層:白色"
@@ -2879,7 +2883,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D9NF77R3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D9NF77R3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ベイブレード25周年記念セット",
       "name_zh": "BX-00 戰鬥陀螺25周年紀念套組"
@@ -2905,7 +2909,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D4545XZ3?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D4545XZ3?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 シノビナイフ4-60LF メタルコート:ブルー",
       "name_zh": "BX-00 忍者刺刀 4-60LF 金屬塗層:水藍"
@@ -2929,7 +2933,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C73JQNZQ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C73JQNZQ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ドランザースパイラル3-80T",
       "name_zh": "BX-00 烈焰飛鳳 S3-80T"
@@ -2953,7 +2957,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CY4H1TJD?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CY4H1TJD?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ドライガースラッシュ4-80P",
       "name_zh": "BX-00 銀牙烈虎 4-80P"
@@ -2978,7 +2982,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DC692T6X?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DC692T6X?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ランダムブースター ライトニングエルドラゴ1-60F",
       "name_zh": "BX-00 雷霆天龍 1-60F 隨機強化組"
@@ -3004,7 +3008,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H1GWGDKW?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H1GWGDKW?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 コバルトドラグーン2-60C メタルコート:ブラック",
       "name_zh": "BX-00 蒼穹龍騎士 2-60C 金屬塗層:闇黑"
@@ -3028,7 +3032,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DP8YCCLP?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DP8YCCLP?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ドラシエルシールド7-60D",
       "name_zh": "BX-00 堅甲戰龜 S7-60D"
@@ -3052,7 +3056,7 @@
       "url": "https://www.amazon.co.jp/dp/B0F1CH2G77?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0F1CH2G77?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ゼノエクスカリバー3-60GF",
       "name_zh": "BX-00 神力聖劍 3-60GF"
@@ -3076,7 +3080,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FGCDDMLG?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FGCDDMLG?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ロックレオーネ6-80GN",
       "name_zh": "BX-00 巨岩雄獅 6-80GN"
@@ -3100,7 +3104,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GS8PVZ2F?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GS8PVZ2F?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ストームスプリガン2-70M",
       "name_zh": "BX-00 暴風巨神 2-70M"
@@ -3124,7 +3128,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H4PK66SN?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H4PK66SN?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ストームペガシス3-70RA",
       "name_zh": "BX-00 暴風天馬3-70RA"
@@ -3150,7 +3154,7 @@
       "url": "https://www.amazon.co.jp/dp/B0G6JDWLYY?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0G6JDWLYY?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-00 ドランブレイブS6-60V メタルコート:ブラック",
       "name_zh": "CX-00 蒼龍勇氣 S6-60V 金屬塗層:闇黑"
@@ -3174,7 +3178,7 @@
       "url": "https://www.amazon.co.jp/dp/B0GSTMQB77?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0GSTMQB77?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-00 エヴァンゲリオンデッキセット",
       "name_zh": "CX-00 新世紀福音戰士戰鬥陀螺套組"
@@ -3200,7 +3204,7 @@
       "url": "https://www.amazon.co.jp/dp/B0HD7R35X8?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HD7R35X8?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "UX-00 スコーピオスピア0-70Z メタルコート:マゼンタ",
       "name_zh": "UX-00 天蠍長矛 0-70Z 金屬塗層:品紅"
@@ -3225,7 +3229,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランソード 3-60F スシローVer.",
       "name_zh": "BX-00 蒼龍神劍 3-60F 壽司郎聯名版"
@@ -3252,7 +3256,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 マーベル キャプテン・アメリカ4-70GB/レッドハルク1-80R",
       "name_zh": "BX-00 漫威 美國隊長 4-70GB / 紅浩克 1-80R"
@@ -3280,7 +3284,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 マーベル マイルズ・モラレス1-60GN/グリーン・ゴブリン9-80HT",
       "name_zh": "BX-00 漫威 終極蜘蛛人 1-60GN / 綠惡魔 9-80HT"
@@ -3309,7 +3313,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 スター・ウォーズ オビ＝ワン・ケノービ4-60P/グリーヴァス将軍3-80HN",
       "name_zh": "BX-00 星際大戰 歐比王肯諾比 4-60P / 葛里維斯將軍 3-80HN"
@@ -3336,7 +3340,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 スター・ウォーズ チューバッカ4-80LF/ストームトルーパー5-70B",
       "name_zh": "BX-00 星際大戰 丘巴卡 4-80LF / 風暴兵 5-70B"
@@ -3361,7 +3365,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランソード3-60F メタルコートVer. X-TREME CUP G1 2023 賞品",
       "name_zh": "BX-00 蒼龍神劍 3-60F 金屬塗層版 2023極限盃G1大賽獎品"
@@ -3386,7 +3390,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FG8L7BS6?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FG8L7BS6?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "CX-00 アシストブレード/J（ジャギー）",
       "name_zh": "CX-00 輔助戰刃/J"
@@ -3412,7 +3416,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FQ5JS5YW?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FQ5JS5YW?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-00 ビットセット F/T/B/N ゴールドxブラック",
       "name_zh": "BX-00 軸心套組 F/T/B/N 金×黑"
@@ -3437,7 +3441,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 アジアチャンピオンシップ開催記念 ドランデッキスターター",
       "name_zh": "UX-00 亞洲冠軍賽舉辦紀念 蒼龍改造入門組"
@@ -3462,7 +3466,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 レオンファングT 4-60A レッドVer.",
       "name_zh": "CX-00 雄獅獠牙 T4-60A 火紅版"
@@ -3486,7 +3490,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ワイバーンホバー 2-80GN DMMくじA賞",
       "name_zh": "UX-00 飛龍凌空 2-80GN DMM 抽獎A獎"
@@ -3512,7 +3516,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ワイバーンホバー 2-80GN メタルコート:バイオレット DMMくじLAST CHANCE賞",
       "name_zh": "UX-00 飛龍凌空 2-80GN 金屬塗層:紫 DMM 抽獎最後獎"
@@ -3537,7 +3541,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランソード3-60F バージョン2.0",
       "name_zh": "BX-00 蒼龍神劍 3-60F 版本2.0"
@@ -3565,7 +3569,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 シャークエッジ2-60GP メタルコート:ブラック 釣りスピリッツ ワンダーVer.",
       "name_zh": "BX-00 鮫鯊鋒鰭 2-60GP 金屬塗層:闇黑"
@@ -3593,7 +3597,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ホエールウェーブ1-80GF メタルコート:ブルー 釣りスピリッツ ワンダーVer.",
       "name_zh": "BX-00 巨鯨怒濤 1-80GF 金屬塗層:藍"
@@ -3619,7 +3623,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 グローリーワルキューレLF メタルコート:ブルー",
       "name_zh": "UX-00 榮耀武神 LF 金屬塗層:藍"
@@ -3643,7 +3647,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ティガレイジFT3-60T",
       "name_zh": "CX-00 迪卡狂怒FT3-60T"
@@ -3669,7 +3673,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ホーネットフォート R7-60T メタルコート:イエロー",
       "name_zh": "CX-00 黃蜂要塞 R7-60T 金屬塗層:黃"
@@ -3695,7 +3699,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 クラーケンリグル S3-70O メタルコート:ブルー",
       "name_zh": "CX-00 海怪扭擺 S3-70O 金屬塗層:藍"
@@ -3721,7 +3725,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 バックスアントラーズ B2-60D メタルコート:オレンジ",
       "name_zh": "CX-00 雄鹿戰角 B2-60D 金屬塗層:橘"
@@ -3745,7 +3749,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 バイソンバローDB DMMくじVol.2 A賞",
       "name_zh": "UX-00 英勇野牛 DB DMM 抽獎 Vol.2 A獎"
@@ -3771,7 +3775,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 バイソンバローDB メタルコート:ホワイト DMMくじVol.2 LAST CHANCE賞",
       "name_zh": "UX-00 英勇野牛 DB 金屬塗層:白色 DMM 抽獎 Vol.2 最後獎"
@@ -3797,7 +3801,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ドランバスター1-60A メッキVer. アジアチャンピオンシップ2024賞品",
       "name_zh": "UX-00 蒼龍爆刃 1-60A 電鍍版 2024亞洲錦標賽獎品"
@@ -3824,7 +3828,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ナイトシールド3-80N メタルコート:ゴールド B4ストアG3大会賞品",
       "name_zh": "BX-00 騎士重盾 3-80N 金屬塗層:燦金 B4商店G3大賽獎品"
@@ -3851,7 +3855,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ウィザードロッド5-70DB メタルコート:ゴールド B4ストアG3大会賞品",
       "name_zh": "UX-00 魔導神杖 5-70DB 金屬塗層:燦金 B4商店G3大賽獎品"
@@ -3878,7 +3882,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ペルセウスダークB 6-80W メタルコート:ゴールド B4ストアG3大会賞品",
       "name_zh": "CX-00 英仙幽冥 B6-80W 金屬塗層:燦金 B4商店G3大賽獎品"
@@ -3903,7 +3907,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ドランブレイブS 6-60V メタルコートVer. X-TREME CUP G1 2025 賞品",
       "name_zh": "CX-00 蒼龍勇氣 S6-60V 金屬塗層版 2025極限盃G1大賽獎品"
@@ -3927,7 +3931,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 プラスワンビットキャンペーン P",
       "name_zh": "BX-00 加贈軸心活動 P"
@@ -3951,7 +3955,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 プラスワンビットキャンペーン V/O/D",
       "name_zh": "BX-00 加贈軸心活動 V/O/D"
@@ -3978,7 +3982,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ラグナレイジFE 4-55Y メタルコート:ゴールド B4ストアG3大会賞品",
       "name_zh": "CX-00 邪神狂怒 FE4-55Y 金屬塗層:燦金 B4商店G3大賽獎品"
@@ -4004,7 +4008,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ドレイクブレイブ G4-70I メタルコート:ブルー",
       "name_zh": "CX-00 龍神勇氣 G4-70I 金屬塗層:水藍"
@@ -4030,7 +4034,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ドレイクブレイブ G4-70I メタルコート:ブルー",
       "name_zh": "CX-00 龍神勇氣 G4-70I 金屬塗層:水藍"
@@ -4055,7 +4059,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランストライク4-50FF メタルコートVer. X-TREME CUP G1 2026 賞品",
       "name_zh": "BX-00 蒼龍突擊 4-50FF 金屬塗層版 2026極限盃G1大賽獎品"
@@ -4079,7 +4083,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 プラスワンビットキャンペーン U/W/GB",
       "name_zh": "BX-00 加贈軸心活動 U/W/GB"
@@ -4106,7 +4110,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ストリングランチャー ゴールド/シルバー/ブロンズVer. X-TREME CUP G2 賞品",
       "name_zh": "BX-00 炫風發射器 金/銀/銅版 極限盃G2大賽獎品"
@@ -4132,7 +4136,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ビットセット F/T/B/N ゴールド×ブラック",
       "name_zh": "BX-00 軸心套組 F/T/B/N 金×黑"
@@ -4158,7 +4162,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ビットセット F/T/B/N シルバー×ホワイト",
       "name_zh": "BX-00 軸心套組 F/T/B/N 銀×白"
@@ -4182,7 +4186,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ベイエンブレムステッカー 01",
       "name_zh": "BX-00 戰鬥陀螺 X 徽章貼紙 01"
@@ -4206,7 +4210,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ベイブレードステッカー 01",
       "name_zh": "BX-00 戰鬥陀螺 X 貼紙 01"
@@ -4230,7 +4234,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ベイブレードステッカー 02",
       "name_zh": "BX-00 戰鬥陀螺 X 貼紙 02"
@@ -4254,7 +4258,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ベイブレードステッカー 03",
       "name_zh": "BX-00 戰鬥陀螺 X 貼紙 03"
@@ -4278,7 +4282,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52SMHWN?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52SMHWN?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-09 ベイバトルパス",
       "name_zh": "BX-09 戰鬥陀螺X通行證"
@@ -4302,7 +4306,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C52YJQBC?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C52YJQBC?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-10 エクストリームスタジアム",
       "name_zh": "BX-10 極限衝擊戰鬥盤"
@@ -4326,7 +4330,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C533Q31X?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C533Q31X?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-11 ランチャーグリップ",
       "name_zh": "BX-11 X發射器握把"
@@ -4350,7 +4354,7 @@
       "url": "https://www.amazon.co.jp/dp/B0C535TZP7?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0C535TZP7?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-12 3on3デッキケース",
       "name_zh": "BX-12 3V3 對戰收納盒"
@@ -4374,7 +4378,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CHR9FP8L?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CHR9FP8L?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-18 ストリングランチャー",
       "name_zh": "BX-18 炫風發射器"
@@ -4398,7 +4402,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CMZQ9157?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CMZQ9157?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-25 ギアケース",
       "name_zh": "BX-25 專業收納包"
@@ -4423,7 +4427,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV79K8KS?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV79K8KS?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-28 ストリングランチャー ホワイトVer.",
       "name_zh": "BX-28 炫風發射器 白色版"
@@ -4448,7 +4452,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV7HCP16?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV7HCP16?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-29 カスタムグリップ ホワイトVer.",
       "name_zh": "BX-29 X發射器改造型握把(白藍)"
@@ -4473,7 +4477,7 @@
       "url": "https://www.amazon.co.jp/dp/B0CV73DH8V?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0CV73DH8V?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-30 カスタムグリップ レッドVer.",
       "name_zh": "BX-30 X發射器改造型握把(黑紅)"
@@ -4497,7 +4501,7 @@
       "url": "https://www.amazon.co.jp/dp/B0D6N98DTB?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0D6N98DTB?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-32 ワイドエクストリームスタジアム",
       "name_zh": "BX-32 寬極限競技場"
@@ -4521,7 +4525,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWSBHQWD?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWSBHQWD?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-40 ワインダーランチャーL",
       "name_zh": "BX-40 拉條發射器L"
@@ -4546,7 +4550,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWS96T4F?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWS96T4F?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-41 ラバーカスタムグリップ ガンメタVer.",
       "name_zh": "BX-41 X發射器改造型握把(黑/透紅)"
@@ -4571,7 +4575,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWSB1VDQ?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWSB1VDQ?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-42 ラバーカスタムグリップ ブルーVer.",
       "name_zh": "BX-42 X發射器改造型握把(藍/透明)"
@@ -4596,7 +4600,7 @@
       "url": "https://www.amazon.co.jp/dp/B0DWS3ZFF7?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0DWS3ZFF7?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-43 ギアケース ホワイトVer.",
       "name_zh": "BX-43 專業收納包 白色版"
@@ -4621,7 +4625,7 @@
       "url": "https://www.amazon.co.jp/dp/B0FQ9ZSLPD?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0FQ9ZSLPD?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-47 ストリングランチャーL レッドVer.",
       "name_zh": "BX-47 炫風發射器L 紅色版"
@@ -4646,7 +4650,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H19XNXW2?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H19XNXW2?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-51 ストリングランチャーブラック×グリーン",
       "name_zh": "BX-51 炫風發射器 黑色×綠色"
@@ -4663,7 +4667,8 @@
         "bx56",
         "バイオレット",
         "ストリングランチャー",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -4672,10 +4677,11 @@
       "url": "https://www.amazon.co.jp/dp/B0HJ7CPXJ6?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0HJ7CPXJ6?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-56 ストリングランチャーL ホワイト×バイオレット",
-      "name_zh": "BX-56 炫風發射器L 白色×紫色"
+      "name_zh": "BX-56 炫風發射器L 白色×紫色",
+      "jan": "4904810058915"
     },
     {
       "store": "amazon_jp",
@@ -4697,7 +4703,7 @@
       "url": "https://www.amazon.co.jp/dp/B0H85ZRYJX?m=AN1VRQENFRJN5&th=1&psc=1",
       "direct_url": "https://www.amazon.co.jp/dp/B0H85ZRYJX?m=AN1VRQENFRJN5&th=1&psc=1",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": true,
       "name_ja": "BX-57 3on3デッキケース ブラックVer.",
       "name_zh": "BX-57 3V3 對戰收納盒 黑色版"
@@ -4722,7 +4728,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 アジアチャンピオンシップ開催記念 ドランデッキスターター",
       "name_zh": "UX-00 亞洲冠軍賽舉辦紀念 蒼龍改造入門組"
@@ -4747,7 +4753,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 エクストリームスタジアム ライトパッケージ",
       "name_zh": "BX-00 極限競技場 輕量包"
@@ -4773,7 +4779,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ヘルズサイズ4-60T メタルコート:ゴールド",
       "name_zh": "BX-00 惡魔紅鐮 4-60T 金屬塗層:燦金"
@@ -4799,7 +4805,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 レオンクロー5-60P メタルコート:ゴールド",
       "name_zh": "BX-00 雄獅獵爪 5-60P 金屬塗層:燦金"
@@ -4825,7 +4831,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 シャークエッジ5-60GF メタルコート:ブルー",
       "name_zh": "BX-00 鮫鯊鋒鰭 5-60GF 金屬塗層:水藍"
@@ -4851,7 +4857,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ヘルズチェイン5-60HT メタルコート:ブラック",
       "name_zh": "BX-00 惡魔鎖鏈 5-60HT 金屬塗層:闇黑"
@@ -4878,7 +4884,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランダガー2-80GP メタルコート:ブラック ジャイアンツVer.",
       "name_zh": "BX-00 蒼龍利刃2-80GP 金屬塗層:闇黑 巨人隊版"
@@ -4903,7 +4909,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランザースパイラル3-80T ブラックVer.",
       "name_zh": "BX-00 烈焰飛鳳 S3-80T 闇黑版"
@@ -4930,7 +4936,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ドランバスター1-60A メタルコート:ブルー FCバルセロナVer.",
       "name_zh": "UX-00 蒼龍爆刃 1-60A 金屬塗層:藍 FC巴塞隆納版"
@@ -4955,7 +4961,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ベイキックオフセット FCバルセロナVer.",
       "name_zh": "UX-00 惡魔戰錘戰鬥組FC巴賽隆納Ver."
@@ -4979,7 +4985,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドラグーンストーム4-60RA",
       "name_zh": "BX-00 龍騎士 S4-60RA"
@@ -5004,7 +5010,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 コバルトドレイク4-60F クリアVer.",
       "name_zh": "BX-00 蒼穹龍神 4-60F 透明版"
@@ -5029,7 +5035,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 エアロペガサス3-70A レッドVer.",
       "name_zh": "UX-00 空力天馬 3-70A 火紅版"
@@ -5055,7 +5061,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 マーベル アイアンマン4-80B/サノス4-60P",
       "name_zh": "BX-00 漫威 鋼鐵人 4-80B / 薩諾斯 4-60P"
@@ -5081,7 +5087,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 マーベル スパイダーマン3-60F/ヴェノム3-80N",
       "name_zh": "BX-00 漫威 蜘蛛人 3-60F / 猛毒 3-80N"
@@ -5106,7 +5112,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ドランバスター1-60A カラーチョイスブースター",
       "name_zh": "UX-00 蒼龍爆刃 1-60A 配色補充包"
@@ -5132,7 +5138,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 マンモスタスク2-80E メタルコート:ブラック",
       "name_zh": "BX-00 猛瑪長牙 2-80E 金屬塗層:闇黑"
@@ -5161,7 +5167,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 スター・ウォーズ ルーク・スカイウォーカー4-80B/ダース・ベイダー4-60P",
       "name_zh": "BX-00 星際大戰 路克天行者 4-80B / 達斯維達 4-60P"
@@ -5189,7 +5195,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 スター・ウォーズ マンダロリアン3-60F/モフ・ギデオン3-80N",
       "name_zh": "BX-00 星際大戰 曼達洛人 3-60F / 星區長吉迪恩 3-80N"
@@ -5216,7 +5222,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 フェニックスウイング9-60GF メタルコート:ブラック キタニタツヤVer.",
       "name_zh": "BX-00 鳳凰飛翼 9-60GF 金屬塗層:闇黑 木谷龍也版"
@@ -5242,7 +5248,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 トランスフォーマー オプティマスプライム4-60P/メガトロン4-80B",
       "name_zh": "BX-00 變形金剛 柯博文 4-60P / 密卡登 4-80B"
@@ -5268,7 +5274,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 トランスフォーマー オプティマスプライマル3-60F/スタースクリーム3-80N",
       "name_zh": "BX-00 變形金剛 金剛王 3-60F / 天王星 3-80N"
@@ -5295,7 +5301,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ジュラシック・ワールド T-レックス1-80GB/モササウルス9-60U",
       "name_zh": "BX-00 侏羅紀世界 暴龍 1-80GB / 滄龍 9-60U"
@@ -5322,7 +5328,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ジュラシック・ワールド スピノサウルス3-85A/ケツァルコアトルス4-55D",
       "name_zh": "BX-00 侏羅紀世界 棘龍 3-85A / 翼龍 4-55D"
@@ -5348,7 +5354,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 ナイトメイル3-85BS メタルコート:ネイビー",
       "name_zh": "UX-00 騎士圓甲 3-85BS 金屬塗層:夜藍"
@@ -5374,7 +5380,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ウィザードアークR4-55LO メタルコート:ブラック",
       "name_zh": "CX-00 魔導至尊 R4-55LO 金屬塗層:闇黑"
@@ -5400,7 +5406,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ペガサスブラストATr メタルコート:レッド",
       "name_zh": "CX-00 天馬爆擊ATr 金屬塗層:火紅"
@@ -5426,7 +5432,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ビットセット F/T/B/N シルバーxホワイト",
       "name_zh": "BX-00 軸心套組 F/T/B/N 銀×白"
@@ -5453,7 +5459,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ドランソード1-60V メタルコート:ブラック JリーグVer.",
       "name_zh": "BX-00 蒼龍神劍 1-60V 金屬塗層:闇黑 日本職業足球聯盟版"
@@ -5480,7 +5486,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 コバルトドラグーン9-60F メタルコート:ホワイト JリーグVer.",
       "name_zh": "BX-00 蒼穹龍騎士 9-60F 金屬塗層:白色 日本職業足球聯盟版"
@@ -5507,7 +5513,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 サムライセイバー5-60K メタルコート:サムライブルー サッカー日本代表Ver.",
       "name_zh": "UX-00 武士星劍 5-60K 金屬塗層:武士藍 足球日本代表版"
@@ -5533,7 +5539,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 ストリングランチャー B4ストア限定カラーVer.",
       "name_zh": "BX-00 炫風發射器 B4商店限定顏色版本"
@@ -5559,7 +5565,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+BX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "BX-00 コバルトドレイク4-60F メタルコート:ブルー",
       "name_zh": "BX-00 蒼穹龍神 4-60F 金屬塗層:藍"
@@ -5586,7 +5592,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+UX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "UX-00 エアロペガサス3-70A ダブルメタルコート:ブルーｘグリーン",
       "name_zh": "UX-00 空力天馬 3-70A 金屬塗層:藍/綠"
@@ -5612,7 +5618,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ワルキューレボルトS 4-70V メタルコート:ゴールド",
       "name_zh": "CX-00 戰神伏特 S4-70V 金屬塗層:燦金"
@@ -5638,7 +5644,7 @@
       "url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "direct_url": "https://www.amazon.co.jp/s?k=ベイブレードX+CX-00&rh=p_6%3AAN1VRQENFRJN5",
       "seller": "Amazon Japan",
-      "enabled": true,
+      "enabled": false,
       "is_shelf_product": false,
       "name_ja": "CX-00 ロックチップ／ドラン クリアブラックVer.",
       "name_zh": "CX-00 鎖定紋章／蒼龍 透明黑版"
@@ -5677,7 +5683,8 @@
       "keywords": [
         "bx-52",
         "bx52",
-        "光輝龍騎士"
+        "光輝龍騎士",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -5687,7 +5694,8 @@
       "direct_url": "https://shopee.tw/search?keyword=BX-52&shop=285705541",
       "seller": "shopee",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810085553"
     },
     {
       "store": "shopee",
@@ -5699,7 +5707,8 @@
       "keywords": [
         "bx53",
         "多合一套組",
-        "bx-53"
+        "bx-53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -5709,7 +5718,8 @@
       "direct_url": "https://shopee.tw/search?keyword=BX-53&shop=285705541",
       "seller": "shopee",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810073734"
     },
     {
       "store": "shopee",
@@ -8283,7 +8293,8 @@
         "紫色",
         "bx56",
         "白色",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -8293,7 +8304,8 @@
       "direct_url": "https://shopee.tw/search?keyword=BX-56&shop=285705541",
       "seller": "shopee",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810058915"
     },
     {
       "store": "shopee",
@@ -10323,7 +10335,7 @@
       "is_00": false,
       "price": "-",
       "last_price": "NT$ 19,057",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/beyblade-x-dmmくじ-vol3-戰鬥陀螺一番賞-第三彈",
       "direct_url": "https://www.twj.tw/products/beyblade-x-dmmくじ-vol3-戰鬥陀螺一番賞-第三彈",
       "seller": "twj_toys",
@@ -10342,7 +10354,8 @@
       "keywords": [
         "bx-52",
         "bx52",
-        "光輝龍騎士"
+        "光輝龍騎士",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -10352,7 +10365,8 @@
       "direct_url": "https://www.twj.tw/search?q=BX-52",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810085553"
     },
     {
       "store": "twj_toys",
@@ -10364,7 +10378,8 @@
       "keywords": [
         "bx53",
         "多合一套組",
-        "bx-53"
+        "bx-53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -10374,7 +10389,8 @@
       "direct_url": "https://www.twj.tw/search?q=BX-53",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810073734"
     },
     {
       "store": "twj_toys",
@@ -10392,7 +10408,7 @@
       "is_00": true,
       "price": "-",
       "last_price": "NT$ 350",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-00-烈焰飛鳳s-3-80tbeyblade-x｜4904810910503",
       "direct_url": "https://www.twj.tw/products/takara-tomy-戰鬥陀螺-bx-00-烈焰飛鳳s-3-80tbeyblade-x｜4904810910503",
       "seller": "twj_toys",
@@ -10584,7 +10600,7 @@
       "is_00": true,
       "price": "-",
       "last_price": "NT$ 800",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/2026戰鬥陀螺-beyblade-x-cx-00-雄鹿鹿角-b2-60d-金屬塗層橘色-b4-limited-takara-tomy正版",
       "direct_url": "https://www.twj.tw/products/2026戰鬥陀螺-beyblade-x-cx-00-雄鹿鹿角-b2-60d-金屬塗層橘色-b4-limited-takara-tomy正版",
       "seller": "twj_toys",
@@ -10747,7 +10763,7 @@
       "is_00": true,
       "price": "-",
       "last_price": "NT$ 800",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/2026takara-tomy-beyblade-x-cx-00-扭動海妖-s3-70o-鋼鐵塗層藍色-戰鬥陀螺-正版",
       "direct_url": "https://www.twj.tw/products/2026takara-tomy-beyblade-x-cx-00-扭動海妖-s3-70o-鋼鐵塗層藍色-戰鬥陀螺-正版",
       "seller": "twj_toys",
@@ -11655,7 +11671,7 @@
       "is_00": false,
       "price": "-",
       "last_price": "NT$ 9,999",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/takara-tomy-beyblade-x-戰鬥陀螺-ux-20-榮耀武神-lfglory-valkyrie-lfstarter-入門組｜4904810096139",
       "direct_url": "https://www.twj.tw/products/takara-tomy-beyblade-x-戰鬥陀螺-ux-20-榮耀武神-lfglory-valkyrie-lfstarter-入門組｜4904810096139",
       "seller": "twj_toys",
@@ -11679,7 +11695,7 @@
       "is_00": false,
       "price": "-",
       "last_price": "NT$ 895",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/20268beyblade-x-ux-21-惡魔冥界改造組-戰鬥陀螺-takara-tomy正版",
       "direct_url": "https://www.twj.tw/products/20268beyblade-x-ux-21-惡魔冥界改造組-戰鬥陀螺-takara-tomy正版",
       "seller": "twj_toys",
@@ -12077,7 +12093,7 @@
       "is_00": false,
       "price": "-",
       "last_price": "NT$ 260",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/新款-戰鬥盒-3g-戰鬥盒-戰鬥陀螺-對戰用-3-vs-3-bx-12-bx-12-bx12",
       "direct_url": "https://www.twj.tw/products/新款-戰鬥盒-3g-戰鬥盒-戰鬥陀螺-對戰用-3-vs-3-bx-12-bx-12-bx12",
       "seller": "twj_toys",
@@ -12371,7 +12387,7 @@
       "is_00": false,
       "price": "-",
       "last_price": "NT$ 850",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/bx-25-專業收納包-黑色版-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
       "direct_url": "https://www.twj.tw/products/bx-25-專業收納包-黑色版-戰鬥陀螺-x-戰鬥陀螺-beyblade-x-beyblade",
       "seller": "twj_toys",
@@ -12962,7 +12978,8 @@
         "紫色",
         "bx56",
         "白色",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -12972,7 +12989,8 @@
       "direct_url": "https://www.twj.tw/search?q=BX-56",
       "seller": "twj_toys",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810058915"
     },
     {
       "store": "twj_toys",
@@ -13453,7 +13471,7 @@
       "is_00": true,
       "price": "-",
       "last_price": "NT$ 385",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-x-b-00-龍騎士s",
       "direct_url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-x-b-00-龍騎士s",
       "seller": "twj_toys",
@@ -14007,7 +14025,7 @@
       "is_00": true,
       "price": "-",
       "last_price": "NT$ 1,395",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/20268beyblade-x-新世紀福音戰士-eva-聯名款陀螺｜初號機限定配色｜全新限定機型",
       "direct_url": "https://www.twj.tw/products/20268beyblade-x-新世紀福音戰士-eva-聯名款陀螺｜初號機限定配色｜全新限定機型",
       "seller": "twj_toys",
@@ -14558,7 +14576,7 @@
       "is_00": false,
       "price": "-",
       "last_price": "NT$ 350",
-      "last_status": "🟢 突襲上架現貨！",
+      "last_status": "⚪ 已售完 (無庫存)",
       "url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-cx-18-腕龍鞭打-隨機強化組-takara-tomy-正版",
       "direct_url": "https://www.twj.tw/products/beyblade-x-戰鬥陀螺-cx-18-腕龍鞭打-隨機強化組-takara-tomy-正版",
       "seller": "twj_toys",
@@ -15025,7 +15043,8 @@
       "keywords": [
         "bx-52",
         "bx52",
-        "光輝龍騎士"
+        "光輝龍騎士",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -15035,7 +15054,8 @@
       "direct_url": "https://shop.funbox.com.tw/search?q=BX-52",
       "seller": "funbox_tw",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810085553"
     },
     {
       "store": "funbox_tw",
@@ -15047,7 +15067,8 @@
       "keywords": [
         "bx53",
         "多合一套組",
-        "bx-53"
+        "bx-53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -15057,7 +15078,8 @@
       "direct_url": "https://shop.funbox.com.tw/search?q=BX-53",
       "seller": "funbox_tw",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810073734"
     },
     {
       "store": "funbox_tw",
@@ -17631,7 +17653,8 @@
         "紫色",
         "bx56",
         "白色",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -17641,7 +17664,8 @@
       "direct_url": "https://shop.funbox.com.tw/search?q=BX-56",
       "seller": "funbox_tw",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810058915"
     },
     {
       "store": "funbox_tw",
@@ -19688,7 +19712,8 @@
       "keywords": [
         "bx-52",
         "bx52",
-        "光輝龍騎士"
+        "光輝龍騎士",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -19698,7 +19723,8 @@
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-52",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810085553"
     },
     {
       "store": "pchome",
@@ -19710,7 +19736,8 @@
       "keywords": [
         "bx53",
         "多合一套組",
-        "bx-53"
+        "bx-53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -19720,7 +19747,8 @@
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-53",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810073734"
     },
     {
       "store": "pchome",
@@ -22294,7 +22322,8 @@
         "紫色",
         "bx56",
         "白色",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -22304,7 +22333,8 @@
       "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-56",
       "seller": "pchome",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810058915"
     },
     {
       "store": "pchome",
@@ -24351,7 +24381,8 @@
       "keywords": [
         "bx-52",
         "bx52",
-        "光輝龍騎士"
+        "光輝龍騎士",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -24361,7 +24392,8 @@
       "direct_url": "https://www.eslite.com/search?keyword=BX-52",
       "seller": "eslite",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810085553"
     },
     {
       "store": "eslite",
@@ -24373,7 +24405,8 @@
       "keywords": [
         "bx53",
         "多合一套組",
-        "bx-53"
+        "bx-53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -24383,7 +24416,8 @@
       "direct_url": "https://www.eslite.com/search?keyword=BX-53",
       "seller": "eslite",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810073734"
     },
     {
       "store": "eslite",
@@ -26957,7 +26991,8 @@
         "紫色",
         "bx56",
         "白色",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -26967,7 +27002,8 @@
       "direct_url": "https://www.eslite.com/search?keyword=BX-56",
       "seller": "eslite",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810058915"
     },
     {
       "store": "eslite",
@@ -29014,7 +29050,8 @@
       "keywords": [
         "bx-52",
         "bx52",
-        "光輝龍騎士"
+        "光輝龍騎士",
+        "4904810085553"
       ],
       "is_00": false,
       "price": "-",
@@ -29024,7 +29061,8 @@
       "direct_url": "https://mmtoyshop.com/search?q=BX-52",
       "seller": "mm_shop",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810085553"
     },
     {
       "store": "mm_shop",
@@ -29036,7 +29074,8 @@
       "keywords": [
         "bx53",
         "多合一套組",
-        "bx-53"
+        "bx-53",
+        "4904810073734"
       ],
       "is_00": false,
       "price": "-",
@@ -29046,7 +29085,8 @@
       "direct_url": "https://mmtoyshop.com/search?q=BX-53",
       "seller": "mm_shop",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810073734"
     },
     {
       "store": "mm_shop",
@@ -31620,7 +31660,8 @@
         "紫色",
         "bx56",
         "白色",
-        "bx-56"
+        "bx-56",
+        "4904810058915"
       ],
       "is_00": false,
       "price": "-",
@@ -31630,7 +31671,8 @@
       "direct_url": "https://mmtoyshop.com/search?q=BX-56",
       "seller": "mm_shop",
       "enabled": true,
-      "is_shelf_product": false
+      "is_shelf_product": false,
+      "jan": "4904810058915"
     },
     {
       "store": "mm_shop",
@@ -33640,6 +33682,1069 @@
       "url": "https://mmtoyshop.com/search?q=UX-19",
       "direct_url": "https://mmtoyshop.com/search?q=UX-19",
       "seller": "mm_shop",
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "amazon_jp",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月ブースター(仮) (BX-54 11月強化包 (暫定))",
+      "name_ja": "BX-54 11月ブースター(仮)",
+      "name_zh": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "¥1,600",
+      "last_price": "¥1,600",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.amazon.co.jp/s?k=4904810080763",
+      "direct_url": "https://www.amazon.co.jp/s?k=4904810080763",
+      "seller": "Amazon Japan",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "ブースター",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": false,
+      "is_shelf_product": false
+    },
+    {
+      "store": "shopee",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shopee.tw/search?keyword=BX-54&shop=285705541",
+      "direct_url": "https://shopee.tw/search?keyword=BX-54&shop=285705541",
+      "seller": "shopee",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "強化包",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "twj_toys",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.twj.tw/search?q=BX-54",
+      "direct_url": "https://www.twj.tw/search?q=BX-54",
+      "seller": "twj_toys",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "強化包",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "funbox_tw",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shop.funbox.com.tw/search?q=BX-54",
+      "direct_url": "https://shop.funbox.com.tw/search?q=BX-54",
+      "seller": "funbox_tw",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "強化包",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "pchome",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-54",
+      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-54",
+      "seller": "pchome",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "強化包",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "eslite",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.eslite.com/search?keyword=BX-54",
+      "direct_url": "https://www.eslite.com/search?keyword=BX-54",
+      "seller": "eslite",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "強化包",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "mm_shop",
+      "asin": "BX-54",
+      "code": "BX-54",
+      "pid": "BX-54",
+      "series": "BX",
+      "name": "BX-54 11月強化包 (暫定)",
+      "jan": "4904810080763",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://mmtoyshop.com/search?q=BX-54",
+      "direct_url": "https://mmtoyshop.com/search?q=BX-54",
+      "seller": "mm_shop",
+      "keywords": [
+        "bx-54",
+        "bx54",
+        "4904810080763",
+        "強化包",
+        "11月ブースター"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "amazon_jp",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造セット(仮) (CX-20 11月改造組 (暫定))",
+      "name_ja": "CX-20 11月改造セット(仮)",
+      "name_zh": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "¥6,600",
+      "last_price": "¥6,600",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.amazon.co.jp/s?k=4904810077596",
+      "direct_url": "https://www.amazon.co.jp/s?k=4904810077596",
+      "seller": "Amazon Japan",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造セット",
+        "カスタマイズセット",
+        "11月改造セット"
+      ],
+      "is_00": false,
+      "enabled": false,
+      "is_shelf_product": false
+    },
+    {
+      "store": "shopee",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shopee.tw/search?keyword=CX-20&shop=285705541",
+      "direct_url": "https://shopee.tw/search?keyword=CX-20&shop=285705541",
+      "seller": "shopee",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造組",
+        "11月改造組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "twj_toys",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.twj.tw/search?q=CX-20",
+      "direct_url": "https://www.twj.tw/search?q=CX-20",
+      "seller": "twj_toys",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造組",
+        "11月改造組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "funbox_tw",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shop.funbox.com.tw/search?q=CX-20",
+      "direct_url": "https://shop.funbox.com.tw/search?q=CX-20",
+      "seller": "funbox_tw",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造組",
+        "11月改造組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "pchome",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-20",
+      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-20",
+      "seller": "pchome",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造組",
+        "11月改造組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "eslite",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.eslite.com/search?keyword=CX-20",
+      "direct_url": "https://www.eslite.com/search?keyword=CX-20",
+      "seller": "eslite",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造組",
+        "11月改造組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "mm_shop",
+      "asin": "CX-20",
+      "code": "CX-20",
+      "pid": "CX-20",
+      "series": "CX",
+      "name": "CX-20 11月改造組 (暫定)",
+      "jan": "4904810077596",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://mmtoyshop.com/search?q=CX-20",
+      "direct_url": "https://mmtoyshop.com/search?q=CX-20",
+      "seller": "mm_shop",
+      "keywords": [
+        "cx-20",
+        "cx20",
+        "4904810077596",
+        "改造組",
+        "11月改造組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "amazon_jp",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月スターター(仮) (UX-22 12月入門組 (暫定))",
+      "name_ja": "UX-22 12月スターター(仮)",
+      "name_zh": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "¥2,500",
+      "last_price": "¥2,500",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.amazon.co.jp/s?k=4904810073741",
+      "direct_url": "https://www.amazon.co.jp/s?k=4904810073741",
+      "seller": "Amazon Japan",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "スターター",
+        "12月スターター"
+      ],
+      "is_00": false,
+      "enabled": false,
+      "is_shelf_product": false
+    },
+    {
+      "store": "shopee",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shopee.tw/search?keyword=UX-22&shop=285705541",
+      "direct_url": "https://shopee.tw/search?keyword=UX-22&shop=285705541",
+      "seller": "shopee",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "入門組",
+        "12月入門組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "twj_toys",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.twj.tw/search?q=UX-22",
+      "direct_url": "https://www.twj.tw/search?q=UX-22",
+      "seller": "twj_toys",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "入門組",
+        "12月入門組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "funbox_tw",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shop.funbox.com.tw/search?q=UX-22",
+      "direct_url": "https://shop.funbox.com.tw/search?q=UX-22",
+      "seller": "funbox_tw",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "入門組",
+        "12月入門組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "pchome",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-22",
+      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-22",
+      "seller": "pchome",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "入門組",
+        "12月入門組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "eslite",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.eslite.com/search?keyword=UX-22",
+      "direct_url": "https://www.eslite.com/search?keyword=UX-22",
+      "seller": "eslite",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "入門組",
+        "12月入門組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "mm_shop",
+      "asin": "UX-22",
+      "code": "UX-22",
+      "pid": "UX-22",
+      "series": "UX",
+      "name": "UX-22 12月入門組 (暫定)",
+      "jan": "4904810073741",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://mmtoyshop.com/search?q=UX-22",
+      "direct_url": "https://mmtoyshop.com/search?q=UX-22",
+      "seller": "mm_shop",
+      "keywords": [
+        "ux-22",
+        "ux22",
+        "4904810073741",
+        "入門組",
+        "12月入門組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "amazon_jp",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月ランダムブースター(仮) (BX-55 12月隨機強化組 (暫定))",
+      "name_ja": "BX-55 12月ランダムブースター(仮)",
+      "name_zh": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "¥1,600",
+      "last_price": "¥1,600",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.amazon.co.jp/s?k=4904810077602",
+      "direct_url": "https://www.amazon.co.jp/s?k=4904810077602",
+      "seller": "Amazon Japan",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "ランダムブースター",
+        "12月ランダムブースター"
+      ],
+      "is_00": false,
+      "enabled": false,
+      "is_shelf_product": false
+    },
+    {
+      "store": "shopee",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shopee.tw/search?keyword=BX-55&shop=285705541",
+      "direct_url": "https://shopee.tw/search?keyword=BX-55&shop=285705541",
+      "seller": "shopee",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "隨機強化組",
+        "12月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "twj_toys",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.twj.tw/search?q=BX-55",
+      "direct_url": "https://www.twj.tw/search?q=BX-55",
+      "seller": "twj_toys",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "隨機強化組",
+        "12月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "funbox_tw",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shop.funbox.com.tw/search?q=BX-55",
+      "direct_url": "https://shop.funbox.com.tw/search?q=BX-55",
+      "seller": "funbox_tw",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "隨機強化組",
+        "12月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "pchome",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-55",
+      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20BX-55",
+      "seller": "pchome",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "隨機強化組",
+        "12月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "eslite",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.eslite.com/search?keyword=BX-55",
+      "direct_url": "https://www.eslite.com/search?keyword=BX-55",
+      "seller": "eslite",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "隨機強化組",
+        "12月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "mm_shop",
+      "asin": "BX-55",
+      "code": "BX-55",
+      "pid": "BX-55",
+      "series": "BX",
+      "name": "BX-55 12月隨機強化組 (暫定)",
+      "jan": "4904810077602",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://mmtoyshop.com/search?q=BX-55",
+      "direct_url": "https://mmtoyshop.com/search?q=BX-55",
+      "seller": "mm_shop",
+      "keywords": [
+        "bx-55",
+        "bx55",
+        "4904810077602",
+        "隨機強化組",
+        "12月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "amazon_jp",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月ブースター(仮) (UX-23 1月強化包 (暫定))",
+      "name_ja": "UX-23 1月ブースター(仮)",
+      "name_zh": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "¥1,600",
+      "last_price": "¥1,600",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.amazon.co.jp/s?k=4904810075936",
+      "direct_url": "https://www.amazon.co.jp/s?k=4904810075936",
+      "seller": "Amazon Japan",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "ブースター",
+        "1月ブースター"
+      ],
+      "is_00": false,
+      "enabled": false,
+      "is_shelf_product": false
+    },
+    {
+      "store": "shopee",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shopee.tw/search?keyword=UX-23&shop=285705541",
+      "direct_url": "https://shopee.tw/search?keyword=UX-23&shop=285705541",
+      "seller": "shopee",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "強化包",
+        "1月強化包"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "twj_toys",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.twj.tw/search?q=UX-23",
+      "direct_url": "https://www.twj.tw/search?q=UX-23",
+      "seller": "twj_toys",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "強化包",
+        "1月強化包"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "funbox_tw",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shop.funbox.com.tw/search?q=UX-23",
+      "direct_url": "https://shop.funbox.com.tw/search?q=UX-23",
+      "seller": "funbox_tw",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "強化包",
+        "1月強化包"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "pchome",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-23",
+      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20UX-23",
+      "seller": "pchome",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "強化包",
+        "1月強化包"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "eslite",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.eslite.com/search?keyword=UX-23",
+      "direct_url": "https://www.eslite.com/search?keyword=UX-23",
+      "seller": "eslite",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "強化包",
+        "1月強化包"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "mm_shop",
+      "asin": "UX-23",
+      "code": "UX-23",
+      "pid": "UX-23",
+      "series": "UX",
+      "name": "UX-23 1月強化包 (暫定)",
+      "jan": "4904810075936",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://mmtoyshop.com/search?q=UX-23",
+      "direct_url": "https://mmtoyshop.com/search?q=UX-23",
+      "seller": "mm_shop",
+      "keywords": [
+        "ux-23",
+        "ux23",
+        "4904810075936",
+        "強化包",
+        "1月強化包"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "amazon_jp",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月ランダムブースター(仮) (CX-21 2月隨機強化組 (暫定))",
+      "name_ja": "CX-21 2月ランダムブースター(仮)",
+      "name_zh": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "¥1,600",
+      "last_price": "¥1,600",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.amazon.co.jp/s?k=4904810075929",
+      "direct_url": "https://www.amazon.co.jp/s?k=4904810075929",
+      "seller": "Amazon Japan",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "ランダムブースター",
+        "2月ランダムブースター"
+      ],
+      "is_00": false,
+      "enabled": false,
+      "is_shelf_product": false
+    },
+    {
+      "store": "shopee",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shopee.tw/search?keyword=CX-21&shop=285705541",
+      "direct_url": "https://shopee.tw/search?keyword=CX-21&shop=285705541",
+      "seller": "shopee",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "隨機強化組",
+        "2月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "twj_toys",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.twj.tw/search?q=CX-21",
+      "direct_url": "https://www.twj.tw/search?q=CX-21",
+      "seller": "twj_toys",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "隨機強化組",
+        "2月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "funbox_tw",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://shop.funbox.com.tw/search?q=CX-21",
+      "direct_url": "https://shop.funbox.com.tw/search?q=CX-21",
+      "seller": "funbox_tw",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "隨機強化組",
+        "2月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "pchome",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-21",
+      "direct_url": "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=funbox%20%E9%BA%97%E5%AC%B0%20CX-21",
+      "seller": "pchome",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "隨機強化組",
+        "2月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "eslite",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://www.eslite.com/search?keyword=CX-21",
+      "direct_url": "https://www.eslite.com/search?keyword=CX-21",
+      "seller": "eslite",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "隨機強化組",
+        "2月隨機強化組"
+      ],
+      "is_00": false,
+      "enabled": true,
+      "is_shelf_product": false
+    },
+    {
+      "store": "mm_shop",
+      "asin": "CX-21",
+      "code": "CX-21",
+      "pid": "CX-21",
+      "series": "CX",
+      "name": "CX-21 2月隨機強化組 (暫定)",
+      "jan": "4904810075929",
+      "price": "-",
+      "last_price": "-",
+      "last_status": "⚪ 待命中 (尚未上架)",
+      "url": "https://mmtoyshop.com/search?q=CX-21",
+      "direct_url": "https://mmtoyshop.com/search?q=CX-21",
+      "seller": "mm_shop",
+      "keywords": [
+        "cx-21",
+        "cx21",
+        "4904810075929",
+        "隨機強化組",
+        "2月隨機強化組"
+      ],
+      "is_00": false,
       "enabled": true,
       "is_shelf_product": false
     }
