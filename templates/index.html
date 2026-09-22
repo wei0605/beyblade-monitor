@@ -1959,7 +1959,18 @@
       return counts;
     }
 
+    const shopeeKnownItems = {
+      'shopee_mm': {
+        'CX-18': '57660540592',
+        'UX-10': '56759790605'
+      },
+      'shopee': {}
+    };
+
     function hasRealProductPage(it) {
+      const storeKey = it.store || 'amazon_jp';
+      const asin = it.asin || '';
+      if (shopeeKnownItems[storeKey] && shopeeKnownItems[storeKey][asin]) return true;
       if (it.has_product_page !== undefined) return !!it.has_product_page;
       const u = it.direct_url || it.url || '';
       if (!u) return false;
@@ -1977,10 +1988,11 @@
     }
 
     function getItemUrl(it, storeKey) {
-      if (it.direct_url && !it.direct_url.includes('/search') && !it.direct_url.includes('/category?keyword=') && !it.direct_url.includes('#product_list')) return it.direct_url;
-      if (it.url && !it.url.includes('/search') && !it.url.includes('/category?keyword=') && !it.url.includes('#product_list')) return it.url;
       const asin = it.asin || '';
       const isModelCode = /^(?:BX|UX|CX)-\d{2}[A-Z]?$/i.test(asin);
+
+      if (it.direct_url && !it.direct_url.includes('/search') && !it.direct_url.includes('/category?keyword=') && !it.direct_url.includes('#product_list')) return it.direct_url;
+      if (it.url && !it.url.includes('/search') && !it.url.includes('/category?keyword=') && !it.url.includes('#product_list')) return it.url;
 
       if (storeKey === 'amazon_jp') {
         return `https://www.amazon.co.jp/dp/${asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
@@ -1997,9 +2009,15 @@
         return isModelCode ? `https://www.eslite.com/search?keyword=BEYBLADE+${asin}` : `https://www.eslite.com/product/${asin}`;
       } else if (storeKey === 'shopee') {
         if (asin.includes('_')) return `https://shopee.tw/product/${asin.replace('_', '/')}`;
+        if (shopeeKnownItems['shopee'] && shopeeKnownItems['shopee'][asin]) {
+          return `https://shopee.tw/product/285705541/${shopeeKnownItems['shopee'][asin]}`;
+        }
         return `https://shopee.tw/funbox5120#product_list`;
       } else if (storeKey === 'shopee_mm') {
         if (asin.includes('_')) return `https://shopee.tw/product/${asin.replace('_', '/')}`;
+        if (shopeeKnownItems['shopee_mm'] && shopeeKnownItems['shopee_mm'][asin]) {
+          return `https://shopee.tw/product/11664018/${shopeeKnownItems['shopee_mm'][asin]}`;
+        }
         return `https://shopee.tw/renmao#product_list`;
       } else if (storeKey === 'tcsb') {
         if (isModelCode) return `https://www.tcsb.com.tw/search?query=${encodeURIComponent(asin)}`;

@@ -1946,6 +1946,15 @@ SHOPEE_SHOPS = {
     }
 }
 
+SHOPEE_KNOWN_ITEMS: Dict[str, Dict[str, str]] = {
+    "shopee_mm": {
+        "CX-18": "57660540592",
+        "UX-10": "56759790605",
+    },
+    "shopee": {
+    }
+}
+
 class ShopeeChecker:
     @staticmethod
     def extract_ids(text: str) -> Tuple[str, str]:
@@ -1969,25 +1978,48 @@ class ShopeeChecker:
         text_or_url: str,
         store_key: str = "shopee",
         item_name: str = "",
-        item_keywords: Optional[List[str]] = None
+        item_keywords: Optional[List[str]] = None,
+        direct_url: str = ""
     ) -> Dict[str, Any]:
         raw_text = str(text_or_url).strip()
         shop_cfg = SHOPEE_SHOPS.get(store_key, SHOPEE_SHOPS["shopee"])
         seller_name = shop_cfg.get("name", "蝦皮官方店")
         shop_list_url = shop_cfg.get("list_url", "https://shopee.tw")
+        shop_id_cfg = shop_cfg.get("shop_id", "")
 
-        # 若傳入蝦皮短網址 (例如 https://tw.shp.ee/...)，嘗試解析真實重新導向網址
-        if "shp.ee" in raw_text:
-            try:
-                session = cffi_requests.Session(impersonate="chrome124") if cffi_requests else get_shared_session()
-                r_redir = session.get(raw_text, allow_redirects=True, timeout=5)
-                raw_text = r_redir.url
-            except Exception:
-                pass
+        # 1. 優先從 direct_url 提取 shop_id 與 item_id
+        shop_id, item_id = "", ""
+        if direct_url and "#product_list" not in direct_url and "/search" not in direct_url:
+            shop_id, item_id = cls.extract_ids(direct_url)
 
-        shop_id, item_id = cls.extract_ids(raw_text)
+        # 2. 若傳入短網址或直接網址，嘗試解析
         if not shop_id or not item_id:
-            # 若為純型號關鍵字 (例如 "CX-05", "UX-15", "BX-52" 等) -> 突襲待命守候模式，回傳全部商品列表頁
+            if "shp.ee" in raw_text:
+                try:
+                    session = cffi_requests.Session(impersonate="chrome124") if cffi_requests else get_shared_session()
+                    r_redir = session.get(raw_text, allow_redirects=True, timeout=5)
+                    raw_text = r_redir.url
+                except Exception:
+                    pass
+            shop_id, item_id = cls.extract_ids(raw_text)
+
+        # 3. 若為純型號代碼，優先從已知陀螺型號對應庫查詢
+        if not shop_id or not item_id:
+            model_cand = raw_text.upper()
+            m_code = re.search(r"((?:BX|UX|CX|BXG|BXH|BXC|BXA)[-_]?\d{1,3}[A-Z]?)", model_cand)
+            extracted_code = m_code.group(1).upper() if m_code else model_cand
+            norm_code = extracted_code if "-" in extracted_code else f"{extracted_code[:2]}-{extracted_code[2:]}"
+            
+            known_dict = SHOPEE_KNOWN_ITEMS.get(store_key, {})
+            if norm_code in known_dict:
+                item_id = known_dict[norm_code]
+                shop_id = shop_id_cfg
+            elif extracted_code in known_dict:
+                item_id = known_dict[extracted_code]
+                shop_id = shop_id_cfg
+
+        if not shop_id or not item_id:
+            # 若為純型號關鍵字且尚未抓到實體商品頁 -> 突襲待命守候模式，回傳全部商品列表頁
             return {
                 "ok": True,
                 "store": store_key,
@@ -2023,6 +2055,9 @@ class ShopeeChecker:
                 except Exception:
                     pass
 
+        og_url_m = re.search(r'<meta[^>]*property=["\']og:url["\'][^>]*content=["\']([^"\']+)["\']', html)
+        canonical_url = og_url_m.group(1) if og_url_m else url
+
         m_state = re.search(r'<script[^>]*>\s*(\{"initialState":.*?)\s*</script>', html, re.DOTALL)
         if not m_state:
             return {"ok": False, "msg": "無法解析蝦皮商品狀態 (未取得初始資料)", "has_product_page": False}
@@ -2034,9 +2069,15 @@ class ShopeeChecker:
             cmap = {}
 
         if not cmap:
-            in_stock = ("加入購物車" in html) and ("已售完" not in html)
             title_m = re.search(r"<title>(.*?)</title>", html)
-            title = title_m.group(1) if title_m else "蝦皮商品"
+            title = title_m.group(1).replace(" | 蝦皮購物", "").strip() if title_m else "蝦皮商品"
+            in_stock = ("加入購物車" in html) and ("已售完" not in html) and ("停止預購" not in title) and ("停止預購" not in html)
+            if "停止預購" in title or "停止預購" in html:
+                status_desc = "🔴 缺貨中 (停止預購)"
+            elif in_stock:
+                status_desc = "🟢 蝦皮現貨有貨"
+            else:
+                status_desc = "⚪ 缺貨中 / 已售完"
             return {
                 "ok": True,
                 "store": store_key,
@@ -2046,9 +2087,10 @@ class ShopeeChecker:
                 "in_stock": in_stock,
                 "is_official": True,
                 "seller": seller_name,
-                "url": url,
+                "url": canonical_url,
+                "direct_url": canonical_url,
                 "has_product_page": True,
-                "status_text": "🟢 蝦皮現貨有貨" if in_stock else "⚪ 缺貨中 / 已售完"
+                "status_text": status_desc
             }
 
         first_key = list(cmap.keys())[0]
@@ -2086,6 +2128,14 @@ class ShopeeChecker:
                 in_stock = ("已售完" not in html)
                 status_desc = "有貨" if in_stock else "缺貨中"
 
+        if "停止預購" in (title or "") or "停止預購" in html:
+            in_stock = False
+            status_desc = "🔴 缺貨中 (停止預購)"
+        elif in_stock:
+            status_desc = f"🟢 現貨有貨 ({status_desc})"
+        else:
+            status_desc = "⚪ 缺貨中 / 已售完"
+
         return {
             "ok": True,
             "store": store_key,
@@ -2095,7 +2145,8 @@ class ShopeeChecker:
             "in_stock": in_stock,
             "is_official": True,
             "seller": seller_name,
-            "url": url,
+            "url": canonical_url,
+            "direct_url": canonical_url,
             "has_product_page": True,
             "status_text": status_desc
         }
@@ -2326,11 +2377,13 @@ def check_store_item(
     elif store == "eslite":
         return EsliteChecker.check_prod(asin)
     elif store in ("shopee", "shopee_mm"):
+        item_url = item.get("direct_url") or item.get("url") or ""
         return ShopeeChecker.check_item(
             asin,
             store_key=store,
             item_name=item.get("name", ""),
-            item_keywords=item.get("keywords", [])
+            item_keywords=item.get("keywords", []),
+            direct_url=item_url
         )
     elif store == "tcsb":
         return TcsbChecker.check_prod(
@@ -2392,6 +2445,8 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
         if "_" in asin:
             sp, it = asin.split("_", 1)
             return f"https://shopee.tw/product/{sp}/{it}"
+        if asin in SHOPEE_KNOWN_ITEMS.get("shopee", {}):
+            return f"https://shopee.tw/product/285705541/{SHOPEE_KNOWN_ITEMS['shopee'][asin]}"
         if asin.startswith("http") and not asin.endswith("/search") and "#product_list" not in asin:
             return asin
         return "https://shopee.tw/funbox5120#product_list"
@@ -2399,6 +2454,8 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
         if "_" in asin:
             sp, it = asin.split("_", 1)
             return f"https://shopee.tw/product/{sp}/{it}"
+        if asin in SHOPEE_KNOWN_ITEMS.get("shopee_mm", {}):
+            return f"https://shopee.tw/product/11664018/{SHOPEE_KNOWN_ITEMS['shopee_mm'][asin]}"
         if asin.startswith("http") and not asin.endswith("/search") and "#product_list" not in asin:
             return asin
         return "https://shopee.tw/renmao#product_list"
