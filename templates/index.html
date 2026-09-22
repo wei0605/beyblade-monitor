@@ -21,24 +21,24 @@
       --text-muted: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; padding-bottom: 60px; }
-    .container { max-width: 860px; margin: 0 auto; }
+    body { background: var(--bg); color: var(--text); padding: 16px 20px; padding-bottom: 60px; min-height: 100vh; }
+    .container { width: 100%; max-width: 1720px; margin: 0 auto; }
     
     /* Header */
-    header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
-    .logo-area { display: flex; align-items: center; gap: 10px; }
-    .logo-icon { font-size: 26px; color: #60a5fa; animation: spin-slow 12s linear infinite; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--card-bg); border-radius: 12px; margin-bottom: 14px; border: 1px solid var(--border); }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { font-size: 28px; color: #60a5fa; animation: spin-slow 12s linear infinite; }
     @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-    .app-title { font-size: 16px; font-weight: bold; }
-    .app-subtitle { font-size: 11px; color: var(--text-muted); }
-    .header-actions { display: flex; align-items: center; gap: 8px; }
-    .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+    .app-title { font-size: 18px; font-weight: bold; }
+    .app-subtitle { font-size: 12px; color: var(--text-muted); }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
     .badge-running { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
     .badge-stopped { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .btn-settings-toggle { background: #334155; color: #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-settings-toggle { background: #334155; color: #cbd5e1; padding: 7px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; border: none; }
 
     /* Control Bar */
-    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
     button { padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
     .btn-start { background: #059669; color: white; }
     .btn-start:active { background: #047857; }
@@ -48,26 +48,26 @@
     .btn-check:active { background: #1d4ed8; }
 
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
-    .stat-card { background: var(--card-bg); padding: 10px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
-    .stat-val { font-size: 18px; font-weight: bold; color: #60a5fa; }
-    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: var(--card-bg); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 20px; font-weight: bold; color: #60a5fa; }
+    .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
     /* Store Tabs Bar */
     .tabs-wrapper { margin-bottom: 12px; position: relative; }
     .tabs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
     .tabs-title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .store-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
-    .store-tabs::-webkit-scrollbar { height: 4px; }
+    .store-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+    .store-tabs::-webkit-scrollbar { height: 5px; }
     .store-tabs::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     
-    .tab-btn { flex: 0 0 auto; background: var(--card-bg); border: 1px solid var(--border); color: #cbd5e1; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; user-select: none; }
+    .tab-btn { flex: 0 0 auto; background: var(--card-bg); border: 1px solid var(--border); color: #cbd5e1; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; user-select: none; }
     .tab-btn:hover { background: #273549; color: white; }
     .tab-btn.active { background: linear-gradient(135deg, #1e3a8a, #2563eb); border-color: #60a5fa; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35); }
-    .tab-badge { background: #0f172a; color: #94a3b8; font-size: 11px; padding: 2px 7px; border-radius: 12px; font-weight: bold; }
+    .tab-badge { background: #0f172a; color: #94a3b8; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
     .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.2); color: white; }
-    .tab-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
-    .tab-mute-icon { font-size: 10px; color: #f87171; margin-left: 2px; }
+    .tab-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
+    .tab-mute-icon { font-size: 11px; color: #f87171; margin-left: 2px; }
     .tab-btn.paused { opacity: 0.7; border-style: dashed; }
     .tab-pause-badge { font-size: 10px; background: #334155; color: #fbbf24; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
     @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
@@ -80,10 +80,10 @@
       background: rgba(30, 41, 59, 0.7);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .notify-status-badge {
       display: inline-flex;
@@ -149,32 +149,50 @@
     .btn-test-sm:hover { background: #475569; color: white; }
 
     /* Section Header */
-    .section-title { font-size: 14px; font-weight: 600; margin: 16px 4px 8px 4px; display: flex; align-items: center; justify-content: space-between; }
-    .btn-add-item { background: #059669; color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .section-title { font-size: 15px; font-weight: 600; margin: 18px 4px 10px 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .section-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn-add-item { background: #059669; color: white; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-batch-import { background: #7c3aed; color: white; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-batch-import:hover { background: #6d28d9; }
+    .btn-filter-toggle { background: #1e293b; color: #94a3b8; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-filter-toggle.active { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
+
+    /* Item Grid Layout - 電腦寬螢幕滿版自適應網格 */
+    #itemsContainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 768px) {
+      #itemsContainer {
+        grid-template-columns: 1fr;
+      }
+    }
 
     /* Item Card */
-    .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); position: relative; transition: all 0.2s; }
-    .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.06); box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
+    .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border); position: relative; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+    .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.08); box-shadow: 0 0 16px rgba(16, 185, 129, 0.18); }
     .item-card.disabled { opacity: 0.55; }
     .item-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .store-badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
     .item-asin { font-size: 11px; font-family: monospace; color: var(--text-muted); background: #0f172a; padding: 2px 6px; border-radius: 4px; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .item-name { font-size: 14px; font-weight: 600; color: #f1f5f9; line-height: 1.4; margin-bottom: 6px; }
     .item-note { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
-    .item-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+    .item-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 8px; }
     .item-status { font-size: 12px; font-weight: 600; }
     .item-price { font-size: 15px; font-weight: bold; color: #f59e0b; }
     
     .item-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-    .btn-buy { flex: 2; color: white; font-size: 12px; padding: 8px; text-decoration: none; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: bold; min-width: 140px; }
+    .btn-buy { flex: 2; color: white; font-size: 12px; padding: 8px; text-decoration: none; border-radius: 8px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: bold; min-width: 130px; }
     .item-btn { background: #334155; color: #cbd5e1; font-size: 12px; padding: 8px 10px; border-radius: 8px; cursor: pointer; flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .item-btn.active { background: #0284c7; color: white; }
     .btn-edit { background: #475569; }
     .btn-delete { background: #991b1b; color: #fecaca; }
 
     /* Empty State */
-    .empty-state { text-align: center; padding: 36px 16px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border); margin: 10px 0; }
-    .empty-icon { font-size: 36px; color: #475569; margin-bottom: 10px; }
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 42px 16px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--border); margin: 10px 0; }
+    .empty-icon { font-size: 38px; color: #475569; margin-bottom: 10px; }
     .empty-text { font-size: 14px; color: #94a3b8; margin-bottom: 14px; }
     .btn-empty-add { background: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
 
@@ -459,9 +477,17 @@
     <!-- Items List Header -->
     <div class="section-title">
       <span id="tabHeading"><i class="fa-solid fa-list-check"></i> 🇯🇵 Amazon Japan 商品清單 (<span id="activeCount">0</span> 啟用)</span>
-      <button class="btn-add-item" onclick="openAddModal()">
-        <i class="fa-solid fa-plus"></i> 新增商品
-      </button>
+      <div class="section-actions">
+        <button id="btnFilterInStock" class="btn-filter-toggle" onclick="toggleFilterMode()">
+          <i class="fa-solid fa-filter"></i> <span id="filterModeText">僅顯示已突襲/有貨 (0)</span>
+        </button>
+        <button class="btn-batch-import" onclick="openBatchModal()">
+          <i class="fa-solid fa-file-import"></i> 批次匯入型號
+        </button>
+        <button class="btn-add-item" onclick="openAddModal()">
+          <i class="fa-solid fa-plus"></i> 新增商品
+        </button>
+      </div>
     </div>
     
     <div id="itemsContainer">
@@ -520,6 +546,34 @@
     </div>
   </div>
 
+  <!-- Batch Import Modal -->
+  <div id="batchModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title" style="color: #a78bfa;">
+        <i class="fa-solid fa-file-import"></i> 批次匯入防突襲商品清單
+      </div>
+      <div class="form-group">
+        <label class="form-label">匯入至目標賣場:</label>
+        <select id="batchItemStore" class="form-select">
+          <!-- Populated from STORE_CONFIG -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">貼上型號清單 (支援以換行、逗號或空格分隔):</label>
+        <textarea id="batchInputText" class="form-input" style="height: 140px; resize: vertical; font-family: monospace; font-size: 13px;" placeholder="例如：&#10;CX-06&#10;CX-07&#10;UX-22, UX-23&#10;BX-55 BX-56"></textarea>
+        <span style="font-size: 11px; color: #94a3b8; margin-top: 4px; display: block;">
+          💡 提示：系統會自動過濾並大寫規範化（例如 BX-00、CX-00、UX-00），已存在的型號將自動去重不重複匯入。
+        </span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeBatchModal()">取消</button>
+        <button class="btn-modal-confirm" style="background: #7c3aed;" onclick="confirmBatchImport()">
+          <i class="fa-solid fa-cloud-arrow-up"></i> 一鍵批次匯入
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let isRunning = false;
     let itemsData = [];
@@ -527,6 +581,30 @@
     let storeSettingsData = {};
     let currentStoreTab = 'amazon_jp';
     let isEditingSettings = false;
+    let filterInStockOnly = false; // 是否開啟「僅顯示已突襲/有現貨」模式
+
+    function toggleFilterMode() {
+      filterInStockOnly = !filterInStockOnly;
+      renderFilterButton();
+      renderItems();
+    }
+
+    function renderFilterButton() {
+      const btn = document.getElementById('btnFilterInStock');
+      const text = document.getElementById('filterModeText');
+      if (!btn || !text) return;
+      
+      const curItems = itemsData.filter(it => (it.store || 'amazon_jp') === currentStoreTab);
+      const stockCount = curItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家'))).length;
+      
+      if (filterInStockOnly) {
+        btn.className = 'btn-filter-toggle active';
+        text.innerHTML = `🟢 僅顯示有貨 (${stockCount}) - 點擊展開全部`;
+      } else {
+        btn.className = 'btn-filter-toggle';
+        text.innerHTML = `<i class="fa-solid fa-filter"></i> 僅顯示有貨 (${stockCount}/${curItems.length})`;
+      }
+    }
 
     async function fetchStatus() {
       try {
@@ -986,12 +1064,18 @@
     function renderItems() {
       const container = document.getElementById('itemsContainer');
       container.innerHTML = '';
+      renderFilterButton();
 
-      const filtered = itemsData
+      const storeItems = itemsData
         .map((it, idx) => ({ ...it, originalIndex: idx }))
         .filter(it => (it.store || 'amazon_jp') === currentStoreTab);
 
-      if (filtered.length === 0) {
+      let filtered = storeItems;
+      if (filterInStockOnly) {
+        filtered = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家')));
+      }
+
+      if (storeItems.length === 0) {
         const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
         container.innerHTML = `
           <div class="empty-state">
@@ -999,6 +1083,23 @@
             <div class="empty-text">目前 ${curCfg.flag} <b>${curCfg.name}</b> 尚未新增任何監控商品</div>
             <button class="btn-empty-add" onclick="openAddModal()">
               <i class="fa-solid fa-plus"></i> 新增商品到此賣場
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      if (filterInStockOnly && filtered.length === 0) {
+        const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon" style="color: #60a5fa;"><i class="fa-solid fa-radar"></i></div>
+            <div class="empty-text">
+              目前 ${curCfg.flag} <b>${curCfg.name}</b> 共有 <b>${storeItems.length}</b> 個型號在背景待命中，尚無現貨釋出。<br>
+              <span style="font-size: 12px; color: #64748b;">一旦平台突襲上架或有貨，商品卡片將自動立即顯現並觸發通知！</span>
+            </div>
+            <button class="btn-filter-toggle active" style="margin: 0 auto;" onclick="toggleFilterMode()">
+              <i class="fa-solid fa-list-ul"></i> 展開檢視全部 ${storeItems.length} 個待命商品
             </button>
           </div>
         `;
@@ -1259,6 +1360,52 @@
 
     function closeModal() {
       document.getElementById('itemModal').classList.remove('active');
+    }
+
+    function openBatchModal() {
+      const select = document.getElementById('batchItemStore');
+      select.innerHTML = '';
+      Object.keys(storesConfig).forEach(k => {
+        const cfg = storesConfig[k];
+        const opt = document.createElement('option');
+        opt.value = k;
+        opt.innerText = `${cfg.flag} ${cfg.name}`;
+        if (k === currentStoreTab) opt.selected = true;
+        select.appendChild(opt);
+      });
+      document.getElementById('batchInputText').value = '';
+      document.getElementById('batchModal').classList.add('active');
+    }
+
+    function closeBatchModal() {
+      document.getElementById('batchModal').classList.remove('active');
+    }
+
+    async function confirmBatchImport() {
+      const store = document.getElementById('batchItemStore').value;
+      const text = document.getElementById('batchInputText').value.trim();
+      if (!text) {
+        alert("請先貼上要匯入的型號清單！");
+        return;
+      }
+      try {
+        const res = await fetch('/api/batch_add_items', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ store, text })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(data.msg || "批次匯入成功！");
+          closeBatchModal();
+          currentStoreTab = store;
+          fetchStatus();
+        } else {
+          alert("匯入失敗: " + (data.msg || "未知錯誤"));
+        }
+      } catch (e) {
+        alert("匯入請求失敗: " + e);
+      }
     }
 
     async function confirmSaveItem() {

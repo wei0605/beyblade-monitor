@@ -771,6 +771,84 @@ async def api_delete_item(index: int = Query(...)):
     return JSONResponse({"ok": False, "msg": "無效商品索引"}, status_code=400)
 
 
+@app.post("/api/batch_add_items")
+async def api_batch_add_items(req: Request, background_tasks: BackgroundTasks):
+    """批次匯入多個型號至指定賣場 (支援以換行、逗號、空格分隔多組型號)"""
+    data = await req.json()
+    store = data.get("store", "shopee").strip()
+    if store not in STORE_CONFIG:
+        store = "shopee"
+
+    raw_text = str(data.get("text", "")).strip()
+    if not raw_text:
+        return JSONResponse({"ok": False, "msg": "請輸入要匯入的商品型號！"}, status_code=400)
+
+    # 提取所有型號 (例如 BX-50, UX-15, CX-05 等)
+    tokens = re.split(r"[\r\n,，;；\s]+", raw_text)
+    pattern = re.compile(r"^(?:BX|UX|CX)-\d{2}[A-Z]?$", re.I)
+
+    existing_asins = {
+        str(it.get("asin", "")).strip().upper()
+        for it in state.config.get("items", [])
+        if it.get("store") == store
+    }
+
+    added_count = 0
+    new_items_to_check = []
+
+    for t in tokens:
+        clean_t = t.strip().upper()
+        if not clean_t:
+            continue
+        # 若為非 Amazon 通路，規範為 BX/UX/CX 系列型號；若為 Amazon 通路則支援 ASIN 或型號
+        if store not in ("amazon_jp", "amazon_stealth") and not pattern.match(clean_t):
+            # 嘗試從字串中尋找型號
+            m = re.search(r"((?:BX|UX|CX)-\d{2}[A-Z]?)", clean_t, re.I)
+            if m:
+                clean_t = m.group(1).upper()
+            else:
+                continue
+
+        if clean_t in existing_asins:
+            continue
+
+        item_name = f"BEYBLADE X {clean_t}"
+        new_item = {
+            "enabled": True,
+            "store": store,
+            "name": item_name,
+            "asin": clean_t,
+            "note": "批次清單匯入",
+            "last_status": "⚪ 尚未上架 (待突襲發布)",
+            "last_price": "-",
+            "last_seller": "-",
+            "last_time": "-"
+        }
+        state.config.setdefault("items", []).append(new_item)
+        existing_asins.add(clean_t)
+        new_items_to_check.append((len(state.config["items"]) - 1, new_item))
+        added_count += 1
+
+    if added_count > 0:
+        state.save_config()
+        s_name = STORE_CONFIG[store]["short_name"]
+        state.add_log(f"📦 已批次匯入 {added_count} 個型號至 [{s_name}] 防突襲清單", "SUCCESS")
+
+        def _bg_check_batch():
+            for idx, it in new_items_to_check:
+                if state.stop_event.is_set():
+                    break
+                res = check_store_item(it)
+                handle_result(idx, it, res, is_manual=True)
+                time.sleep(0.1)
+
+        background_tasks.add_task(_bg_check_batch)
+        return {"ok": True, "added_count": added_count, "msg": f"成功匯入 {added_count} 個商品！"}
+    else:
+        return JSONResponse({"ok": False, "msg": "未能識別出新的有效型號，或清單中的型號已存在於該賣場！"}, status_code=400)
+
+
+
 @app.post("/api/test_discord")
 async def api_test_discord(req: Request):
     """從 Web 介面測試指定賣場之 Discord 推播"""
