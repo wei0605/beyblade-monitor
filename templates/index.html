@@ -985,35 +985,9 @@
         </label>
       </div>
 
-      <div class="switch-row" style="background: rgba(56, 189, 248, 0.08); padding: 10px; border-radius: 8px; border: 1px dashed rgba(56, 189, 248, 0.35); margin-bottom: 12px;">
-        <div class="switch-label">
-          <i class="fa-solid fa-radar" style="color: #38bdf8;"></i> <b>防突襲上架雷達 (獨立背景定時掃描)</b>
-          <div style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 2px;">
-            開啟後背景定時掃描各電商最新上架商品並比對陀螺型號；關閉時停止雷達爬取。
-          </div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="settingStealthRadar" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
       <div class="form-group">
         <label class="form-label">輪詢循環間隔 (秒，建議 3~8 秒):</label>
         <input type="number" id="settingInterval" class="form-input" min="2" max="300" value="5">
-      </div>
-
-      <div class="form-group" style="background: rgba(56, 189, 248, 0.08); padding: 12px; border-radius: 8px; border: 1px dashed rgba(56, 189, 248, 0.35);">
-        <label class="form-label" style="color: #38bdf8; margin-bottom: 4px;">
-          <i class="fa-solid fa-radar"></i> 最新上架商品防突襲掃描間隔 (秒，預設 60 秒):
-        </label>
-        <div class="input-with-btn">
-          <input type="number" id="settingStealthScanInterval" class="form-input" min="10" max="600" value="60">
-          <button class="btn-test" style="background: #0284c7; color: white;" onclick="triggerStealthScanNow()"><i class="fa-solid fa-bolt"></i> 立即掃描</button>
-        </div>
-        <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block; line-height: 1.4;">
-          每隔設定秒數向蝦皮、誠品、童無忌、麗嬰、PChome、M.M小舖抓取最新上架商品，自動比對 98 款 BX/UX/CX 陀螺型號。省爬蟲次數又零漏報！
-        </span>
       </div>
 
       <div class="form-group">
@@ -2024,21 +1998,43 @@
       return asin;
     }
 
+    function getAmazonSortTier(it) {
+      const status = it.last_status || '';
+      const offPrice = it.official_price || '';
+      const seller = it.last_seller || '';
+      
+      // Tier 1: 官方有貨 / 官方開放預購 (自動至最頂端)
+      const isOfficialInStock = (
+        status.includes('🟢') || 
+        status.includes('官方現貨') || 
+        status.includes('🔵') || 
+        status.includes('官方開放預購') || 
+        (offPrice && offPrice !== '官方缺貨' && offPrice !== '-') ||
+        (seller.includes('官方') && !status.includes('缺貨') && !status.includes('異常'))
+      );
+      if (isOfficialInStock) return 1;
+
+      // Tier 2: 第三方有貨 (全新品最低含運)
+      const isThirdPartyInStock = (
+        status.includes('🟡') || 
+        status.includes('第三方最低') || 
+        status.includes('優質賣家') ||
+        (it.third_party_price && it.third_party_price !== '-')
+      );
+      if (isThirdPartyInStock) return 2;
+
+      // Tier 3: 官方缺貨中 / 異常 / 待檢查 (下方)
+      return 3;
+    }
+
     function renderItems() {
       const container = document.getElementById('itemsContainer');
       container.innerHTML = '';
       renderFilterButton();
 
-      const isNonAmazon = (currentStoreTab !== 'amazon_jp');
       const storeItems = itemsData
         .map((it, idx) => ({ ...it, originalIndex: idx }))
         .filter(it => (it.store || 'amazon_jp') === currentStoreTab);
-
-      // Update stealth button count
-      const stealthBtnCountEl = document.getElementById('stealthCatalogBtnCount');
-      if (stealthBtnCountEl) {
-        stealthBtnCountEl.innerText = storeItems.length || 98;
-      }
 
       if (storeItems.length === 0) {
         const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
@@ -2055,41 +2051,31 @@
       }
 
       // 依使用者要求排序：
-      // 非 Amazon 賣場：三層排序 (1. 有頁面+有現貨最上 2. 有頁面缺貨次之 3. 沒抓到商品頁最下；同層內監控中優先、型號降序)
-      // Amazon 賣場：監控中優先 > 有現貨/預購優先 > 型號降序
+      // Amazon 賣場階層排序：
+      // 1. 監控中優先 (沒在監控移至分界線下方)
+      // 2. 官方有貨 / 官方開放預購 -> 自動排在最頂端 (Tier 1)！
+      // 3. 第三方有全新品最低(含運) -> 次之 (Tier 2)！
+      // 4. 官方缺貨中 / 暫無庫存 / 異常在下方 (Tier 3)！
+      // 5. 同階層內照陀螺型號數字降序排列 (新到舊，大到小)
       storeItems.sort((a, b) => {
-        if (isNonAmazon) {
-          const tierA = getProductSortTier(a);
-          const tierB = getProductSortTier(b);
-          if (tierA !== tierB) {
-            return tierA - tierB;
-          }
-          const aEnabled = (a.enabled !== false);
-          const bEnabled = (b.enabled !== false);
-          if (aEnabled !== bEnabled) {
-            return aEnabled ? -1 : 1;
-          }
-          return getModelSortNum(b) - getModelSortNum(a);
-        } else {
-          const aEnabled = (a.enabled !== false);
-          const bEnabled = (b.enabled !== false);
-          if (aEnabled !== bEnabled) {
-            return aEnabled ? -1 : 1;
-          }
-          const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家') || a.last_status.includes('第三方最低')));
-          const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家') || b.last_status.includes('第三方最低')));
-          if (aInStock !== bInStock) {
-            return aInStock ? -1 : 1;
-          }
-          return getModelSortNum(b) - getModelSortNum(a);
+        const aEnabled = (a.enabled !== false);
+        const bEnabled = (b.enabled !== false);
+        if (aEnabled !== bEnabled) {
+          return aEnabled ? -1 : 1;
         }
+        const tierA = getAmazonSortTier(a);
+        const tierB = getAmazonSortTier(b);
+        if (tierA !== tierB) {
+          return tierA - tierB;
+        }
+        return getModelSortNum(b) - getModelSortNum(a);
       });
 
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
       const monitoredItems = storeItems.filter(it => it.enabled !== false);
       const unmonitoredItems = storeItems.filter(it => it.enabled === false);
-      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低'))).length;
-      const lockedPageCount = storeItems.filter(it => hasRealProductPage(it)).length;
+      const officialStockCount = storeItems.filter(it => getAmazonSortTier(it) === 1).length;
+      const inStockCount = storeItems.filter(it => getAmazonSortTier(it) <= 2).length;
 
       // 頂部賣場快速資訊列
       const headerBar = document.createElement('div');
@@ -2105,14 +2091,14 @@
           <span class="badge-unmonitored-count">
             <i class="fa-solid fa-power-off"></i> 沒在監控: ${unmonitoredItems.length}
           </span>
-          ${isNonAmazon ? `
-            <span class="badge-page-count" style="background: #0ea5e922; color: #38bdf8; border: 1px solid #0ea5e955; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
-              <i class="fa-solid fa-link"></i> 已鎖定頁面: ${lockedPageCount}
+          ${officialStockCount > 0 ? `
+            <span class="badge-instock-count" style="background: #05966922; color: #34d399; border: 1px solid #05966955;">
+              <i class="fa-solid fa-circle-check"></i> 官方現貨: ${officialStockCount}
             </span>
           ` : ''}
-          ${inStockCount > 0 ? `
-            <span class="badge-instock-count">
-              <i class="fa-solid fa-circle-check"></i> 有現貨: ${inStockCount}
+          ${inStockCount > officialStockCount ? `
+            <span class="badge-instock-count" style="background: #f59e0b22; color: #fbbf24; border: 1px solid #f59e0b55;">
+              <i class="fa-solid fa-store"></i> 第三方有貨: ${inStockCount - officialStockCount}
             </span>
           ` : ''}
         </div>
@@ -2121,7 +2107,7 @@
 
       let displayList = storeItems;
       if (filterInStockOnly) {
-        displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低')));
+        displayList = displayList.filter(it => getAmazonSortTier(it) <= 2);
       }
 
       let hasRenderedDivider = false;
