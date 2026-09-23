@@ -93,6 +93,7 @@ class MonitorState:
         self.max_logs = 30  # 瘦身日誌長度以節省記憶體
         self.seen_stealth_urls: set = set()
         self.stock_qty_state: Dict[str, int] = {}
+        self.store_check_status: Dict[str, Dict[str, Any]] = {}
         self.stealth_thread: Any = None
         self.watchdog_thread: Any = None
         self.config: Dict[str, Any] = self.load_config()
@@ -101,7 +102,7 @@ class MonitorState:
             "is_running": self.stealth_radar_enabled,
             "last_scan_time": "-",
             "last_scan_timestamp": 0.0,
-            "interval_seconds": self.config.get("stealth_scan_interval", 60),
+            "interval_seconds": self.config.get("stealth_scan_interval", 20),
             "total_scans": 0,
             "total_hits": 0,
             "last_log": "⚡ 防突襲雷達準備就緒，背景常駐守候中" if self.stealth_radar_enabled else "⏸ 防突襲雷達已關閉",
@@ -184,12 +185,12 @@ class MonitorState:
         return s_set.get("enable_monitoring", True)
 
     def get_stealth_scan_interval(self) -> float:
-        """獲取最新上架商品防突襲雷達掃描間隔 (秒，預設 60 秒)"""
-        val = self.config.get("stealth_scan_interval", 60)
+        """獲取最新上架商品防突襲雷達掃描間隔 (秒，預設 20 秒)"""
+        val = self.config.get("stealth_scan_interval", 20)
         try:
             return max(5.0, float(val))
         except (ValueError, TypeError):
-            return 60.0
+            return 20.0
 
     def get_amazon_item_interval(self) -> float:
         """獲取 Amazon 每項商品檢查間隔 (秒，預設 0.6 秒)"""
@@ -446,6 +447,7 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     t0 = time.time()
 
     in_stock_hits = 0
+    unfetched_count = 0
     # 徹底移除賣場內層 ThreadPoolExecutor，改為各賣場專屬線程內循序掃描：
     # 避免 9 賣場 × 2 子線程 = 18 額外執行緒與數千個 Future 物件堆積在記憶體中引發 Render OOM！
     for count, (idx, item) in enumerate(store_items, start=1):
@@ -462,9 +464,19 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             keepa_api_key=keepa_key,
             keepa_mode=keepa_mode
         )
-        if res:
-            if handle_result(idx, item, res, is_manual=is_manual):
-                in_stock_hits += 1
+        if not res or not res.get("ok"):
+            # 使用者明確指示：當除 Amazon 以外的電商遇到太頻繁讀取不給讀取時就跳過，以避免卡住
+            if store_key != "amazon_jp":
+                msg = str(res.get("msg", "") if res else "")
+                is_rate_limited = res.get("rate_limited") or any(k in msg.lower() for k in ["429", "too many requests", "403", "503", "頻率限制", "逾時", "timeout", "過於頻繁", "連線失敗", "異常"])
+                if is_rate_limited:
+                    unfetched_count += 1
+                    item["last_status"] = "⚪ 讀取頻繁 (暫略)"
+                    item["last_time"] = get_now_gmt8().strftime("%H:%M:%S")
+            continue
+
+        if handle_result(idx, item, res, is_manual=is_manual):
+            in_stock_hits += 1
 
         # 微幅延遲 50ms 讓出 CPU (Amazon 請求間隔已由 AmazonJPChecker.throttle 統一精準控管，不再重複空轉等待)
         time.sleep(0.05)
@@ -474,10 +486,20 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             force_release_memory()
 
     dt = time.time() - t0
+    now_str = get_now_gmt8().strftime("%H:%M:%S")
+    state.store_check_status[store_key] = {
+        "last_time": now_str,
+        "total": len(store_items),
+        "in_stock": in_stock_hits,
+        "unfetched": unfetched_count,
+        "duration": round(dt, 1)
+    }
+
+    unfetched_msg = f"，其中 {unfetched_count} 項因讀取頻繁/逾時暫略" if unfetched_count > 0 else ""
     if in_stock_hits > 0:
-        state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨！", "SUCCESS")
+        state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨{unfetched_msg}！", "SUCCESS")
     else:
-        state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨", "INFO")
+        state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨{unfetched_msg}", "INFO")
 
     # 每賣場檢查結束後，批量將狀態寫入磁碟並強制呼叫 malloc_trim 將記憶體歸還 OS
     if state._config_dirty:
@@ -487,8 +509,7 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
 
 def store_autonomous_worker(store_key: str):
     """各電商分頁專屬獨立生命週期 Worker 線程：
-    完全解耦、獨立執行自身賣場之一般價格庫存監控與防突襲最新上架雷達，
-    自主控制間隔，絕不跨賣場排隊阻塞！
+    完全解耦、獨立執行自身賣場之一般價格庫存監控，自主控制間隔，絕不跨賣場排隊阻塞！
     """
     s_cfg = STORE_CONFIG.get(store_key, {})
     s_name = s_cfg.get("short_name", store_key)
@@ -499,34 +520,24 @@ def store_autonomous_worker(store_key: str):
     time.sleep(offset)
 
     while not state.stop_event.is_set():
-        # 1. 檢查一般價格監控開關與該賣場開關
         is_price_enabled = state.is_monitoring and state.is_store_monitored(store_key)
-        # 2. 檢查防突襲雷達開關與該賣場開關 (非 Amazon 支援即時突襲雷達)
-        is_stealth_enabled = state.stealth_radar_enabled and state.is_store_monitored(store_key) and (store_key != "amazon_jp")
 
-        if not is_price_enabled and not is_stealth_enabled:
+        if not is_price_enabled:
             # 該賣場未被啟用任何監控，短暫休眠後再次檢查
             for _ in range(10):
-                if state.stop_event.is_set() or state.is_monitoring or state.stealth_radar_enabled:
+                if state.stop_event.is_set() or state.is_monitoring:
                     break
                 time.sleep(0.2)
             continue
 
-        # A. 執行該電商專屬的【一般商品價格與庫存監控】
+        # 執行該電商專屬的【一般商品價格與庫存監控】
         if is_price_enabled and not state.stop_event.is_set():
             try:
                 check_items_for_store(store_key, is_manual=False)
             except Exception as e:
                 logger.error(f"[{s_name}] 價格監控異常: {e}", exc_info=True)
 
-        # B. 執行該電商專屬的【防突襲最新上架雷達掃描】
-        if is_stealth_enabled and not state.stop_event.is_set():
-            try:
-                scan_stealth_for_single_store(store_key, is_manual=False)
-            except Exception as e:
-                logger.error(f"[{s_name}] 防突襲雷達掃描異常: {e}", exc_info=True)
-
-        # C. 各賣場自主計算休眠時間 (完全獨立，不互相等待)
+        # 各賣場自主計算休眠時間 (完全獨立，不互相等待)
         s_set = state.config.get("store_settings", {}).get(store_key, {})
         default_ival = 1.5 if store_key == "amazon_jp" else 5.0
         store_interval = float(s_set.get("item_interval_seconds", default_ival))
@@ -551,9 +562,40 @@ def ensure_all_store_workers():
             t.start()
 
 
+def stealth_radar_worker():
+    """專屬防突襲秒級雷達 Worker 線程：
+    完全獨立運行，絕不被任何賣場的 200 多項商品價格輪巡阻塞！
+    每 15~20 秒輕量單次請求抓取各大電商最新上架新品，1 秒內捕獲突襲補貨！
+    """
+    time.sleep(2.0)
+    while not state.stop_event.is_set():
+        if state.stealth_radar_enabled and state.is_monitoring:
+            try:
+                target_stores = [s for s in STORE_CONFIG.keys() if s != "amazon_jp" and state.is_store_monitored(s)]
+                for s_key in target_stores:
+                    if state.stop_event.is_set() or not state.stealth_radar_enabled or not state.is_monitoring:
+                        break
+                    scan_stealth_for_single_store(s_key, is_manual=False)
+                    time.sleep(0.3)
+            except Exception as e:
+                logger.error(f"防突襲雷達異常: {e}", exc_info=True)
+
+        interval = state.get_stealth_scan_interval()
+        sleep_slices = max(1, int(interval * 5))
+        for _ in range(sleep_slices):
+            if state.stop_event.is_set():
+                break
+            time.sleep(0.2)
+
+        force_release_memory()
+
+
 def ensure_stealth_radar_worker():
-    """確保防突襲雷達運作 (確保各電商獨立線程)"""
-    ensure_all_store_workers()
+    """確保防突襲雷達專屬獨立線程運作"""
+    if state.stealth_thread is None or not state.stealth_thread.is_alive():
+        t = threading.Thread(target=stealth_radar_worker, daemon=True, name="StealthRadarWorker")
+        state.stealth_thread = t
+        t.start()
 
 
 def memory_watchdog():
@@ -744,9 +786,10 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
 def start_monitor():
     state.is_monitoring = True
     state.stop_event.clear()
-    state.add_log("=== 雲端 24H 各電商獨立監控線程已啟動 ===", "SUCCESS")
+    state.add_log("=== 雲端 24H 各電商獨立監控與秒級防突襲雷達已啟動 ===", "SUCCESS")
     ensure_memory_watchdog()
     ensure_all_store_workers()
+    ensure_stealth_radar_worker()
 
 
 def stop_monitor():
@@ -824,6 +867,7 @@ async def get_status():
         "stores": STORE_CONFIG,
         "store_counts": store_counts,
         "store_settings": state.config.get("store_settings", {}),
+        "store_check_status": state.store_check_status,
         "items": items,
         "logs": state.logs
     }

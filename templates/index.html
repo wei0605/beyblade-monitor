@@ -358,6 +358,8 @@
     .tab-badge { background: #0f172a; color: #94a3b8; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
     .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.2); color: white; }
     .tab-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
+    .tab-instock-badge { font-size: 10px; background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); padding: 1px 6px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; animation: pulse 2s infinite; }
+    .tab-btn.active .tab-instock-badge { background: rgba(16, 185, 129, 0.45); color: #a7f3d0; border-color: #6ee7b7; }
     .tab-mute-icon { font-size: 11px; color: #f87171; margin-left: 2px; }
     .tab-btn.paused { opacity: 0.7; border-style: dashed; }
     .tab-pause-badge { font-size: 10px; background: #334155; color: #fbbf24; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
@@ -1456,6 +1458,7 @@
     let itemsData = [];
     let storesConfig = {};
     let storeSettingsData = {};
+    let storeCheckStatusData = {};
     let currentStoreTab = 'amazon_jp';
     let isEditingSettings = false;
     let filterInStockOnly = false; // 是否開啟「僅顯示已突襲/有現貨」模式
@@ -1507,6 +1510,7 @@
         itemsData = data.items || [];
         storesConfig = data.stores || {};
         storeSettingsData = data.store_settings || {};
+        storeCheckStatusData = data.store_check_status || {};
         
         // Update Status Badge & Button
         const badge = document.getElementById('statusBadge');
@@ -1632,7 +1636,7 @@
         const isMonitored = sSet.enable_monitoring !== false;
         const isNotifyOn = sSet.enable_notifications !== false;
         
-        const hasStock = itemsData.some(it => (it.store || 'amazon_jp') === key && it.last_status && it.last_status.includes('現貨'));
+        const storeStockCount = itemsData.filter(it => (it.store || 'amazon_jp') === key && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'))).length;
 
         btn.className = `tab-btn ${key === currentStoreTab ? 'active' : ''} ${!isMonitored ? 'paused' : ''}`;
         btn.onclick = () => switchStoreTab(key);
@@ -1640,7 +1644,7 @@
           <span>${cfg.flag} ${cfg.short_name}</span>
           ${!isMonitored ? '<span class="tab-pause-badge" title="此賣場監控已暫停">暫停</span>' : ''}
           ${!isNotifyOn ? '<span class="tab-mute-icon" title="該賣場推播已停用"><i class="fa-solid fa-bell-slash"></i></span>' : ''}
-          ${hasStock ? '<span class="tab-dot" title="有現貨"></span>' : ''}
+          ${storeStockCount > 0 ? `<span class="tab-instock-badge" title="此賣場有 ${storeStockCount} 項商品現貨在庫">● ${storeStockCount}現貨</span>` : ''}
           <span class="tab-badge">${count}</span>
         `;
         container.appendChild(btn);
@@ -2096,6 +2100,11 @@
       // 頂部賣場快速資訊列
       const headerBar = document.createElement('div');
       headerBar.className = 'store-items-header-bar';
+      
+      const chkStatus = storeCheckStatusData[currentStoreTab] || {};
+      const lastCheckStr = chkStatus.last_time ? `${chkStatus.last_time} (耗時 ${chkStatus.duration !== undefined ? chkStatus.duration + 's' : '-'})` : '排程巡檢中';
+      const unfetchedNum = chkStatus.unfetched || 0;
+
       headerBar.innerHTML = `
         <div class="store-items-summary">
           <span style="font-weight: 700; color: #f8fafc;">
@@ -2115,6 +2124,14 @@
           ${inStockCount > 0 ? `
             <span class="badge-instock-count">
               <i class="fa-solid fa-circle-check"></i> 有現貨: ${inStockCount}
+            </span>
+          ` : ''}
+          <span class="badge-last-check" style="background: #1e293b; color: #cbd5e1; border: 1px solid #334155; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #38bdf8;"></i> 上次巡檢: ${lastCheckStr}
+          </span>
+          ${unfetchedNum > 0 ? `
+            <span class="badge-unfetched-count" style="background: #ef444422; color: #f87171; border: 1px solid #ef444455; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;" title="因該賣場請求頻率限制或短暫逾時，此輪暫略 ${unfetchedNum} 項商品以避免卡住，下輪巡檢會再次重試">
+              <i class="fa-solid fa-forward-step"></i> 本輪暫略: ${unfetchedNum} 項 (防卡跳過)
             </span>
           ` : ''}
         </div>
