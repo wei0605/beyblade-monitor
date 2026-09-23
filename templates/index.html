@@ -1058,12 +1058,20 @@
             <span style="font-weight: 600;">啟用住宅代理</span>
           </label>
         </div>
+        <div style="margin-bottom: 8px;">
+          <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">快速切換代理供應商：</label>
+          <select id="settingProxyPreset" class="form-input" style="padding: 7px 10px; font-size: 13px; font-weight: 500;" onchange="onProxyPresetChange()">
+            <option value="brightdata">🌐 Bright Data (最新住宅代理 - ISP/靜態)</option>
+            <option value="smartproxy">🌐 Smartproxy (動態住宅代理)</option>
+            <option value="custom">✏️ 自訂代理網址 (手動填寫)</option>
+          </select>
+        </div>
         <div class="input-with-btn">
           <input type="text" id="settingProxyUrl" class="form-input" placeholder="http://username:password@gate.smartproxy.com:7000">
           <button class="btn-test" onclick="testProxy()"><i class="fa-solid fa-plug"></i> 測試代理</button>
         </div>
         <span style="font-size: 11px; color: #94a3b8; margin-top: 3px; display: block; line-height: 1.4;">
-          支援 HTTP/SOCKS5 住宅真實家用寬頻 IP。開關關閉時使用本機/雲端直連，無需清空代理網址。
+          支援 HTTP/SOCKS5 住宅真實寬頻 IP。開關關閉時使用本機/雲端直連，無需清空代理網址。
         </span>
       </div>
 
@@ -1570,6 +1578,18 @@
           if (document.getElementById('settingProxyUrl')) {
             document.getElementById('settingProxyUrl').value = data.proxy_url || '';
           }
+          if (document.getElementById('settingProxyPreset')) {
+            const curP = (data.proxy_url || '').trim();
+            if (curP === PROXY_PRESETS['brightdata']) {
+              document.getElementById('settingProxyPreset').value = 'brightdata';
+            } else if (curP === PROXY_PRESETS['smartproxy']) {
+              document.getElementById('settingProxyPreset').value = 'smartproxy';
+            } else if (data.selected_proxy_preset) {
+              document.getElementById('settingProxyPreset').value = data.selected_proxy_preset;
+            } else {
+              document.getElementById('settingProxyPreset').value = 'custom';
+            }
+          }
           if (document.getElementById('settingProxyEnabled')) {
             document.getElementById('settingProxyEnabled').checked = (data.proxy_enabled !== false);
           }
@@ -1729,6 +1749,19 @@
         alert("請求失敗: " + e);
       } finally {
         if (btn) btn.disabled = false;
+      }
+    }
+
+    const PROXY_PRESETS = {
+      'brightdata': 'http://brd-customer-hl_8881bc8a-zone-amz_monitor:62kqqetyc7uj@brd.superproxy.io:44445',
+      'smartproxy': 'http://smart-Paul1928:Qaz990501@proxy.smartproxy.net:3120',
+      'custom': ''
+    };
+
+    function onProxyPresetChange() {
+      const preset = document.getElementById('settingProxyPreset').value;
+      if (preset !== 'custom' && PROXY_PRESETS[preset]) {
+        document.getElementById('settingProxyUrl').value = PROXY_PRESETS[preset];
       }
     }
 
@@ -2569,6 +2602,7 @@
         amazon_use_playwright: amazonPlaywright,
         proxy_url: document.getElementById('settingProxyUrl') ? document.getElementById('settingProxyUrl').value.trim() : "",
         proxy_enabled: document.getElementById('settingProxyEnabled') ? document.getElementById('settingProxyEnabled').checked : true,
+        selected_proxy_preset: document.getElementById('settingProxyPreset') ? document.getElementById('settingProxyPreset').value : "brightdata",
         amazon_custom_cookie: document.getElementById('settingAmazonCookie') ? document.getElementById('settingAmazonCookie').value.trim() : "",
         keepa_api_key: document.getElementById('settingKeepaApiKey') ? document.getElementById('settingKeepaApiKey').value.trim() : "",
         keepa_enabled: document.getElementById('settingKeepaEnabled') ? document.getElementById('settingKeepaEnabled').checked : true,

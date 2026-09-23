@@ -822,6 +822,8 @@ async def get_status():
         "amazon_use_playwright": state.get_amazon_use_playwright(),
         "proxy_url": state.config.get("proxy_url", ""),
         "proxy_enabled": state.config.get("proxy_enabled", True),
+        "proxy_presets": state.config.get("proxy_presets", []),
+        "selected_proxy_preset": state.config.get("selected_proxy_preset", "brightdata"),
         "amazon_custom_cookie": state.get_amazon_custom_cookie(),
         "keepa_api_key": state.config.get("keepa_api_key", ""),
         "keepa_enabled": state.config.get("keepa_enabled", bool(state.config.get("keepa_api_key"))),
@@ -888,6 +890,8 @@ async def api_update_settings(req: Request):
         state.config["proxy_url"] = str(data["proxy_url"]).strip()
     if "proxy_enabled" in data:
         state.config["proxy_enabled"] = bool(data["proxy_enabled"])
+    if "selected_proxy_preset" in data:
+        state.config["selected_proxy_preset"] = str(data["selected_proxy_preset"]).strip()
     if "amazon_custom_cookie" in data:
         state.config["amazon_custom_cookie"] = str(data["amazon_custom_cookie"]).strip()
     if "keepa_api_key" in data:

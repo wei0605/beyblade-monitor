@@ -5097,11 +5097,29 @@
   "enable_line": false,
   "amazon_jitter": true,
   "amazon_use_playwright": false,
-  "proxy_url": "http://smart-Paul1928:Qaz990501@proxy.smartproxy.net:3120",
+  "proxy_url": "http://brd-customer-hl_8881bc8a-zone-amz_monitor:62kqqetyc7uj@brd.superproxy.io:44445",
   "amazon_custom_cookie": "",
   "keepa_api_key": "",
   "keepa_mode": "fallback",
   "proxy_enabled": true,
   "keepa_enabled": false,
-  "stealth_radar_enabled": false
+  "stealth_radar_enabled": false,
+  "proxy_presets": [
+    {
+      "id": "brightdata",
+      "name": "Bright Data (最新住宅代理 - ISP)",
+      "url": "http://brd-customer-hl_8881bc8a-zone-amz_monitor:62kqqetyc7uj@brd.superproxy.io:44445"
+    },
+    {
+      "id": "smartproxy",
+      "name": "Smartproxy (動態住宅代理)",
+      "url": "http://smart-Paul1928:Qaz990501@proxy.smartproxy.net:3120"
+    },
+    {
+      "id": "custom",
+      "name": "自訂代理網址 (手動填寫)",
+      "url": ""
+    }
+  ],
+  "selected_proxy_preset": "brightdata"
 }
