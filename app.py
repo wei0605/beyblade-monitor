@@ -600,6 +600,7 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     is_preorder = res.get("is_preorder", False)
     official_price = res.get("official_price", "-")
     third_party_price = res.get("third_party_price", "-")
+    third_party_condition = res.get("third_party_condition", "new")
 
     has_page = res.get("has_product_page")
     res_url = res.get("url")
@@ -627,7 +628,10 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
                 is_alert_worthy = True
             else:
                 tp_val = third_party_price if (third_party_price and third_party_price != "-") else price
-                status_text = f"🟡 第三方最低(含運): {tp_val}" if tp_val and tp_val != "-" else "🟡 第三方最低(含運)"
+                if third_party_condition == "collectible":
+                    status_text = f"🟠 收藏品/近全新最低(含運): {tp_val}" if tp_val and tp_val != "-" else "🟠 收藏品/近全新最低(含運)"
+                else:
+                    status_text = f"🟡 第三方最低(含運): {tp_val}" if tp_val and tp_val != "-" else "🟡 第三方最低(含運)"
                 # 使用者明確要求：推播只要推播官方補貨的通知就好 金額也顯示官方金額就好
                 is_alert_worthy = False
         else:
@@ -636,7 +640,10 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     else:
         if store == "amazon_jp":
             if third_party_price and third_party_price != "-":
-                status_text = f"🟡 第三方最低(含運): {third_party_price}"
+                if third_party_condition == "collectible":
+                    status_text = f"🟠 收藏品/近全新最低(含運): {third_party_price}"
+                else:
+                    status_text = f"🟡 第三方最低(含運): {third_party_price}"
             elif res.get("no_featured_offer", False):
                 status_text = "⚪ 官方缺貨中 (僅轉賣選項)"
             else:
@@ -657,6 +664,7 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     item["last_time"] = now_str
     item["official_price"] = official_price
     item["third_party_price"] = third_party_price
+    item["third_party_condition"] = third_party_condition
     state.mark_config_dirty()
 
     prev_was_in_stock = state.in_stock_state.get(item_key, False)

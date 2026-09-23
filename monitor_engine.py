@@ -1114,19 +1114,21 @@ class AmazonJPChecker:
                     if r_aod.status_code == 200 and len(r_aod.text) > 500:
                         aod_soup = BeautifulSoup(r_aod.text, "html.parser")
                         aod_tp_ints = []
+                        aod_collectible_ints = []
                         for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
-                            # 1. 嚴格狀況檢查：只抓全新品 (Brand New)，徹底排除二手/中古/非全新品/收藏品/再生品
+                            # 1. 狀況檢查：徹底排除二手/中古/非全新品/再生翻新品，區分全新品 (Brand New) 與收藏品 (Collectible / ほぼ新品)
                             cond_el = of.select_one("#aod-offer-heading, [id*='heading'], [id*='condition'], [id*='Condition'], .aod-offer-heading")
                             cond_text = cond_el.get_text(" ", strip=True).lower() if cond_el else ""
                             
                             is_used = any(b in cond_text for b in [
-                                "中古", "非全新品", "二手", "收藏品", "コレクター", "再生品",
-                                "used", "collectible", "renewed", "refurbished", "pre-owned"
+                                "中古", "非全新品", "二手", "再生品",
+                                "used", "renewed", "refurbished", "pre-owned"
                             ])
+                            is_collectible = any(b in cond_text for b in ["收藏品", "コレクター", "collectible"])
                             is_explicit_new = any(w in cond_text for w in ["新品", "全新", "new"])
                             
-                            # 若包含二手/收藏品關鍵字，或者有標示狀況但不是全新品，一律剔除！
-                            if is_used or (cond_text and not is_explicit_new):
+                            # 嚴格排除真正的中古二手/瑕疵再生品
+                            if is_used or (cond_text and not is_explicit_new and not is_collectible):
                                 continue
 
                             s_el = of.select_one("#aod-offer-soldBy, [id*='soldBy']")
@@ -1188,17 +1190,24 @@ class AmazonJPChecker:
                                 res["official_price"] = f"￥{found_p:,}"
                                 res["seller"] = "Amazon.co.jp (官方自營)"
                                 res["in_stock"] = True
+                            elif is_collectible:
+                                aod_collectible_ints.append(total_offer_price)
                             else:
                                 # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA，嚴格加上運費
                                 aod_tp_ints.append(total_offer_price)
 
-                        # AOD 為經過精確全新品狀況檢驗的清單：
-                        # 1. 若 aod_tp_ints 有值，則取最低全新品總價 (售價+運費)
-                        # 2. 若 AOD 有 offers 但 aod_tp_ints 為空，代表所有賣家均為二手/收藏品，全新品第三方報價為 "-"
+                        # AOD 狀況優先級判定 (方案 B)：
+                        # 1. 第一優先：全新品 (Brand New)
+                        # 2. 第二備選：若無全新品，但有「收藏品 / ほぼ新品」，納入並標記為收藏品最低價
                         if aod_tp_ints:
                             res["third_party_price"] = f"￥{min(aod_tp_ints):,}"
+                            res["third_party_condition"] = "new"
+                        elif aod_collectible_ints:
+                            res["third_party_price"] = f"￥{min(aod_collectible_ints):,}"
+                            res["third_party_condition"] = "collectible"
                         elif aod_soup.select("#aod-pinned-offer, #aod-offer"):
                             res["third_party_price"] = "-"
+                            res["third_party_condition"] = "none"
             except Exception:
                 pass
 
