@@ -266,135 +266,132 @@ class MonitorState:
 state = MonitorState()
 
 
-def scan_latest_arrivals_radar(store_filter: str = None, is_manual: bool = False):
-    """防突襲最新上架商品雷達
-    每 1 分鐘 (或依使用者自訂間隔、手動觸發時) 向非 Amazon 各電商抓取最新上架商品列表，
-    自動比對 98 款 BX/UX/CX 陀螺型號與關鍵字。
-    一經命中：自動補全品名、價格與直達網址，並發送 Discord 與 LINE 官方推播！
-    """
-    target_stores = [store_filter] if store_filter else [s for s in STORE_CONFIG.keys() if s != "amazon_jp"]
-    proxy = state.get_proxy_url()
+def scan_stealth_for_single_store(s_key: str, is_manual: bool = False, proxy: Optional[str] = None) -> int:
+    """單一電商專屬最新上架防突襲比對掃描 (完全獨立、無跨賣場阻塞)"""
+    if s_key not in STORE_CONFIG or s_key == "amazon_jp":
+        return 0
+    if not state.is_store_monitored(s_key):
+        return 0
+
+    s_cfg = STORE_CONFIG.get(s_key, {})
+    s_name = s_cfg.get("short_name", s_key)
+
     items = state.config.get("items", [])
+    catalog_items = [it for it in items if it.get("store") == s_key and it.get("enabled", True)]
+    if not catalog_items:
+        return 0
 
-    scanned_store_names = []
-    total_new_hits = 0
+    if proxy is None:
+        proxy = state.get_proxy_url()
 
-    for s_key in target_stores:
-        if s_key not in STORE_CONFIG or s_key == "amazon_jp":
-            continue
-        if not state.is_store_monitored(s_key):
-            continue
-
-        s_cfg = STORE_CONFIG.get(s_key, {})
-        s_name = s_cfg.get("short_name", s_key)
-
-        catalog_items = [it for it in items if it.get("store") == s_key and it.get("enabled", True)]
-        if not catalog_items:
-            continue
-
-        scanned_store_names.append(s_name)
-
-        if is_manual:
-            state.add_log(f"⚡ [{s_name}] 正在掃描最新上架商品...", "INFO")
-
-        try:
-            latest_prods = fetch_latest_store_products(s_key, proxy=proxy)
-            if not latest_prods:
-                if is_manual:
-                    state.add_log(f"[{s_name}] 最新上架商品清單為空或暫無回應", "INFO")
-                continue
-
-            hit_count = 0
-            new_hit_count = 0
-            for prod in latest_prods:
-                title = prod.get("title", "")
-                if not title:
-                    continue
-                match_res = match_product_with_stealth_catalog(title, catalog_items)
-                if match_res:
-                    # 若為 PChome 通路，嚴格檢核必須為 Funbox 麗嬰國際官方直營上架商品 (排除第三方轉賣或平行輸入水貨)
-                    if s_key == "pchome":
-                        pid = prod.get("item_id", "")
-                        is_official, full_title = PChomeChecker.is_official_funbox(pid, title)
-                        if not is_official:
-                            continue
-                        if full_title and full_title != title:
-                            title = full_title
-                            prod["title"] = full_title
-                            prod["seller"] = "funbox 麗嬰國際 (PChome 官方)"
-
-                    matched_model = match_res["model"]
-                    target_item = match_res["catalog_item"]
-                    prod_url = prod.get("url", "")
-                    prod_price = prod.get("price", "未標示")
-                    prod_seller = prod.get("seller", s_cfg.get("name", s_key))
-
-                    alert_key = f"{s_key}_{matched_model}_{prod_url}"
-                    is_new_discovery = alert_key not in state.seen_stealth_urls
-                    state.seen_stealth_urls.add(alert_key)
-
-                    now_str = get_now_gmt8().strftime("%H:%M:%S")
-                    is_in_stock = bool(prod.get("in_stock", False))
-                    target_item["last_price"] = prod_price
-                    target_item["last_seller"] = prod_seller
-                    target_item["last_time"] = now_str
-                    target_item["url"] = prod_url
-                    target_item["direct_url"] = prod_url
-
-                    if not is_in_stock:
-                        target_item["last_status"] = "⚪ 已售完 (無庫存)"
-                        state.mark_config_dirty()
-                        continue
-
-                    # 只有真正有庫存/現貨時，才標記現貨並推播通知
-                    target_item["last_status"] = "🟢 突襲上架現貨！"
-                    state.mark_config_dirty()
-
-                    hit_count += 1
-                    if is_new_discovery:
-                        new_hit_count += 1
-                        total_new_hits += 1
-                    if is_new_discovery or is_manual:
-                        state.add_log(f"🚨【突襲上架發現！】[{s_name}] 命中型號 {matched_model}（現貨）！品名: {title[:28]} 售價: {prod_price}", "SUCCESS")
-                        item_display_name = f"BEYBLADE X {matched_model} ({title[:25]})" if matched_model not in title else title[:35]
-                        trigger_notifications(target_item, item_display_name, matched_model, prod_price, prod_seller, prod_url)
-                        state.in_stock_state[f"{s_key}_{matched_model}"] = True
-
-            if hit_count == 0 and is_manual:
-                state.add_log(f"[{s_name}] 最新上架 {len(latest_prods)} 件商品掃描完成，未發現命中型號", "INFO")
-            elif new_hit_count > 0 or (hit_count > 0 and is_manual):
-                state.add_log(f"🎉 [{s_name}] 本次掃描捕獲 {new_hit_count if not is_manual else hit_count} 件防突襲陀螺上架！", "SUCCESS")
-        except Exception as e:
-            logger.warning(f"[{s_name}] 最新上架雷達掃描異常: {e}")
-
-    # 更新防突襲雷達全域即時看板狀態
-    now_gmt8 = get_now_gmt8().strftime("%H:%M:%S")
-    state.stealth_radar_status["last_scan_time"] = now_gmt8
-    state.stealth_radar_status["last_scan_timestamp"] = time.time()
-    state.stealth_radar_status["total_scans"] += 1
-    state.stealth_radar_status["total_hits"] += total_new_hits
-    if scanned_store_names:
-        stores_summary = "、".join(scanned_store_names)
-        if total_new_hits > 0:
-            summary_msg = f"🚨 剛掃描 [{stores_summary}]，捕獲 {total_new_hits} 款陀螺突襲上架！"
-        else:
-            summary_msg = f"⚡ 剛掃描 [{stores_summary}] 最新上架，未發現新型號突襲"
-    else:
-        summary_msg = "⚡ 防突襲雷達待命中 (非 Amazon 賣場暫未開啟)"
-    state.stealth_radar_status["last_log"] = summary_msg
     if is_manual:
-        state.add_log(summary_msg, "SUCCESS" if total_new_hits > 0 else "INFO")
+        state.add_log(f"⚡ [{s_name}] 正在掃描最新上架商品...", "INFO")
+
+    total_new_hits = 0
+    try:
+        latest_prods = fetch_latest_store_products(s_key, proxy=proxy)
+        if not latest_prods:
+            if is_manual:
+                state.add_log(f"[{s_name}] 最新上架商品清單為空或暫無回應", "INFO")
+            return 0
+
+        hit_count = 0
+        new_hit_count = 0
+        for prod in latest_prods:
+            title = prod.get("title", "")
+            if not title:
+                continue
+            match_res = match_product_with_stealth_catalog(title, catalog_items)
+            if match_res:
+                # 若為 PChome 通路，嚴格檢核必須為 Funbox 麗嬰國際官方直營上架商品 (排除第三方轉賣或平行輸入水貨)
+                if s_key == "pchome":
+                    pid = prod.get("item_id", "")
+                    is_official, full_title = PChomeChecker.is_official_funbox(pid, title)
+                    if not is_official:
+                        continue
+                    if full_title and full_title != title:
+                        title = full_title
+                        prod["title"] = full_title
+                        prod["seller"] = "funbox 麗嬰國際 (PChome 官方)"
+
+                matched_model = match_res["model"]
+                target_item = match_res["catalog_item"]
+                prod_url = prod.get("url", "")
+                prod_price = prod.get("price", "未標示")
+                prod_seller = prod.get("seller", s_cfg.get("name", s_key))
+
+                alert_key = f"{s_key}_{matched_model}_{prod_url}"
+                is_new_discovery = alert_key not in state.seen_stealth_urls
+                state.seen_stealth_urls.add(alert_key)
+
+                now_str = get_now_gmt8().strftime("%H:%M:%S")
+                is_in_stock = bool(prod.get("in_stock", False))
+                target_item["last_price"] = prod_price
+                target_item["last_seller"] = prod_seller
+                target_item["last_time"] = now_str
+                target_item["url"] = prod_url
+                target_item["direct_url"] = prod_url
+
+                if not is_in_stock:
+                    target_item["last_status"] = "⚪ 已售完 (無庫存)"
+                    state.mark_config_dirty()
+                    continue
+
+                target_item["last_status"] = "🟢 突襲上架現貨！"
+                state.mark_config_dirty()
+
+                hit_count += 1
+                if is_new_discovery:
+                    new_hit_count += 1
+                    total_new_hits += 1
+                if is_new_discovery or is_manual:
+                    state.add_log(f"🚨【突襲上架發現！】[{s_name}] 命中型號 {matched_model}（現貨）！品名: {title[:28]} 售價: {prod_price}", "SUCCESS")
+                    item_display_name = f"BEYBLADE X {matched_model} ({title[:25]})" if matched_model not in title else title[:35]
+                    trigger_notifications(target_item, item_display_name, matched_model, prod_price, prod_seller, prod_url)
+                    state.in_stock_state[f"{s_key}_{matched_model}"] = True
+
+        if hit_count == 0 and is_manual:
+            state.add_log(f"[{s_name}] 最新上架 {len(latest_prods)} 件商品掃描完成，未發現命中型號", "INFO")
+        elif new_hit_count > 0 or (hit_count > 0 and is_manual):
+            state.add_log(f"🎉 [{s_name}] 本次掃描捕獲 {new_hit_count if not is_manual else hit_count} 件防突襲陀螺上架！", "SUCCESS")
+
+        now_gmt8 = get_now_gmt8().strftime("%H:%M:%S")
+        state.stealth_radar_status["last_scan_time"] = now_gmt8
+        state.stealth_radar_status["last_scan_timestamp"] = time.time()
+        state.stealth_radar_status["total_scans"] += 1
+        state.stealth_radar_status["total_hits"] += total_new_hits
+        if total_new_hits > 0:
+            state.stealth_radar_status["last_log"] = f"🚨 [{s_name}] 捕獲 {total_new_hits} 款陀螺突襲上架！"
+        else:
+            state.stealth_radar_status["last_log"] = f"⚡ [{s_name}] 最新上架掃描完成，暫無新品突襲"
+
+    except Exception as e:
+        logger.warning(f"[{s_name}] 最新上架雷達掃描異常: {e}")
 
     if state._config_dirty:
         state.save_config(force=True)
+    return total_new_hits
+
+
+def scan_latest_arrivals_radar(store_filter: Optional[str] = None, is_manual: bool = False):
+    """各大電商最新上架商品防突襲比對掃描 (支援單一電商或全部電商並行掃描)"""
+    if store_filter:
+        scan_stealth_for_single_store(store_filter, is_manual=is_manual)
+        return
+
+    target_stores = [s for s in STORE_CONFIG.keys() if s != "amazon_jp" and state.is_store_monitored(s)]
+    if not target_stores:
+        return
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(target_stores)) as executor:
+        futures = [executor.submit(scan_stealth_for_single_store, s, is_manual) for s in target_stores]
+        concurrent.futures.wait(futures)
+
     force_release_memory()
 
 
-# 全域並行賣場掃描限制：至多同時允許 2 個賣場進行爬蟲檢查，避免 7 大賣場同秒併發 28 條連線爆記憶體
-GLOBAL_STORE_SEMAPHORE = threading.Semaphore(2)
-
 def check_items_for_store(store_key: str, is_manual: bool = False):
-    """專門為單一賣場執行的極速檢查函式 (一般價格監控專用，各賣場完全隔離、獨立抓價)"""
+    """專門為單一賣場執行的極速檢查函式 (各賣場完全隔離、獨立抓價，無跨賣場排隊鎖)"""
     if store_key not in STORE_CONFIG:
         return
 
@@ -414,151 +411,145 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             state.add_log(f"提示: [{s_name}] 目前無啟用一般價格監控的商品", "INFO")
         return
 
-    with GLOBAL_STORE_SEMAPHORE:
-        amazon_delay = state.get_amazon_item_interval()
-        amazon_jitter = state.get_amazon_jitter()
-        proxy = state.get_proxy_url()
-        only_official = state.config.get("only_amazon_seller", True)
-        custom_cookie = state.get_amazon_custom_cookie() if store_key == "amazon_jp" else None
-        keepa_key = state.get_keepa_api_key() if store_key == "amazon_jp" else None
-        keepa_mode = state.get_keepa_mode() if store_key == "amazon_jp" else "fallback"
+    amazon_delay = state.get_amazon_item_interval()
+    amazon_jitter = state.get_amazon_jitter()
+    proxy = state.get_proxy_url()
+    only_official = state.config.get("only_amazon_seller", True)
+    custom_cookie = state.get_amazon_custom_cookie() if store_key == "amazon_jp" else None
+    keepa_key = state.get_keepa_api_key() if store_key == "amazon_jp" else None
+    keepa_mode = state.get_keepa_mode() if store_key == "amazon_jp" else "fallback"
 
-        extras = []
-        if store_key == "amazon_jp":
-            if proxy:
-                extras.append("住宅代理")
-            if custom_cookie:
-                extras.append("自訂Cookie")
-            if keepa_key and keepa_mode != "disabled":
-                extras.append(f"Keepa {keepa_mode}")
-        tag = f" ({', '.join(extras)})" if extras else ""
-        state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
-        t0 = time.time()
+    extras = []
+    if store_key == "amazon_jp":
+        if proxy:
+            extras.append("住宅代理")
+        if custom_cookie:
+            extras.append("自訂Cookie")
+        if keepa_key and keepa_mode != "disabled":
+            extras.append(f"Keepa {keepa_mode}")
+    tag = f" ({', '.join(extras)})" if extras else ""
+    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
+    t0 = time.time()
 
-        def worker(item_tuple):
+    def worker(item_tuple):
+        if state.stop_event.is_set():
+            return None
+        idx, item = item_tuple
+        res = check_store_item(
+            item,
+            amazon_interval=amazon_delay,
+            amazon_jitter=amazon_jitter,
+            proxy=proxy,
+            only_amazon_seller=only_official,
+            custom_cookie=custom_cookie,
+            keepa_api_key=keepa_key,
+            keepa_mode=keepa_mode
+        )
+        return idx, item, res
+
+    # 限制每賣場同時連線工作線程至多 2 個，減輕 CPU 與記憶體瞬間負載
+    max_workers = min(len(store_items), 2)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        for it in store_items:
             if state.stop_event.is_set():
-                return None
-            idx, item = item_tuple
-            res = check_store_item(
-                item,
-                amazon_interval=amazon_delay,
-                amazon_jitter=amazon_jitter,
-                proxy=proxy,
-                only_amazon_seller=only_official,
-                custom_cookie=custom_cookie,
-                keepa_api_key=keepa_key,
-                keepa_mode=keepa_mode
-            )
-            return idx, item, res
+                break
+            futures.append(executor.submit(worker, it))
+            if store_key == "amazon_jp" and amazon_delay > 0:
+                stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
+                time.sleep(stagger)
 
-        # 限制每賣場同時連線工作線程至多 2 個，減輕 CPU 與記憶體瞬間負載
-        max_workers = min(len(store_items), 2)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = []
-            for it in store_items:
-                if state.stop_event.is_set():
-                    break
-                futures.append(executor.submit(worker, it))
-                if store_key == "amazon_jp" and amazon_delay > 0:
-                    stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
-                    time.sleep(stagger)
+        in_stock_hits = 0
+        for f in concurrent.futures.as_completed(futures):
+            if state.stop_event.is_set():
+                break
+            result = f.result()
+            if result:
+                idx, item, res = result
+                if handle_result(idx, item, res, is_manual=is_manual):
+                    in_stock_hits += 1
 
-            in_stock_hits = 0
-            for f in concurrent.futures.as_completed(futures):
-                if state.stop_event.is_set():
-                    break
-                result = f.result()
-                if result:
-                    idx, item, res = result
-                    if handle_result(idx, item, res, is_manual=is_manual):
-                        in_stock_hits += 1
+    dt = time.time() - t0
+    if in_stock_hits > 0:
+        state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨！", "SUCCESS")
+    else:
+        state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨", "INFO")
 
-        dt = time.time() - t0
-        if in_stock_hits > 0:
-            state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨！", "SUCCESS")
-        else:
-            state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨", "INFO")
-
-        # 每賣場檢查結束後，批量將狀態寫入磁碟並強制呼叫 malloc_trim 將記憶體歸還 OS
-        if state._config_dirty:
-            state.save_config(force=True)
-        force_release_memory()
+    # 每賣場檢查結束後，批量將狀態寫入磁碟並強制呼叫 malloc_trim 將記憶體歸還 OS
+    if state._config_dirty:
+        state.save_config(force=True)
+    force_release_memory()
 
 
-def store_monitor_worker(store_key: str):
-    """一般價格監控專屬獨立線程：各賣場跑各自獨立的輪詢週期，專門檢查清單中已啟用的商品價格與庫存"""
+def store_autonomous_worker(store_key: str):
+    """各電商分頁專屬獨立生命週期 Worker 線程：
+    完全解耦、獨立執行自身賣場之一般價格庫存監控與防突襲最新上架雷達，
+    自主控制間隔，絕不跨賣場排隊阻塞！
+    """
     s_cfg = STORE_CONFIG.get(store_key, {})
     s_name = s_cfg.get("short_name", store_key)
 
-    # 錯開各賣場初次啟動時間 (依序錯開 0.5s)，避免一開機瞬間全部賣場同毫秒出發
+    # 錯開各賣場初次啟動時間 (依序微幅錯開 0.2s)，避免開機瞬間 7 賣場同毫秒出發
     keys_list = list(STORE_CONFIG.keys())
-    offset = keys_list.index(store_key) * 0.5 if store_key in keys_list else 0.0
+    offset = keys_list.index(store_key) * 0.2 if store_key in keys_list else 0.0
     time.sleep(offset)
 
     while not state.stop_event.is_set():
-        # 如果一般價格監控被關閉，或該賣場未被啟用監控，定時檢查開關狀態
-        if not state.is_monitoring or not state.is_store_monitored(store_key):
+        # 1. 檢查一般價格監控開關與該賣場開關
+        is_price_enabled = state.is_monitoring and state.is_store_monitored(store_key)
+        # 2. 檢查防突襲雷達開關與該賣場開關 (非 Amazon 支援即時突襲雷達)
+        is_stealth_enabled = state.stealth_radar_enabled and state.is_store_monitored(store_key) and (store_key != "amazon_jp")
+
+        if not is_price_enabled and not is_stealth_enabled:
+            # 該賣場未被啟用任何監控，短暫休眠後再次檢查
             for _ in range(10):
-                if state.stop_event.is_set() or state.is_monitoring:
+                if state.stop_event.is_set() or state.is_monitoring or state.stealth_radar_enabled:
                     break
-                time.sleep(0.1)
+                time.sleep(0.2)
             continue
 
-        # 執行該賣場的一般商品價格與庫存檢查
-        try:
-            check_items_for_store(store_key, is_manual=False)
-        except Exception as e:
-            logger.error(f"賣場 [{s_name}] 價格監控異常: {e}", exc_info=True)
+        # A. 執行該電商專屬的【一般商品價格與庫存監控】
+        if is_price_enabled and not state.stop_event.is_set():
+            try:
+                check_items_for_store(store_key, is_manual=False)
+            except Exception as e:
+                logger.error(f"[{s_name}] 價格監控異常: {e}", exc_info=True)
 
+        # B. 執行該電商專屬的【防突襲最新上架雷達掃描】
+        if is_stealth_enabled and not state.stop_event.is_set():
+            try:
+                scan_stealth_for_single_store(store_key, is_manual=False)
+            except Exception as e:
+                logger.error(f"[{s_name}] 防突襲雷達掃描異常: {e}", exc_info=True)
+
+        # C. 各賣場自主計算休眠時間 (完全獨立，不互相等待)
         s_set = state.config.get("store_settings", {}).get(store_key, {})
-        default_ival = 1.5 if store_key == "amazon_jp" else 6.0
+        default_ival = 1.5 if store_key == "amazon_jp" else 5.0
         store_interval = float(s_set.get("item_interval_seconds", default_ival))
-        store_interval = max(4.0 if store_key != "amazon_jp" else 1.0, store_interval)
+        store_interval = max(2.0 if store_key != "amazon_jp" else 1.0, store_interval)
 
-        # 依該賣場自訂間隔休眠，切片為 0.1s 以保證隨時響應停止或開關切換
-        sleep_slices = int(store_interval * 10)
+        sleep_slices = max(1, int(store_interval * 5))
         for _ in range(sleep_slices):
-            if state.stop_event.is_set() or not state.is_monitoring:
-                break
-            time.sleep(0.1)
-
-
-def stealth_radar_worker():
-    """專屬防突襲上架雷達背景線程：
-    每隔設定秒數 (預設 60s) 自動向各大電商掃描最新上架商品並比對陀螺型號防突襲。
-    與一般價格監控完全分開，擁有獨立開關。
-    """
-    time.sleep(1.0)
-    while not state.stop_event.is_set():
-        if not state.stealth_radar_enabled:
-            state.stealth_radar_status["is_running"] = False
-            state.stealth_radar_status["last_log"] = "⏸ 防突襲上架雷達已暫停"
-            for _ in range(10):
-                if state.stop_event.is_set() or state.stealth_radar_enabled:
-                    break
-                time.sleep(0.1)
-            continue
-
-        state.stealth_radar_status["is_running"] = True
-        try:
-            scan_latest_arrivals_radar(store_filter=None, is_manual=False)
-        except Exception as e:
-            logger.error(f"防突襲雷達輪詢異常: {e}", exc_info=True)
-
-        interval = state.get_stealth_scan_interval()
-        sleep_slices = max(1, int(interval * 5))
-        for _ in range(sleep_slices):
-            if state.stop_event.is_set() or not state.stealth_radar_enabled:
+            if state.stop_event.is_set():
                 break
             time.sleep(0.2)
 
+        force_release_memory()
+
+
+def ensure_all_store_workers():
+    """確保所有電商分頁的獨立 Worker 線程運作"""
+    for s_key in STORE_CONFIG.keys():
+        t = state.store_threads.get(s_key)
+        if t is None or not t.is_alive():
+            t = threading.Thread(target=store_autonomous_worker, args=(s_key,), daemon=True, name=f"StoreWorker-{s_key}")
+            state.store_threads[s_key] = t
+            t.start()
+
 
 def ensure_stealth_radar_worker():
-    """確保防突襲雷達獨立背景線程運行"""
-    if state.stealth_thread is None or not state.stealth_thread.is_alive():
-        t = threading.Thread(target=stealth_radar_worker, daemon=True, name="StealthRadarWorker")
-        state.stealth_thread = t
-        t.start()
+    """確保防突襲雷達運作 (確保各電商獨立線程)"""
+    ensure_all_store_workers()
 
 
 def memory_watchdog():
@@ -730,15 +721,9 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
 def start_monitor():
     state.is_monitoring = True
     state.stop_event.clear()
-    state.add_log("=== 雲端 24H 一般價格監控線程已啟動 ===", "SUCCESS")
+    state.add_log("=== 雲端 24H 各電商獨立監控線程已啟動 ===", "SUCCESS")
     ensure_memory_watchdog()
-    for s_key in STORE_CONFIG.keys():
-        t = state.store_threads.get(s_key)
-        if t is None or not t.is_alive():
-            t = threading.Thread(target=store_monitor_worker, args=(s_key,), daemon=True, name=f"PriceWorker-{s_key}")
-            state.store_threads[s_key] = t
-            t.start()
-    ensure_stealth_radar_worker()
+    ensure_all_store_workers()
 
 
 def stop_monitor():
@@ -1295,13 +1280,16 @@ async def api_check_store_now(background_tasks: BackgroundTasks, store: str = Qu
 
 @app.post("/api/check_now")
 async def api_check_now(background_tasks: BackgroundTasks):
-    """立即檢查所有已開啟監控之賣場商品"""
+    """立即檢查所有已開啟監控商品 (多電商並行獨立觸發，不排隊)"""
     def _do_all():
-        for s_key in STORE_CONFIG.keys():
-            if state.is_store_monitored(s_key):
-                check_items_for_store(s_key, is_manual=True)
+        active_stores = [s for s in STORE_CONFIG.keys() if state.is_store_monitored(s)]
+        if not active_stores:
+            return
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(active_stores)) as executor:
+            futures = [executor.submit(check_items_for_store, s, True) for s in active_stores]
+            concurrent.futures.wait(futures)
     background_tasks.add_task(_do_all)
-    return {"ok": True, "msg": "已開始全賣場極速檢查"}
+    return {"ok": True, "msg": "已並行觸發各電商即時檢查"}
 
 
 @app.post("/api/trigger_stealth_scan")
