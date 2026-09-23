@@ -811,7 +811,7 @@ class KeepaChecker:
             return {"ok": False, "msg": "未設定 Keepa API Key"}
 
         api_key = api_key.strip()
-        url = f"https://api.keepa.com/product?key={api_key}&domain=5&asin={asin}&stats=1"
+        url = f"https://api.keepa.com/product?key={api_key}&domain=5&asin={asin}&stats=1&history=0"
 
         try:
             r = requests.get(url, timeout=12)
@@ -1465,15 +1465,18 @@ class MMShopChecker:
                     price_str = f"NT$ {price_m.group(1)}" if price_m else "未標示"
                     
                     card_text = c.get_text()
+                    m_qty = re.search(r'庫存\s*<span[^>]*>\s*(-?\d+)\s*<', str(c)) or re.search(r'庫存\s*(-?\d+)', card_text)
+                    qty = int(m_qty.group(1)) if m_qty else None
                     soldout = c.find(lambda t: t.has_attr("data-bv") and t["data-bv"] == "product-soldout")
-                    in_stock = (soldout is None) and ("補貨中" not in card_text) and ("已售完" not in card_text) and ("庫存\n0" not in card_text)
+                    in_stock = (qty > 0) if (qty is not None) else ((soldout is None) and ("補貨中" not in card_text) and ("已售完" not in card_text) and ("庫存\n0" not in card_text))
                     
                     parsed_cards.append({
                         "title": title,
                         "url": real_url,
                         "item_id": item_id,
                         "price": price_str,
-                        "in_stock": in_stock
+                        "in_stock": in_stock,
+                        "qty": qty
                     })
 
                 code_clean = base_code.lower().replace("-", "")
@@ -1499,6 +1502,11 @@ class MMShopChecker:
                         best_card = card
 
                 if best_card and (best_score >= 20 or base_code != "BX-00"):
+                    card_qty = best_card.get("qty")
+                    if card_qty is not None:
+                        status_text = f"🟢 M.M小舖現貨開放！(庫存: {card_qty})" if best_card["in_stock"] else f"⚪ 補貨中 / 暫無庫存 (庫存: {card_qty})"
+                    else:
+                        status_text = "🟢 M.M小舖現貨開放！" if best_card["in_stock"] else "⚪ 補貨中 / 暫無庫存"
                     return {
                         "ok": True,
                         "store": "mm_shop",
@@ -1507,11 +1515,12 @@ class MMShopChecker:
                         "title": best_card["title"],
                         "price": best_card["price"],
                         "in_stock": best_card["in_stock"],
+                        "qty": card_qty,
                         "is_official": True,
                         "seller": "M.M小舖",
                         "url": best_card["url"],
                         "has_product_page": True,
-                        "status_text": "🟢 M.M小舖現貨開放！" if best_card["in_stock"] else "⚪ 補貨中 / 暫無庫存"
+                        "status_text": status_text
                     }
         except Exception:
             pass
@@ -1523,6 +1532,7 @@ class MMShopChecker:
             "title": f"BEYBLADE X {keyword}",
             "price": "-",
             "in_stock": False,
+            "qty": 0,
             "is_official": True,
             "seller": "M.M小舖",
             "url": search_url,
@@ -1561,19 +1571,31 @@ class MMShopChecker:
             content = b""
             for chunk in r.iter_content(chunk_size=32768):
                 content += chunk
-                if b'"@type":"Product"' in content or b'"@type": "Product"' in content:
+                if b'prod_quantity' in content:
                     try:
                         content += next(r.iter_content(chunk_size=32768))
                     except StopIteration:
                         pass
                     break
-                if len(content) > 400000:
+                if b'"@type":"Product"' in content or b'"@type": "Product"' in content:
+                    try:
+                        content += next(r.iter_content(chunk_size=32768))
+                    except StopIteration:
+                        pass
+                    if b'prod_quantity' in content or len(content) > 300000:
+                        break
+                if len(content) > 350000:
                     break
             r.close()
         except Exception as e:
             return {"ok": False, "msg": f"M.M小舖連線逾時: {str(e)[:25]}", "has_product_page": False}
 
         html = content.decode("utf-8", errors="ignore")
+        m_qty = (re.search(r'id=["\']prod_quantity["\'][^>]*data-val=["\'](-?\d+)["\']', html) or 
+                 re.search(r'id=["\']prod_quantity["\'][^>]*>\s*(-?\d+)\s*<', html) or 
+                 re.search(r'商品庫存\s*<span[^>]*>\s*(-?\d+)\s*<', html))
+        qty = int(m_qty.group(1)) if m_qty else None
+
         product_ld = None
         for m in re.finditer(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
             try:
@@ -1588,15 +1610,20 @@ class MMShopChecker:
             title = product_ld.get("name", "")
             offers = product_ld.get("offers", {})
             avail = offers.get("availability", "")
-            in_stock = ("InStock" in avail) and ("OutOfStock" not in avail)
+            in_stock = (qty > 0) if (qty is not None) else (("InStock" in avail) and ("OutOfStock" not in avail))
             price_val = offers.get("price", "")
             price_str = f"NT$ {price_val}" if price_val else "未標示"
         else:
             title_m = re.search(r"<title>(.*?)(?: - |\||M\.M).*?</title>", html)
             title = title_m.group(1).strip() if title_m else item_id
-            in_stock = ("加入購物車" in html or "立即購買" in html) and ("已售完" not in html and "缺貨" not in html)
+            in_stock = (qty > 0) if (qty is not None) else (("加入購物車" in html or "立即購買" in html) and ("已售完" not in html and "缺貨" not in html))
             p_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', html)
             price_str = f"NT$ {p_m.group(1)}" if p_m else "未標示"
+
+        if qty is not None:
+            status_text = f"🟢 M.M小舖現貨開放！(庫存: {qty})" if in_stock else f"⚪ 補貨中 / 暫無庫存 (庫存: {qty})"
+        else:
+            status_text = "🟢 M.M小舖現貨開放！" if in_stock else "⚪ 補貨中 / 暫無庫存"
 
         return {
             "ok": True,
@@ -1605,11 +1632,12 @@ class MMShopChecker:
             "title": title or item_id,
             "price": price_str,
             "in_stock": in_stock,
+            "qty": qty,
             "is_official": True,
             "seller": "M.M小舖",
             "url": url,
             "has_product_page": True,
-            "status_text": "🟢 M.M小舖現貨開放！" if in_stock else "⚪ 補貨中 / 暫無庫存"
+            "status_text": status_text
         }
 
 
@@ -2749,8 +2777,10 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     real_url = "https://mmtoyshop.com" + href if href.startswith("/") else href
                     price_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', c.get_text())
                     price_str = f"NT$ {price_m.group(1)}" if price_m else "未標示"
+                    m_qty = re.search(r'庫存\s*<span[^>]*>\s*(-?\d+)\s*<', str(c)) or re.search(r'庫存\s*(-?\d+)', c.get_text())
+                    qty = int(m_qty.group(1)) if m_qty else None
                     soldout = c.find(lambda t: t.has_attr("data-bv") and t["data-bv"] == "product-soldout")
-                    in_stock = (soldout is None) and ("補貨中" not in c.get_text()) and ("已售完" not in c.get_text())
+                    in_stock = (qty > 0) if (qty is not None) else ((soldout is None) and ("補貨中" not in c.get_text()) and ("已售完" not in c.get_text()))
                     results.append({
                         "store": "mm_shop",
                         "title": title,
@@ -2758,7 +2788,8 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                         "url": real_url,
                         "item_id": item_id,
                         "seller": "M.M小舖",
-                        "in_stock": in_stock
+                        "in_stock": in_stock,
+                        "qty": qty
                     })
         except Exception:
             pass

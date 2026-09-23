@@ -2215,7 +2215,7 @@
           <div class="item-meta">
             <div>
               <div class="item-status" style="color: ${statusColor}">${escapeHtml(displayStatus)}</div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}${it.qty !== undefined && it.qty !== null ? ` | <span style="color: ${it.qty > 0 ? '#34d399' : '#94a3b8'}; font-weight: 600;">庫存: ${it.qty}</span>` : ''}</div>
             </div>
             ${storeKey === 'amazon_jp' ? `
               <div class="item-price" style="text-align: right; display: flex; flex-direction: column; gap: 2px; align-items: flex-end;">

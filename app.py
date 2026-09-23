@@ -16,8 +16,11 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 
-# Render / Linux 記憶體瘦身環境變數：限制 glibc 記憶體 arena 數量為 2，杜絕記憶體碎片化
-os.environ.setdefault("MALLOC_ARENA_MAX", "2")
+# Render / Linux 記憶體瘦身環境變數：限制 glibc 記憶體 arena 與釋放閾值，杜絕記憶體碎片化
+os.environ["MALLOC_ARENA_MAX"] = "2"
+os.environ["MALLOC_TRIM_THRESHOLD_"] = "65536"
+os.environ["MALLOC_MMAP_THRESHOLD_"] = "65536"
+os.environ["PYTHONUNBUFFERED"] = "1"
 
 # 限制 Python 執行緒堆疊大小為 256KB (預設 Linux glibc 為 8MB，大幅降低執行緒記憶體開銷 95%)
 try:
@@ -26,15 +29,21 @@ except Exception:
     pass
 
 # 更積極的垃圾回收機制
-gc.set_threshold(150, 10, 10)
+gc.set_threshold(100, 5, 5)
+
+_libc = None
+if os.name == "posix":
+    try:
+        _libc = ctypes.CDLL("libc.so.6")
+    except Exception:
+        _libc = None
 
 def force_release_memory():
     """強制回收 Python 記憶體並透過 glibc malloc_trim 將未使用的堆記憶體歸還 Linux 核心 (防止 Render 512MB OOM 重啟)"""
     gc.collect()
-    if os.name == "posix":
+    if _libc is not None:
         try:
-            libc = ctypes.CDLL("libc.so.6")
-            libc.malloc_trim(0)
+            _libc.malloc_trim(0)
         except Exception:
             pass
 
@@ -81,8 +90,9 @@ class MonitorState:
         self._config_dirty = False
         self._last_save_time = time.time()
         self.logs: List[Dict[str, str]] = []
-        self.max_logs = 40  # 瘦身日誌長度以節省記憶體
+        self.max_logs = 30  # 瘦身日誌長度以節省記憶體
         self.seen_stealth_urls: set = set()
+        self.stock_qty_state: Dict[str, int] = {}
         self.stealth_thread: Any = None
         self.watchdog_thread: Any = None
         self.config: Dict[str, Any] = self.load_config()
@@ -138,10 +148,14 @@ class MonitorState:
             "tcsb": ""
         }
 
-        # 確保現有項目相容性：未標記 store 者預設為 amazon_jp
+        # 確保現有項目相容性：未標記 store 者預設為 amazon_jp，並初始化現有庫存狀態
         for it in cfg.get("items", []):
             if "store" not in it:
                 it["store"] = "amazon_jp"
+            st = it.get("store")
+            asin = it.get("asin")
+            if st and asin and "qty" in it and it["qty"] is not None:
+                self.stock_qty_state[f"{st}_{asin}"] = it["qty"]
 
         # 確保各賣場皆有獨立推播與頻率設定
         for s_key in STORE_CONFIG.keys():
@@ -431,10 +445,13 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
     t0 = time.time()
 
-    def worker(item_tuple):
+    in_stock_hits = 0
+    # 徹底移除賣場內層 ThreadPoolExecutor，改為各賣場專屬線程內循序掃描：
+    # 避免 9 賣場 × 2 子線程 = 18 額外執行緒與數千個 Future 物件堆積在記憶體中引發 Render OOM！
+    for count, (idx, item) in enumerate(store_items, start=1):
         if state.stop_event.is_set():
-            return None
-        idx, item = item_tuple
+            break
+
         res = check_store_item(
             item,
             amazon_interval=amazon_delay,
@@ -445,29 +462,20 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             keepa_api_key=keepa_key,
             keepa_mode=keepa_mode
         )
-        return idx, item, res
+        if res:
+            if handle_result(idx, item, res, is_manual=is_manual):
+                in_stock_hits += 1
 
-    # 限制每賣場同時連線工作線程至多 2 個，減輕 CPU 與記憶體瞬間負載
-    max_workers = min(len(store_items), 2)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for it in store_items:
-            if state.stop_event.is_set():
-                break
-            futures.append(executor.submit(worker, it))
-            if store_key == "amazon_jp" and amazon_delay > 0:
-                stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
-                time.sleep(stagger)
+        # Amazon 依設定延遲，其他賣場微幅延遲 50ms 讓出 CPU
+        if store_key == "amazon_jp" and amazon_delay > 0:
+            stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
+            time.sleep(stagger)
+        else:
+            time.sleep(0.05)
 
-        in_stock_hits = 0
-        for f in concurrent.futures.as_completed(futures):
-            if state.stop_event.is_set():
-                break
-            result = f.result()
-            if result:
-                idx, item, res = result
-                if handle_result(idx, item, res, is_manual=is_manual):
-                    in_stock_hits += 1
+        # 每檢查 15 項商品，強制釋放記憶體歸還 OS
+        if count % 15 == 0:
+            force_release_memory()
 
     dt = time.time() - t0
     if in_stock_hits > 0:
@@ -553,13 +561,13 @@ def ensure_stealth_radar_worker():
 
 
 def memory_watchdog():
-    """背景記憶體守護與定時存檔線程 (每 30 秒執行一次，主動釋放未使用的記憶體歸還 Linux)"""
+    """背景記憶體守護與定時存檔線程 (每 15 秒執行一次，主動釋放未使用的記憶體歸還 Linux)"""
     while not state.stop_event.is_set():
-        time.sleep(30)
+        time.sleep(15)
         try:
             if state._config_dirty:
                 state.save_config(force=True)
-            if len(state.seen_stealth_urls) > 1000:
+            if len(state.seen_stealth_urls) > 300:
                 state.seen_stealth_urls.clear()
             force_release_memory()
         except Exception:
@@ -655,6 +663,18 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
         else:
             status_text = "⚪ 缺貨中 / 暫無庫存"
 
+    # 庫存數量處理 (若賣場支援庫存回傳，如 M.M小舖)
+    qty = res.get("qty")
+    if qty is not None:
+        item["qty"] = qty
+        item["last_qty"] = qty
+
+    prev_qty = state.stock_qty_state.get(item_key)
+    if qty is not None:
+        state.stock_qty_state[item_key] = qty
+
+    qty_changed = (prev_qty is not None and qty is not None and prev_qty != qty)
+
     # 正規化價格顯示 (杜絕出現「官方缺貨中」混淆文字)
     clean_price = price if price and price not in ("官方缺貨中", "價格載入中") else ("-" if not in_stock else price)
 
@@ -670,9 +690,12 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     prev_was_in_stock = state.in_stock_state.get(item_key, False)
     state.in_stock_state[item_key] = is_alert_worthy
 
-    should_trigger = is_alert_worthy and (not prev_was_in_stock or is_manual)
+    is_first_restock = is_alert_worthy and (not prev_was_in_stock or is_manual)
+    should_trigger = is_first_restock or qty_changed
 
-    if is_alert_worthy:
+    if qty_changed:
+        state.add_log(f"📦【庫存變動】[{store_short}] {name} 庫存變動: {prev_qty} ➔ {qty} 件", "SUCCESS" if (qty > prev_qty) else "INFO")
+    elif is_first_restock:
         flag = store_cfg.get("flag", "⚡")
         display_price = official_price if (store == "amazon_jp" and official_price and official_price != "官方缺貨") else price
         state.add_log(f"🔥【官方補貨】{flag} [{store_short}] {name} 官方自營價: {display_price}！", "SUCCESS")
@@ -681,15 +704,16 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
         if store_notify_enabled:
             notify_price = official_price if (store == "amazon_jp" and official_price and official_price != "官方缺貨") else price
             notify_url = get_item_direct_url(item)
-            trigger_notifications(item, name, asin, notify_price, seller, notify_url)
+            qty_desc = f"庫存變動: {prev_qty} ➔ {qty} 件" if qty_changed else (f"剩餘庫存: {qty} 件" if qty is not None else None)
+            trigger_notifications(item, name, asin, notify_price, seller, notify_url, qty_info=qty_desc)
         else:
             state.add_log(f"🔕 [{store_short}] 已關閉推播通知，已略過本次推播", "INFO")
 
     return bool(in_stock)
 
 
-def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: str, url: str):
-    """發送 Discord 與 LINE 官方推播 (支援各賣場獨立 Webhook 與獨立開關)"""
+def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: str, url: str, qty_info: Optional[str] = None):
+    """發送 Discord 與 LINE 官方推播 (支援各賣場獨立 Webhook 與獨立開關，支援庫存變動提醒)"""
     store = item.get("store", "amazon_jp")
     store_cfg = STORE_CONFIG.get(store, STORE_CONFIG["amazon_jp"])
     store_name = store_cfg.get("name", "線上商城")
@@ -705,7 +729,8 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
         discord_url = s_settings.get("discord_webhook", "").strip() or state.config.get("discord_webhook", "").strip()
         if discord_url:
             def _send_d():
-                ok, msg = NotificationManager.send_discord(discord_url, name, asin, price, seller, url, store=store)
+                d_name = f"{name} ({qty_info})" if qty_info else name
+                ok, msg = NotificationManager.send_discord(discord_url, d_name, asin, price, seller, url, store=store)
                 state.add_log(f"Discord ({store_name}): {msg}", "SUCCESS" if ok else "ERROR")
             threading.Thread(target=_send_d, daemon=True).start()
 
@@ -714,8 +739,11 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
         line_token = state.config.get("line_token", "").strip()
         if line_token:
             def _send_l():
+                head = "🚨【庫存變動】" if (qty_info and "變動" in qty_info) else "🚨【補貨】"
+                qty_line = f"📦 {qty_info}\n" if qty_info else ""
                 msg_body = (
-                    f"🚨【補貨】{name}\n"
+                    f"{head}{name}\n"
+                    f"{qty_line}"
                     f"通路: {flag} {store_name}\n"
                     f"即時價格: {price}\n"
                     f"店家/賣家: {seller}\n"
