@@ -1628,97 +1628,154 @@ class CyberbizChecker:
             return m.group(1)
         return text.replace("https://", "").replace("http://", "").strip("/")
 
+    @staticmethod
+    def _get_colors(text: str) -> List[str]:
+        clean = re.sub(r'金屬(塗裝|塗層)?', '', text)
+        colors = ['水藍', '天藍', '深藍', '藍色', '藍', '紫色', '紫', '黑色', '黑', '紅色', '紅', '綠色', '綠', '黃色', '黃', '白色', '白', '銀色', '銀', '金色', '金']
+        found = []
+        for c in colors:
+            if c in clean and not any(c in f for f in found):
+                found.append(c)
+        return found
+
     @classmethod
-    def check_twj_stealth(cls, keyword: str) -> Dict[str, Any]:
-        """童無忌玩具關鍵字突襲搜尋監控"""
-        search_url = f"https://www.twj.tw/search?q={keyword}"
+    def _score_match(cls, cand_title: str, target_model: str, c_words: List[str], target_name: str) -> int:
+        title_lower = cand_title.lower()
+        is_bb = any(w in title_lower for w in ['戰鬥陀螺', '陀螺', 'beyblade', 'bx-', 'ux-', 'cx-'])
+        if not is_bb:
+            return 0
+        score = 1
+        t_clean = re.sub(r'[^a-zA-Z0-9\u4e00-\u9fa5]', '', title_lower)
+        m_clean = re.sub(r'[^a-zA-Z0-9]', '', target_model.lower()) if target_model else ''
+        
+        if m_clean and m_clean in t_clean:
+            score += 10
+        
+        matched_words = [w for w in c_words if w in cand_title]
+        if c_words and not matched_words:
+            return 0
+        score += len(matched_words) * 5
+        
+        target_colors = cls._get_colors(target_name)
+        cand_colors = cls._get_colors(cand_title)
+        if target_colors and cand_colors:
+            if any(c in cand_colors for c in target_colors):
+                score += 10
+            else:
+                return 0
+        return score
+
+    @classmethod
+    def check_stealth(cls, store_key: str, asin: str, item_name: str = "", item_keywords: list = None) -> Dict[str, Any]:
+        """麗嬰國際/童無忌突襲關鍵字與型號雙重智慧搜尋"""
+        m = re.search(r'([A-Za-z]{2}-\d{2,3})', asin) or re.search(r'([A-Za-z]{2}-\d{2,3})', item_name)
+        target_model = m.group(1).upper() if m else ""
+        
+        STOP_WORDS = {
+            "戰鬥陀螺", "戰鬥", "陀螺", "金屬塗裝", "金屬塗層", "塗裝", "塗層", "景品", "抽抽樂", "套組",
+            "限定", "大賽", "獎品", "日版", "代理", "代理版", "官方", "正版", "交換", "票券", "交換票券",
+            "兌換", "台灣", "麗嬰", "童無忌", "玩具", "點數", "專用", "配件", "零件", "收納盒", "發射器",
+            "cx00", "cx-00", "bx00", "bx-00", "ux00", "ux-00", "beyblade", "beybladex"
+        }
+        
+        raw_words = re.findall(r"[\u4e00-\u9fa5]{2,}", item_name)
+        if item_keywords:
+            for kw in item_keywords:
+                raw_words.extend(re.findall(r"[\u4e00-\u9fa5]{2,}", str(kw)))
+        c_words = [w for w in set(raw_words) if w.lower() not in STOP_WORDS]
+        
+        queries = []
+        if target_model:
+            queries.append(target_model)
+        query_words = [w for w in c_words if len(w) >= 3 and not any(c in w for c in ['藍', '紫', '金', '黑', '紅', '綠', '黃', '白', '銀'])]
+        for qw in query_words:
+            if qw not in queries:
+                queries.append(qw)
+        if not queries:
+            queries.append(asin)
+            
+        base_search = "https://shop.funbox.com.tw/search?q=" if store_key == "funbox_tw" else "https://www.twj.tw/search?q="
+        seller_name = "麗嬰國際官網 (Funbox)" if store_key == "funbox_tw" else "童無忌玩具"
         session = get_shared_session()
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         }
-        try:
-            r = session.get(search_url, headers=headers, timeout=6)
-            if r.status_code == 200:
-                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
-                clean_kw = keyword.lower().replace("-", "").strip()
-                for s in set(found_slugs):
-                    s_clean = s.lower().replace("-", "")
-                    if clean_kw in s_clean and any(k in s.lower() for k in ["beyblade", "bx", "ux", "cx"]):
-                        res = cls.check_prod(s, store_key="twj_toys")
-                        if res.get("ok") and res.get("price") != "未標示":
-                            res["asin"] = keyword
-                            res["has_product_page"] = True
-                            return res
-        except Exception:
-            pass
-
+        
+        candidates = []
+        for q in queries:
+            url = f"{base_search}{urllib.parse.quote(q)}"
+            try:
+                r = session.get(url, headers=headers, timeout=6)
+                if r.status_code != 200:
+                    continue
+                soup = BeautifulSoup(r.text, "html.parser")
+                for a in soup.find_all("a", href=re.compile(r'/products/([a-zA-Z0-9%_-]+)')):
+                    slug_m = re.search(r'/products/([a-zA-Z0-9%_-]+)', a.get('href'))
+                    if not slug_m:
+                        continue
+                    slug = slug_m.group(1)
+                    title = a.get_text(" ", strip=True)
+                    if not title or len(title) < 4:
+                        continue
+                    score = cls._score_match(title, target_model, c_words, item_name)
+                    if score > 0:
+                        candidates.append((score, slug, title))
+                if any(s >= 15 for s, _, _ in candidates):
+                    break
+            except Exception:
+                pass
+                
+        if candidates:
+            candidates.sort(key=lambda x: x[0], reverse=True)
+            best_slug = candidates[0][1]
+            res = cls.check_prod(best_slug, store_key=store_key, item_name=item_name, item_keywords=item_keywords)
+            if res.get("ok"):
+                res["asin"] = asin
+                res["url"] = f"https://shop.funbox.com.tw/products/{best_slug}" if store_key == "funbox_tw" else f"https://www.twj.tw/products/{best_slug}"
+                res["direct_url"] = res["url"]
+                res["has_product_page"] = True
+                return res
+                
+        first_q = queries[0] if queries else asin
         return {
             "ok": True,
-            "store": "twj_toys",
-            "asin": keyword,
-            "title": f"BEYBLADE X {keyword}",
+            "store": store_key,
+            "asin": asin,
+            "title": item_name or f"BEYBLADE X {asin}",
             "price": "-",
             "in_stock": False,
             "is_official": True,
-            "seller": "童無忌玩具",
-            "url": f"https://www.twj.tw/search?q={keyword}",
+            "seller": seller_name,
+            "url": f"{base_search}{urllib.parse.quote(first_q)}",
             "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
+
+    @classmethod
+    def check_twj_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """童無忌玩具關鍵字突襲搜尋監控"""
+        return cls.check_stealth("twj_toys", asin=keyword)
 
     @classmethod
     def check_funbox_stealth(cls, keyword: str) -> Dict[str, Any]:
         """麗嬰國際官網關鍵字突襲搜尋監控"""
-        search_url = f"https://shop.funbox.com.tw/search?q={keyword}"
-        session = get_shared_session()
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        }
-        try:
-            r = session.get(search_url, headers=headers, timeout=6)
-            if r.status_code == 200:
-                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
-                clean_kw = keyword.lower().replace("-", "").strip()
-                for s in set(found_slugs):
-                    s_clean = s.lower().replace("-", "")
-                    if clean_kw in s_clean and any(k in s.lower() for k in ["beyblade", "bx", "ux", "cx"]):
-                        res = cls.check_prod(s, store_key="funbox_tw")
-                        if res.get("ok") and res.get("price") != "未標示":
-                            res["asin"] = keyword
-                            res["has_product_page"] = True
-                            return res
-        except Exception:
-            pass
-
-        return {
-            "ok": True,
-            "store": "funbox_tw",
-            "asin": keyword,
-            "title": f"BEYBLADE X {keyword}",
-            "price": "-",
-            "in_stock": False,
-            "is_official": True,
-            "seller": "麗嬰國際官網 (Funbox)",
-            "url": f"https://shop.funbox.com.tw/search?q={keyword}",
-            "has_product_page": False,
-            "status_text": "⚪ 尚未上架 (待突襲發布)"
-        }
+        return cls.check_stealth("funbox_tw", asin=keyword)
 
     @classmethod
-    def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw") -> Dict[str, Any]:
+    def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw", item_name: str = "", item_keywords: list = None) -> Dict[str, Any]:
         raw_text = str(slug_or_url).strip()
         slug = cls.extract_slug(raw_text)
         if not slug:
             return {"ok": False, "msg": "無效商品編號", "has_product_page": False}
 
-        # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 調用突襲搜尋模式
-        if not slug.startswith("http") and ("-" in slug and len(slug) <= 8):
-            if store_key == "twj_toys" and not slug.startswith("202"):
-                return cls.check_twj_stealth(slug)
-            elif store_key == "funbox_tw" and not slug.startswith("sm"):
-                return cls.check_funbox_stealth(slug)
+        # 判斷是否為型號突襲或需要搜尋 (例如 "CX-00", "CX-00 (BXH2301)", "BX-52", "UX-15")
+        is_model_asin = bool(re.search(r'\b(?:BX|UX|CX)-\d{2,3}', raw_text, re.I) or ("(" in raw_text and ")" in raw_text))
+        is_search_url = "search?q=" in raw_text or "/search" in raw_text
+        is_slug_like = bool(re.match(r'^[a-z0-9_-]+$', slug, re.I) and not re.search(r'^(?:BX|UX|CX)-\d', slug, re.I))
+
+        if is_model_asin or is_search_url or not is_slug_like:
+            return cls.check_stealth(store_key, asin=raw_text, item_name=item_name, item_keywords=item_keywords)
 
         if store_key == "twj_toys":
             base_url = "https://www.twj.tw/products"
@@ -1737,6 +1794,8 @@ class CyberbizChecker:
         try:
             r = session.get(url, headers=headers, stream=True, timeout=6)
             if r.status_code == 404:
+                if item_name or is_model_asin:
+                    return cls.check_stealth(store_key, asin=raw_text, item_name=item_name, item_keywords=item_keywords)
                 return {"ok": False, "msg": "商品頁面不存在 (404)", "has_product_page": False}
 
             content = b""
@@ -2382,7 +2441,12 @@ def check_store_item(
             item_keywords=item.get("keywords", [])
         )
     elif store in ("funbox_tw", "twj_toys"):
-        return CyberbizChecker.check_prod(asin, store_key=store)
+        return CyberbizChecker.check_prod(
+            asin,
+            store_key=store,
+            item_name=item.get("name", ""),
+            item_keywords=item.get("keywords", [])
+        )
     elif store == "eslite":
         return EsliteChecker.check_prod(asin)
     elif store in ("shopee", "shopee_mm"):
@@ -2438,14 +2502,13 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
         if asin.startswith("http") and "/item/" in asin:
             return asin
         return f"https://mmtoyshop.com/category?keyword={urllib.parse.quote(asin)}"
-    elif store == "funbox_tw":
-        if is_model_code:
-            return f"https://shop.funbox.com.tw/search?q={asin}"
-        return f"https://shop.funbox.com.tw/products/{asin}"
-    elif store == "twj_toys":
-        if is_model_code:
-            return f"https://www.twj.tw/search?q={asin}"
-        return f"https://www.twj.tw/products/{asin}"
+    elif store in ("funbox_tw", "twj_toys"):
+        base_domain = "https://shop.funbox.com.tw" if store == "funbox_tw" else "https://www.twj.tw"
+        if re.match(r'^[a-z0-9_-]+$', asin, re.I) and not re.search(r'^(?:BX|UX|CX)-\d', asin, re.I):
+            return f"{base_domain}/products/{asin}"
+        m = re.search(r'([A-Za-z]{2}-\d{2,3})', asin)
+        q = m.group(1) if m else asin
+        return f"{base_domain}/search?q={urllib.parse.quote(q)}"
     elif store == "eslite":
         if is_model_code:
             return f"https://www.eslite.com/search?keyword=BEYBLADE+{asin}"
@@ -2565,26 +2628,29 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
         try:
             r = session.get(base_search, timeout=7)
             if r.status_code == 200:
-                found_slugs = re.findall(r'href=[\'"]/products/([^\'"?#]+)[\'"]', r.text)
+                soup = BeautifulSoup(r.text, "html.parser")
                 seen_slugs = set()
-                # 預先過濾：徹底排除 Tomica 多美小汽車、模型車、雜誌、非陀螺其他玩具產線
-                filtered_slugs = []
-                for slug in found_slugs:
-                    decoded = urllib.parse.unquote(slug).lower()
-                    if any(b in decoded for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒"]):
+                parsed_cards = []
+                for a in soup.find_all("a", href=re.compile(r'/products/([a-zA-Z0-9%_-]+)')):
+                    m_slug = re.search(r'/products/([a-zA-Z0-9%_-]+)', a.get('href'))
+                    if not m_slug:
                         continue
-                    if any(w in decoded for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
-                        if slug not in seen_slugs:
-                            seen_slugs.add(slug)
-                            filtered_slugs.append(slug)
+                    slug = m_slug.group(1)
+                    title = a.get_text(" ", strip=True)
+                    if not title or len(title) < 4 or slug in seen_slugs:
+                        continue
+                    seen_slugs.add(slug)
 
-                for slug in filtered_slugs[:30]:
+                    title_low = title.lower()
+                    if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "玩具總動員", "巴斯光年"]):
+                        continue
+                    if any(w in title_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
+                        parsed_cards.append((slug, title))
+
+                for slug, card_title in parsed_cards[:30]:
                     res = CyberbizChecker.check_prod(slug, store_key=store_key)
                     if res.get("ok"):
-                        title = res.get("title", slug)
-                        title_low = title.lower()
-                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "海綿", "不含陀螺", "紙製收納盒"]):
-                            continue
+                        title = res.get("title") or card_title
                         results.append({
                             "store": store_key,
                             "title": title,
@@ -2806,30 +2872,59 @@ def match_product_with_stealth_catalog(
         
         # 若為 00 限定款系列 (如 BX-00, UX-00, CX-00)，進一步由品名特徵關鍵字區分
         if "-00" in norm_code or norm_code.endswith("00"):
-            series_prefix = norm_code[:2]
-            title_low = title_clean.lower()
+            cand_colors = CyberbizChecker._get_colors(title_clean)
+            STOP_WORDS_00 = {
+                "戰鬥陀螺", "戰鬥", "陀螺", "金屬塗裝", "金屬塗層", "塗裝", "塗層", "景品", "抽抽樂", "套組",
+                "限定", "大賽", "獎品", "日版", "代理", "代理版", "官方", "正版", "交換", "票券", "交換票券",
+                "兌換", "台灣", "麗嬰", "童無忌", "玩具", "點數", "專用", "配件", "零件", "收納盒", "發射器",
+                "cx00", "cx-00", "bx00", "bx-00", "ux00", "ux-00", "beyblade", "beybladex"
+            }
+            scored_items = []
             for it in stealth_catalog:
                 it_asin = str(it.get("asin", "")).upper()
-                it_series = it.get("series") or it_asin[:2]
-                if it_series == series_prefix and (it.get("is_00") or "00" in it_asin):
-                    kws = it.get("keywords", [])
-                    # 先由 keywords 嚴格比對
-                    for kw in kws:
-                        if len(kw) >= 2 and kw in title_low:
-                            return {
-                                "model": it.get("asin", norm_code),
-                                "catalog_item": it,
-                                "matched_by": "00_keyword"
-                            }
-                    # 若無 keywords，從品名清理後比對
-                    c_name = str(it.get("name", "")).strip()
-                    clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
-                    if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
-                        return {
-                            "model": it.get("asin", norm_code),
-                            "catalog_item": it,
-                            "matched_by": "00_name"
-                        }
+                it_code = str(it.get("code", "")).upper()
+                is_this_series = (norm_code in it_asin or it_code == norm_code or 
+                                  (norm_code[:2] in it_asin and ("00" in it_asin or it.get("is_00"))))
+                if not is_this_series:
+                    continue
+
+                score = 0
+                pid = str(it.get("pid", "")).upper()
+                if pid and (pid in title_upper or pid.replace("-", "") in title_upper.replace("-", "")):
+                    score += 50
+
+                kws = it.get("keywords", [])
+                distinctive_kws = [k for k in kws if k.lower() not in STOP_WORDS_00]
+                c_name = str(it.get("name", "")).strip()
+                clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
+                name_words = [w for w in re.findall(r"[\u4e00-\u9fa5]{2,}", clean_name) if w not in STOP_WORDS_00]
+                all_words = set(distinctive_kws + name_words)
+
+                all_name_words = [w for w in all_words if not any(c in w for c in ['藍', '紫', '金', '黑', '紅', '綠', '黃', '白', '銀'])]
+                matched_names = [w for w in all_name_words if w.lower() in title_low]
+                if not matched_names and not pid:
+                    continue
+                score += len(matched_names) * 15
+
+                target_colors = CyberbizChecker._get_colors(c_name)
+                if target_colors and cand_colors:
+                    if any(c in cand_colors for c in target_colors):
+                        score += 20
+                    else:
+                        continue
+                elif target_colors and not cand_colors:
+                    score -= 5
+
+                scored_items.append((score, it))
+
+            if scored_items:
+                scored_items.sort(key=lambda x: x[0], reverse=True)
+                best_item = scored_items[0][1]
+                return {
+                    "model": best_item.get("asin", norm_code),
+                    "catalog_item": best_item,
+                    "matched_by": "00_distinctive_keyword"
+                }
         else:
             # 常規型號 (BX-01 ~ BX-57, UX-01 ~ UX-21, CX-01 ~ CX-19)
             for it in stealth_catalog:
@@ -2842,11 +2937,20 @@ def match_product_with_stealth_catalog(
                     }
 
     # 3. 關鍵字比對 (限定版陀螺特有名稱，如暴風天馬、福音戰士、EVA、巴塞隆納、迪卡狂怒、蜘蛛人等)
+    STOP_WORDS_GENERIC = {
+        "戰鬥陀螺", "戰鬥", "陀螺", "金屬塗裝", "金屬塗層", "塗裝", "塗層", "景品", "抽抽樂", "套組",
+        "限定", "大賽", "獎品", "日版", "代理", "代理版", "官方", "正版", "交換", "票券", "交換票券",
+        "兌換", "台灣", "麗嬰", "童無忌", "玩具", "點數", "專用", "配件", "零件", "收納盒", "發射器",
+        "cx00", "cx-00", "bx00", "bx-00", "ux00", "ux-00", "beyblade", "beybladex"
+    }
     title_low = title_clean.lower()
     for it in stealth_catalog:
         kws = it.get("keywords", [])
         for kw in kws:
-            if len(kw) >= 3 and kw in title_low:
+            kw_low = kw.lower()
+            if kw_low in STOP_WORDS_GENERIC:
+                continue
+            if len(kw) >= 3 and kw_low in title_low:
                 return {
                     "model": it.get("asin", ""),
                     "catalog_item": it,
@@ -2854,7 +2958,7 @@ def match_product_with_stealth_catalog(
                 }
         c_name = str(it.get("name", "")).strip()
         clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
-        if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
+        if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low and clean_name.lower() not in STOP_WORDS_GENERIC:
             return {
                 "model": it.get("asin", ""),
                 "catalog_item": it,
