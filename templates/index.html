@@ -358,8 +358,6 @@
     .tab-badge { background: #0f172a; color: #94a3b8; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
     .tab-btn.active .tab-badge { background: rgba(255, 255, 255, 0.2); color: white; }
     .tab-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite; }
-    .tab-instock-badge { font-size: 10px; background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); padding: 1px 6px; border-radius: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; animation: pulse 2s infinite; }
-    .tab-btn.active .tab-instock-badge { background: rgba(16, 185, 129, 0.45); color: #a7f3d0; border-color: #6ee7b7; }
     .tab-mute-icon { font-size: 11px; color: #f87171; margin-left: 2px; }
     .tab-btn.paused { opacity: 0.7; border-style: dashed; }
     .tab-pause-badge { font-size: 10px; background: #334155; color: #fbbf24; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
@@ -466,9 +464,8 @@
     /* Item Card */
     .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border); position: relative; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
     .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.08); box-shadow: 0 0 16px rgba(16, 185, 129, 0.18); }
-    .item-card.skipped { border-color: rgba(245, 158, 11, 0.55); background: rgba(245, 158, 11, 0.06); }
+    .item-card.has-error { border-color: rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.05); }
     .item-card.disabled { opacity: 0.55; }
-    .badge-skipped { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 11px; padding: 2px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
     .item-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .store-badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
     .item-asin { font-size: 11px; font-family: monospace; color: var(--text-muted); background: #0f172a; padding: 2px 6px; border-radius: 4px; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1284,9 +1281,6 @@
     <div class="section-title">
       <span id="tabHeading"><i class="fa-solid fa-list-check"></i> 🇯🇵 Amazon Japan 商品清單 (<span id="activeCount">0</span> 啟用)</span>
       <div class="section-actions">
-        <button id="btnOpenStealthCatalog" class="btn-stealth-catalog" onclick="openStealthModal()">
-          <i class="fa-solid fa-shield-halved"></i> ⚡ 防突襲型號庫 (<span id="stealthCatalogBtnCount">0</span>)
-        </button>
         <button id="btnFilterInStock" class="btn-filter-toggle" onclick="toggleFilterMode()">
           <i class="fa-solid fa-filter"></i> <span id="filterModeText">僅顯示已突襲/有貨 (0)</span>
         </button>
@@ -1304,8 +1298,8 @@
     </div>
 
     <div class="footer-note">
-      戰鬥陀螺 7 大通路雲端秒殺系統 • 支援 LINE & 各賣場獨立 Discord Webhook<br>
-      🇯🇵 Amazon JP • 🇹🇼 PChome 24h • 🏬 M.M小舖 • 🧸 麗嬰官網 • 🎯 童無忌 • 📚 誠品線上 • 🦐 fun box 玩具旗艦店
+      戰鬥陀螺 Amazon Japan 官方自營・全新品含運最低價 雲端即時秒殺監控系統<br>
+      支援 Discord Webhook 獨立推播 & LINE 即時推播通知
     </div>
   </div>
 
@@ -1460,7 +1454,6 @@
     let itemsData = [];
     let storesConfig = {};
     let storeSettingsData = {};
-    let storeCheckStatusData = {};
     let currentStoreTab = 'amazon_jp';
     let isEditingSettings = false;
     let filterInStockOnly = false; // 是否開啟「僅顯示已突襲/有現貨」模式
@@ -1512,7 +1505,6 @@
         itemsData = data.items || [];
         storesConfig = data.stores || {};
         storeSettingsData = data.store_settings || {};
-        storeCheckStatusData = data.store_check_status || {};
         
         // Update Status Badge & Button
         const badge = document.getElementById('statusBadge');
@@ -1638,7 +1630,7 @@
         const isMonitored = sSet.enable_monitoring !== false;
         const isNotifyOn = sSet.enable_notifications !== false;
         
-        const storeStockCount = itemsData.filter(it => (it.store || 'amazon_jp') === key && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購'))).length;
+        const hasStock = itemsData.some(it => (it.store || 'amazon_jp') === key && it.last_status && it.last_status.includes('現貨'));
 
         btn.className = `tab-btn ${key === currentStoreTab ? 'active' : ''} ${!isMonitored ? 'paused' : ''}`;
         btn.onclick = () => switchStoreTab(key);
@@ -1646,7 +1638,7 @@
           <span>${cfg.flag} ${cfg.short_name}</span>
           ${!isMonitored ? '<span class="tab-pause-badge" title="此賣場監控已暫停">暫停</span>' : ''}
           ${!isNotifyOn ? '<span class="tab-mute-icon" title="該賣場推播已停用"><i class="fa-solid fa-bell-slash"></i></span>' : ''}
-          ${storeStockCount > 0 ? `<span class="tab-instock-badge" title="此賣場有 ${storeStockCount} 項商品現貨在庫">● ${storeStockCount}現貨</span>` : ''}
+          ${hasStock ? '<span class="tab-dot" title="有現貨"></span>' : ''}
           <span class="tab-badge">${count}</span>
         `;
         container.appendChild(btn);
@@ -2084,8 +2076,8 @@
           if (aEnabled !== bEnabled) {
             return aEnabled ? -1 : 1;
           }
-          const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家') || a.last_status.includes('第三方最低') || a.last_status.includes('收藏品') || a.last_status.includes('近全新')));
-          const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家') || b.last_status.includes('第三方最低') || b.last_status.includes('收藏品') || b.last_status.includes('近全新')));
+          const aInStock = !!(a.last_status && (a.last_status.includes('現貨') || a.last_status.includes('預購') || a.last_status.includes('突襲上架') || a.last_status.includes('優質賣家') || a.last_status.includes('第三方最低')));
+          const bInStock = !!(b.last_status && (b.last_status.includes('現貨') || b.last_status.includes('預購') || b.last_status.includes('突襲上架') || b.last_status.includes('優質賣家') || b.last_status.includes('第三方最低')));
           if (aInStock !== bInStock) {
             return aInStock ? -1 : 1;
           }
@@ -2096,17 +2088,12 @@
       const curCfg = storesConfig[currentStoreTab] || { name: '此賣場', flag: '🏬' };
       const monitoredItems = storeItems.filter(it => it.enabled !== false);
       const unmonitoredItems = storeItems.filter(it => it.enabled === false);
-      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低') || it.last_status.includes('收藏品') || it.last_status.includes('近全新'))).length;
+      const inStockCount = storeItems.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低'))).length;
       const lockedPageCount = storeItems.filter(it => hasRealProductPage(it)).length;
 
       // 頂部賣場快速資訊列
       const headerBar = document.createElement('div');
       headerBar.className = 'store-items-header-bar';
-      
-      const chkStatus = storeCheckStatusData[currentStoreTab] || {};
-      const lastCheckStr = chkStatus.last_time ? `${chkStatus.last_time} (耗時 ${chkStatus.duration !== undefined ? chkStatus.duration + 's' : '-'})` : '排程巡檢中';
-      const unfetchedNum = chkStatus.unfetched || 0;
-
       headerBar.innerHTML = `
         <div class="store-items-summary">
           <span style="font-weight: 700; color: #f8fafc;">
@@ -2128,26 +2115,13 @@
               <i class="fa-solid fa-circle-check"></i> 有現貨: ${inStockCount}
             </span>
           ` : ''}
-          <span class="badge-last-check" style="background: #1e293b; color: #cbd5e1; border: 1px solid #334155; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
-            <i class="fa-solid fa-clock-rotate-left" style="color: #38bdf8;"></i> 上次巡檢: ${lastCheckStr}
-          </span>
-          ${unfetchedNum > 0 ? `
-            <span class="badge-unfetched-count" style="background: #ef444422; color: #f87171; border: 1px solid #ef444455; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;" title="因該賣場請求頻率限制或短暫逾時，此輪暫略 ${unfetchedNum} 項商品以避免卡住，下輪巡檢會再次重試">
-              <i class="fa-solid fa-forward-step"></i> 本輪暫略: ${unfetchedNum} 項 (防卡跳過)
-            </span>
-          ` : ''}
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="btn-open-stealth-modal-sm" onclick="openStealthModal('${currentStoreTab}')">
-            <i class="fa-solid fa-shield-halved"></i> 檢視防突襲型號總庫
-          </button>
         </div>
       `;
       container.appendChild(headerBar);
 
       let displayList = storeItems;
       if (filterInStockOnly) {
-        displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低') || it.last_status.includes('收藏品') || it.last_status.includes('近全新')));
+        displayList = displayList.filter(it => it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低')));
       }
 
       let hasRenderedDivider = false;
@@ -2173,60 +2147,23 @@
         }
 
         const card = document.createElement('div');
-        const isSkipped = Boolean(
-          it.last_status && (
-            it.last_status.includes('暫略') ||
-            it.last_status.includes('跳過') ||
-            it.last_status.includes('頻繁') ||
-            it.last_status.includes('逾時') ||
-            it.last_status.includes('風控')
-          )
-        );
-
-        let isInStock = false;
-        if (storeKey === 'amazon_jp') {
-          isInStock = Boolean(!isSkipped && it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購')));
-        } else {
-          isInStock = Boolean(!isSkipped && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架')));
-        }
-
-        let statusColor = '#94a3b8';
-        if (isInStock) {
-          statusColor = '#34d399';
-        } else if (isSkipped) {
-          statusColor = '#fbbf24';
-        }
-        card.className = `item-card ${isInStock ? 'in-stock' : ''} ${isSkipped ? 'skipped' : ''} ${!isEnabled ? 'disabled' : ''}`;
+        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低') || it.last_status.includes('突襲上架'));
+        const isWarning = it.last_status && (it.last_status.includes('⚠️') || it.last_status.includes('阻擋') || it.last_status.includes('超時') || it.last_status.includes('異常'));
+        const isThirdParty = it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低'));
+        const statusColor = isWarning ? '#f87171' : (isThirdParty ? '#fbbf24' : (isInStock ? '#34d399' : '#94a3b8'));
+        card.className = `item-card ${isInStock ? 'in-stock' : ''} ${isWarning ? 'has-error' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
         const hasRealPage = hasRealProductPage(it);
         const buyUrl = getItemUrl(it, storeKey);
         let btnText = cfg.btn_text || '👉 直達商品頁';
         let btnIcon = 'fa-bolt';
-        if (storeKey !== 'amazon_jp') {
-          if (hasRealPage) {
-            btnText = '👉 官方直達商品頁';
-            btnIcon = 'fa-bolt';
-          } else {
-            btnText = '🔍 官方搜尋賣場';
-            btnIcon = 'fa-magnifying-glass';
-          }
-        }
-        const btnBg = cfg.color || '#2563eb';
+        const btnBg = cfg.color || '#f59e0b';
 
         let displayStatus = it.last_status || '待檢查';
-        if (storeKey === 'amazon_jp') {
-          if (!isEnabled) {
-            displayStatus = '⚪ 未開啟監控 (已略過)';
-            statusColor = '#94a3b8';
-          } else if (isSkipped) {
-            displayStatus = it.last_status;
-            statusColor = '#fbbf24';
-          } else if (!isInStock) {
-            displayStatus = '⚪ 官方缺貨中';
-            statusColor = '#94a3b8';
-          } else {
-            displayStatus = it.last_status && it.last_status.includes('預購') ? '🔵 官方開放預購' : '🟢 官方現貨';
-            statusColor = '#34d399';
+        if (storeKey === 'amazon_jp' && !isWarning) {
+          if (displayStatus.includes('第三方優質賣家') || (it.third_party_price && it.third_party_price !== '-' && (!it.last_seller || !it.last_seller.includes('官方自營')) && displayStatus.includes('僅轉賣選項'))) {
+            const tpVal = (it.third_party_price && it.third_party_price !== '-') ? it.third_party_price : (it.last_price || '');
+            displayStatus = tpVal ? `🟡 第三方最低(含運): ${tpVal}` : '🟡 第三方最低(含運)';
           }
         }
 
@@ -2235,11 +2172,6 @@
             <span class="store-badge" style="background: ${cfg.color}22; color: ${cfg.color}; border: 1px solid ${cfg.color}55;">
               <i class="${cfg.icon || 'fa-solid fa-store'}"></i> ${cfg.name || '線上賣場'}
             </span>
-            ${isSkipped ? `
-              <span class="badge-skipped">
-                <i class="fa-solid fa-forward"></i> 本輪暫略 (防風控)
-              </span>
-            ` : ''}
             ${storeKey !== 'amazon_jp' ? (hasRealPage ? `
               <span class="badge-page-locked" style="background: #05966922; color: #34d399; border: 1px solid #05966955; font-size: 11px; padding: 2px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
                 <i class="fa-solid fa-link"></i> 已鎖定商品頁
@@ -2258,12 +2190,12 @@
           <div class="item-meta">
             <div>
               <div class="item-status" style="color: ${statusColor}">${escapeHtml(displayStatus)}</div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(storeKey === 'amazon_jp' ? (isInStock ? 'Amazon.co.jp (官方自營)' : 'Amazon.co.jp') : (it.last_seller || cfg.name || '-'))} | 時間: ${escapeHtml(it.last_time || '-')}${it.qty !== undefined && it.qty !== null ? ` | <span style="color: ${it.qty > 0 ? '#34d399' : '#94a3b8'}; font-weight: 600;">庫存: ${it.qty}</span>` : ''}</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}</div>
             </div>
             ${storeKey === 'amazon_jp' ? `
               <div class="item-price" style="text-align: right; display: flex; flex-direction: column; gap: 2px; align-items: flex-end;">
-                <div style="font-size: 14px; font-weight: 700; color: ${isInStock ? '#34d399' : (isSkipped ? '#fbbf24' : '#94a3b8')}; white-space: nowrap;">
-                  ${escapeHtml(isSkipped ? '本輪暫略' : (isInStock ? (it.official_price || it.last_price || '-') : '官方缺貨'))}
+                <div style="font-size: 13px; font-weight: 700; color: ${it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' ? '#34d399' : '#94a3b8'}; white-space: nowrap;">
+                  <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">官方: </span>${escapeHtml(it.official_price || (it.last_seller && it.last_seller.includes('官方') ? it.last_price : '官方缺貨'))}
                 </div>
               </div>
             ` : `

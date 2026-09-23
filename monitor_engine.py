@@ -38,7 +38,7 @@ except ImportError:
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
-# 7 大電商賣場基礎設定與外觀定義
+# Amazon 專屬電商賣場設定與外觀定義
 STORE_CONFIG = {
     "amazon_jp": {
         "key": "amazon_jp",
@@ -51,102 +51,6 @@ STORE_CONFIG = {
         "default_url": "https://www.amazon.co.jp/dp/{id}?m=AN1VRQENFRJN5&th=1&psc=1",
         "id_label": "ASIN 或 Amazon 網址",
         "id_placeholder": "例如: B0HJ783F18 或 商品網址",
-    },
-    "pchome": {
-        "key": "pchome",
-        "name": "PChome 24h",
-        "short_name": "PChome 24h",
-        "icon": "fa-solid fa-cart-shopping",
-        "flag": "🇹🇼",
-        "color": "#ef4444",
-        "btn_text": "🛒 PChome 直達",
-        "default_url": "https://24h.pchome.com.tw/prod/{id}",
-        "id_label": "商品編號或 PChome 網址",
-        "id_placeholder": "例如: DEASSW-A900KGOV3 或 商品網址",
-    },
-    "mm_shop": {
-        "key": "mm_shop",
-        "name": "M.M小舖",
-        "short_name": "M.M小舖",
-        "icon": "fa-solid fa-store",
-        "flag": "🏬",
-        "color": "#06b6d4",
-        "btn_text": "🏬 M.M小舖直達",
-        "default_url": "https://mmtoyshop.com/item/{id}",
-        "id_label": "商品 ID 或 M.M小舖網址",
-        "id_placeholder": "例如: shopee6a3bdb48bde45 或 商品網址",
-    },
-    "funbox_tw": {
-        "key": "funbox_tw",
-        "name": "麗嬰國際官網",
-        "short_name": "麗嬰官網",
-        "icon": "fa-solid fa-cube",
-        "flag": "🧸",
-        "color": "#ec4899",
-        "btn_text": "🧸 麗嬰官網直達",
-        "default_url": "https://shop.funbox.com.tw/products/{id}",
-        "id_label": "商品編號或麗嬰官網網址",
-        "id_placeholder": "例如: sm53043 或 商品網址",
-    },
-    "twj_toys": {
-        "key": "twj_toys",
-        "name": "童無忌玩具",
-        "short_name": "童無忌",
-        "icon": "fa-solid fa-bullseye",
-        "flag": "🎯",
-        "color": "#10b981",
-        "btn_text": "🎯 童無忌直達",
-        "default_url": "https://www.twj.tw/products/{id}",
-        "id_label": "商品代碼或童無忌網址",
-        "id_placeholder": "例如: 20268beyblade-x-bx-00- 或 網址",
-    },
-    "eslite": {
-        "key": "eslite",
-        "name": "誠品線上",
-        "short_name": "誠品線上",
-        "icon": "fa-solid fa-book",
-        "flag": "📚",
-        "color": "#8b5cf6",
-        "btn_text": "📚 誠品線上直達",
-        "default_url": "https://www.eslite.com/product/{id}",
-        "id_label": "商品編號或誠品網址",
-        "id_placeholder": "例如: 2683194026001 或 商品網址",
-    },
-    "shopee": {
-        "key": "shopee",
-        "name": "fun box 玩具旗艦店 (蝦皮)",
-        "short_name": "蝦皮Funbox",
-        "icon": "fa-solid fa-shrimp",
-        "flag": "🦐",
-        "color": "#f97316",
-        "btn_text": "⚡ 1-Click 官方直達",
-        "default_url": "https://shopee.tw/funbox5120#product_list",
-        "id_label": "蝦皮商品網址或代號",
-        "id_placeholder": "例如: https://shopee.tw/product/285705541/... 或 -i.285705541.{itemid}",
-    },
-    "shopee_mm": {
-        "key": "shopee_mm",
-        "name": "M.M小舖 (蝦皮)",
-        "short_name": "蝦皮MM",
-        "icon": "fa-solid fa-store",
-        "flag": "🏬",
-        "color": "#ea580c",
-        "btn_text": "⚡ 1-Click 官方直達",
-        "default_url": "https://shopee.tw/renmao?shopCollection=270873715#product_list",
-        "id_label": "蝦皮商品網址或代號",
-        "id_placeholder": "例如: https://shopee.tw/product/11664018/... 或 -i.11664018.{itemid}",
-    },
-    "tcsb": {
-        "key": "tcsb",
-        "name": "墊腳石購物網",
-        "short_name": "墊腳石",
-        "icon": "fa-solid fa-book-bookmark",
-        "flag": "🏬",
-        "color": "#0284c7",
-        "btn_text": "⚡ 1-Click 官方直達",
-        "default_url": "https://www.tcsb.com.tw/{id}",
-        "id_label": "商品條碼或墊腳石網址",
-        "id_placeholder": "例如: 4904810059905 或 商品網址",
     }
 }
 
@@ -663,17 +567,43 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         seller_name = "-"
         is_official = False
 
-    # 5. 官方自營價提取 (使用者明確指示：不用顯示第三方價格，直接抓官方售價就好，沒抓到就顯示官方沒貨)
+    # 5. 官方自營價 vs 第三方最低價提取
     if in_stock and is_official:
         official_price = price
-        status_text = "🟢 官方現貨" if not has_preorder else "🔵 官方開放預購"
     else:
-        in_stock = False
-        is_official = False
-        price = "-"
         official_price = "官方缺貨"
-        seller_name = "Amazon.co.jp (官方缺貨)"
-        status_text = "⚪ 官方缺貨中"
+
+    # 第三方最低價提取 (從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取，嚴格只抓全新品)
+    tp_ints = []
+    if in_stock and not is_official and price and price != "-" and not is_buybox_used:
+        m = re.search(r"[\d,]+", price)
+        if m:
+            val = int(m.group(0).replace(",", ""))
+            if val >= 500:
+                tp_ints.append(val)
+
+    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, div[id*='aod-ingress'], div[id*='unqualified-buybox'], div[id*='buying-options']"):
+        rows = box.select(".olp-touch-link, li, tr, .a-section, .a-row, .a-box") or [box]
+        for row in rows:
+            row_txt = row.get_text(" ", strip=True).lower()
+            if any(k in row_txt for k in AMZ_USED_KEYWORDS):
+                continue
+            for p_el in row.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value"):
+                t = p_el.get_text(strip=True)
+                m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
+                if m:
+                    v = int(m.group(1).replace(",", ""))
+                    if v >= 500:
+                        tp_ints.append(v)
+
+    # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額 (官方售價絕不可變為第三方價格)
+    if is_official and in_stock and price:
+        m_off = re.search(r"[\d,]+", price)
+        if m_off:
+            off_val = int(m_off.group(0).replace(",", ""))
+            tp_ints = [p for p in tp_ints if p != off_val]
+
+    third_party_cheapest = f"￥{min(tp_ints):,}" if tp_ints else "-"
 
     return {
         "ok": True,
@@ -682,15 +612,14 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         "title": title,
         "price": price,
         "official_price": official_price,
-        "third_party_price": "-",
+        "third_party_price": third_party_cheapest,
         "in_stock": in_stock,
         "is_official": is_official,
         "is_preorder": has_preorder,
         "seller": seller_name,
         "url": url,
         "raw_merchant": f"Seller: {raw_seller}, Fulfiller: {raw_fulfiller}",
-        "no_featured_offer": no_featured_offer,
-        "status_text": status_text
+        "no_featured_offer": no_featured_offer
     }
 
 
@@ -786,7 +715,7 @@ class KeepaChecker:
             return {"ok": False, "msg": "未設定 Keepa API Key"}
 
         api_key = api_key.strip()
-        url = f"https://api.keepa.com/product?key={api_key}&domain=5&asin={asin}&stats=1&history=0"
+        url = f"https://api.keepa.com/product?key={api_key}&domain=5&asin={asin}&stats=1"
 
         try:
             r = requests.get(url, timeout=12)
@@ -899,14 +828,13 @@ class AmazonJPChecker:
     _cooloff_until: float = 0.0
 
     @classmethod
-    def throttle(cls, interval: float = 0.5, enable_jitter: bool = True, jitter_min: float = 0.05, jitter_max: float = 0.2):
-        """保證請求間隔 + Jitter 隨機延遲，遇風控極速冷卻"""
+    def throttle(cls, interval: float = 0.6, enable_jitter: bool = True, jitter_min: float = 0.1, jitter_max: float = 0.35):
+        """保證請求間隔 + Jitter 隨機延遲，遇到風控自動冷卻"""
         with cls._lock:
             now = time.time()
             if now < cls._cooloff_until:
-                wait_cool = min(cls._cooloff_until - now, 0.5)
-                if wait_cool > 0:
-                    time.sleep(wait_cool)
+                wait_cool = cls._cooloff_until - now
+                time.sleep(wait_cool)
                 now = time.time()
 
             delay = interval
@@ -920,10 +848,9 @@ class AmazonJPChecker:
             cls._last_req_time = time.time()
 
     @classmethod
-    def trigger_cooloff(cls, seconds: float = 0.5):
+    def trigger_cooloff(cls, seconds: float = 180.0):
         with cls._lock:
-            safe_sec = min(seconds, 0.5)
-            cls._cooloff_until = max(cls._cooloff_until, time.time() + safe_sec)
+            cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
 
     _session_lock = threading.Lock()
     _cffi_session = None
@@ -940,16 +867,38 @@ class AmazonJPChecker:
                 proxies = {"http": proxy, "https": proxy} if proxy else None
                 try:
                     s = cffi_requests.Session(impersonate=imp, proxies=proxies)
-                    # 1. 若使用者有提供自訂 Cookie，直接注入
-                    if custom_cookie and custom_cookie.strip():
-                        for part in custom_cookie.split(";"):
-                            if "=" in part:
-                                k, v = part.strip().split("=", 1)
-                                s.cookies.set(k.strip(), v.strip(), domain=".amazon.co.jp")
-                    # 2. 嚴格鎖定幣別為日圓 JPY 與日語 ja_JP，日本境內郵遞區號
-                    s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
-                    s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
-                    s.cookies.set("glow-zipcode", AMAZON_DEFAULT_ZIPCODE, domain=".amazon.co.jp")
+                    headers, _ = get_amazon_stealth_headers(custom_cookie=custom_cookie)
+                    try:
+                        # 1. 若使用者有提供自訂 Cookie，直接注入，不進行可能觸發驗證碼的初始首頁訪問
+                        if custom_cookie and custom_cookie.strip():
+                            for part in custom_cookie.split(";"):
+                                if "=" in part:
+                                    k, v = part.strip().split("=", 1)
+                                    s.cookies.set(k.strip(), v.strip(), domain=".amazon.co.jp")
+                        else:
+                            # 2. 先訪問首頁建立 session-id 與基礎 Cookie
+                            s.get("https://www.amazon.co.jp/", headers=headers, timeout=10)
+                            # 注入日本境內郵遞區號 103-0003 (東京都中央區日本橋)
+                            addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
+                            s.post(
+                                addr_url,
+                                headers={**headers, "Content-Type": "application/x-www-form-urlencoded"},
+                                data={
+                                    "locationType": "LOCATION_INPUT",
+                                    "zipCode": AMAZON_DEFAULT_ZIPCODE,
+                                    "storeContext": "generic",
+                                    "deviceType": "web",
+                                    "pageType": "Detail",
+                                    "actionSource": "glow"
+                                },
+                                timeout=8
+                            )
+                        # 3. 嚴格鎖定幣別為日圓 JPY 與日語 ja_JP
+                        s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
+                        s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
+                        s.cookies.set("glow-zipcode", AMAZON_DEFAULT_ZIPCODE, domain=".amazon.co.jp")
+                    except Exception:
+                        pass
                     cls._cffi_session = s
                     cls._session_proxy = proxy
                     cls._session_cookie = custom_cookie
@@ -966,7 +915,7 @@ class AmazonJPChecker:
     def check_asin(
         cls,
         asin: str,
-        interval: float = 0.5,
+        interval: float = 0.6,
         enable_jitter: bool = True,
         use_playwright: bool = False,
         proxy: Optional[str] = None,
@@ -985,6 +934,7 @@ class AmazonJPChecker:
             keepa_res = KeepaChecker.check_asin(asin, keepa_api_key)
             if keepa_res.get("ok"):
                 return keepa_res
+            # 若 Keepa 失敗，自動嘗試降級回爬蟲繼續執行
 
         # 若使用者指定啟用 Playwright 且環境支援，直接走真實瀏覽器
         if use_playwright and PlaywrightAmazonChecker.is_available():
@@ -1004,7 +954,7 @@ class AmazonJPChecker:
             try:
                 session = cls.get_cffi_session(proxy=proxy, imp=imp, custom_cookie=custom_cookie)
                 if session:
-                    r = session.get(url, headers=headers, timeout=5)
+                    r = session.get(url, headers=headers, timeout=12)
                     status_code = r.status_code
                     html = r.text
             except Exception:
@@ -1015,7 +965,7 @@ class AmazonJPChecker:
         if not html:
             try:
                 session = get_shared_session(proxy=proxy)
-                r = session.get(url, headers=headers, proxies=proxies, timeout=5)
+                r = session.get(url, headers=headers, proxies=proxies, timeout=10)
                 status_code = r.status_code
                 html = r.text
             except Exception as e:
@@ -1024,7 +974,7 @@ class AmazonJPChecker:
                     if kp_res.get("ok"):
                         kp_res["status_note"] = "連線超時，Keepa 備援接手"
                         return kp_res
-                return {"ok": False, "rate_limited": True, "msg": f"網路逾時 (暫略): {str(e)[:25]}"}
+                return {"ok": False, "msg": f"網路超時: {str(e)[:25]}"}
 
         if not html:
             if keepa_api_key and keepa_mode in ("fallback", "primary"):
@@ -1032,29 +982,130 @@ class AmazonJPChecker:
                 if kp_res.get("ok"):
                     kp_res["status_note"] = "頁面為空，Keepa 備援接手"
                     return kp_res
-            return {"ok": False, "rate_limited": True, "msg": "無法獲取頁面內容 (暫略)"}
+            return {"ok": False, "msg": "無法獲取頁面內容"}
 
         # 檢測 CAPTCHA 或 503 頻率限制
         is_captcha = ("/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html)
         is_503 = (status_code == 503)
 
         if is_captcha or is_503:
-            cls.reset_cffi_session()
-            cls.trigger_cooloff(0.5)
-            # 【關鍵備援】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
+            cls.trigger_cooloff(180.0)
+            # 【方案 5 關鍵】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
             if keepa_api_key and keepa_mode in ("fallback", "primary"):
                 kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
                 if kp_res.get("ok"):
                     kp_res["status_note"] = "Amazon 觸發風控，已由 Keepa 官方 API 接手"
                     return kp_res
 
-            if use_playwright and PlaywrightAmazonChecker.is_available():
+            if PlaywrightAmazonChecker.is_available():
                 return PlaywrightAmazonChecker.check_asin(asin)
             
             reason = "CAPTCHA 驗證" if is_captcha else "503 頻率限制"
-            return {"ok": False, "rate_limited": True, "msg": f"Amazon {reason} (頻繁暫略)"}
+            return {"ok": False, "msg": f"Amazon {reason} (建議填寫 Cookie/住宅代理，或填入 Keepa API Key 啟用自動備援)"}
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
+
+        # 深度提取：若非官方自營有貨，或沒有精選優惠(no_featured_offer)，或目前無第三方報價，
+        # 額外自 AOD (All Offers Display) 提取所有第三方賣家 (包含運送為個人賣家/非官方自出貨 FBM) 的最低價
+        if not res.get("is_official", False) or res.get("no_featured_offer", False) or res.get("third_party_price") == "-":
+            try:
+                aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain?asin={asin}&pc=dp"
+                s_to_use = session if ('session' in locals() and session) else get_shared_session(proxy=proxy)
+                if s_to_use:
+                    aod_headers = {k: v for k, v in headers.items() if k.lower() != "cookie"}
+                    aod_headers["Referer"] = url
+                    r_aod = s_to_use.get(aod_url, headers=aod_headers, proxies=proxies, timeout=6)
+                    if r_aod.status_code == 200 and len(r_aod.text) > 500:
+                        aod_soup = BeautifulSoup(r_aod.text, "html.parser")
+                        aod_tp_ints = []
+                        for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
+                            # 1. 嚴格狀況檢查：只抓全新品 (Brand New)，徹底排除二手/中古/非全新品/收藏品/再生品
+                            cond_el = of.select_one("#aod-offer-heading, [id*='heading'], [id*='condition'], [id*='Condition'], .aod-offer-heading")
+                            cond_text = cond_el.get_text(" ", strip=True).lower() if cond_el else ""
+                            
+                            is_used = any(b in cond_text for b in [
+                                "中古", "非全新品", "二手", "收藏品", "コレクター", "再生品",
+                                "used", "collectible", "renewed", "refurbished", "pre-owned"
+                            ])
+                            is_explicit_new = any(w in cond_text for w in ["新品", "全新", "new"])
+                            
+                            # 若包含二手/收藏品關鍵字，或者有標示狀況但不是全新品，一律剔除！
+                            if is_used or (cond_text and not is_explicit_new):
+                                continue
+
+                            s_el = of.select_one("#aod-offer-soldBy, [id*='soldBy']")
+                            f_el = of.select_one("#aod-offer-shipsFrom, [id*='shipsFrom']")
+
+                            s_txt = ""
+                            if s_el:
+                                s_right = s_el.select_one(".a-col-right, td:last-child")
+                                if s_right:
+                                    s_link = s_right.select_one("a")
+                                    s_txt = s_link.get_text(strip=True) if s_link else s_right.get_text(" ", strip=True)
+                                else:
+                                    s_txt = s_el.get_text(" ", strip=True)
+
+                            f_txt = ""
+                            if f_el:
+                                f_right = f_el.select_one(".a-col-right, td:last-child")
+                                f_txt = f_right.get_text(" ", strip=True) if f_right else f_el.get_text(" ", strip=True)
+
+                            has_tp_link = bool(s_el and s_el.select_one("a[href*='seller'], a[href*='shops'], #sellerProfileTriggerId"))
+                            is_s_amz = is_amazon_name(s_txt) and not has_tp_link
+                            is_f_amz = is_amazon_name(f_txt)
+                            is_offer_official = is_s_amz and is_f_amz
+
+                            found_p = None
+                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .apex-pricetopay-value, [id^='aod-price-']"):
+                                t = p_el.get_text(strip=True)
+                                m = re.search(r"[\d,]+", t)
+                                if m:
+                                    v = int(m.group(0).replace(",", ""))
+                                    if v >= 500:
+                                        found_p = v
+                                        break
+
+                            if not found_p:
+                                continue
+
+                            # 提取運費 (含自出貨 FBM 個人賣家、未達免運門檻等運費，嚴格加總)
+                            shipping_fee = 0
+                            deliv_p_el = of.select_one("[data-csa-c-delivery-price]")
+                            if deliv_p_el and deliv_p_el.get("data-csa-c-delivery-price"):
+                                m_shp = re.search(r"[\d,]+", deliv_p_el.get("data-csa-c-delivery-price"))
+                                if m_shp:
+                                    shipping_fee = int(m_shp.group(0).replace(",", ""))
+
+                            if shipping_fee == 0:
+                                deliv_box = of.select_one(".aod-delivery-promise-column, .aod-unified-delivery, [id*='delivery'], [id*='ship']")
+                                deliv_text = deliv_box.get_text(" ", strip=True) if deliv_box else of.get_text(" ", strip=True)
+                                if not any(k in deliv_text for k in ["無料配送", "送料無料", "Free Delivery", "Prime", "免運", "免費配送"]):
+                                    m_shp = re.search(r'(?:配送料|送料|配送費|配送|delivery)[^\d￥¥]{0,10}[￥¥]\s*([\d,]+)', deliv_text, re.I)
+                                    if not m_shp:
+                                        m_shp = re.search(r'\+\s*[￥¥]\s*([\d,]+)', deliv_text)
+                                    if m_shp:
+                                        shipping_fee = int(m_shp.group(1).replace(",", ""))
+
+                            total_offer_price = found_p + shipping_fee
+                            if is_offer_official:
+                                res["is_official"] = True
+                                res["official_price"] = f"￥{found_p:,}"
+                                res["seller"] = "Amazon.co.jp (官方自營)"
+                                res["in_stock"] = True
+                            else:
+                                # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA，嚴格加上運費
+                                aod_tp_ints.append(total_offer_price)
+
+                        # AOD 為經過精確全新品狀況檢驗的清單：
+                        # 1. 若 aod_tp_ints 有值，則取最低全新品總價 (售價+運費)
+                        # 2. 若 AOD 有 offers 但 aod_tp_ints 為空，代表所有賣家均為二手/收藏品，全新品第三方報價為 "-"
+                        if aod_tp_ints:
+                            res["third_party_price"] = f"￥{min(aod_tp_ints):,}"
+                        elif aod_soup.select("#aod-pinned-offer, #aod-offer"):
+                            res["third_party_price"] = "-"
+            except Exception:
+                pass
+
         return res
 
 
@@ -1309,18 +1360,15 @@ class MMShopChecker:
                     price_str = f"NT$ {price_m.group(1)}" if price_m else "未標示"
                     
                     card_text = c.get_text()
-                    m_qty = re.search(r'庫存\s*<span[^>]*>\s*(-?\d+)\s*<', str(c)) or re.search(r'庫存\s*(-?\d+)', card_text)
-                    qty = int(m_qty.group(1)) if m_qty else None
                     soldout = c.find(lambda t: t.has_attr("data-bv") and t["data-bv"] == "product-soldout")
-                    in_stock = (qty > 0) if (qty is not None) else ((soldout is None) and ("補貨中" not in card_text) and ("已售完" not in card_text) and ("庫存\n0" not in card_text))
+                    in_stock = (soldout is None) and ("補貨中" not in card_text) and ("已售完" not in card_text) and ("庫存\n0" not in card_text)
                     
                     parsed_cards.append({
                         "title": title,
                         "url": real_url,
                         "item_id": item_id,
                         "price": price_str,
-                        "in_stock": in_stock,
-                        "qty": qty
+                        "in_stock": in_stock
                     })
 
                 code_clean = base_code.lower().replace("-", "")
@@ -1346,11 +1394,6 @@ class MMShopChecker:
                         best_card = card
 
                 if best_card and (best_score >= 20 or base_code != "BX-00"):
-                    card_qty = best_card.get("qty")
-                    if card_qty is not None:
-                        status_text = f"🟢 M.M小舖現貨開放！(庫存: {card_qty})" if best_card["in_stock"] else f"⚪ 補貨中 / 暫無庫存 (庫存: {card_qty})"
-                    else:
-                        status_text = "🟢 M.M小舖現貨開放！" if best_card["in_stock"] else "⚪ 補貨中 / 暫無庫存"
                     return {
                         "ok": True,
                         "store": "mm_shop",
@@ -1359,12 +1402,11 @@ class MMShopChecker:
                         "title": best_card["title"],
                         "price": best_card["price"],
                         "in_stock": best_card["in_stock"],
-                        "qty": card_qty,
                         "is_official": True,
                         "seller": "M.M小舖",
                         "url": best_card["url"],
                         "has_product_page": True,
-                        "status_text": status_text
+                        "status_text": "🟢 M.M小舖現貨開放！" if best_card["in_stock"] else "⚪ 補貨中 / 暫無庫存"
                     }
         except Exception:
             pass
@@ -1376,7 +1418,6 @@ class MMShopChecker:
             "title": f"BEYBLADE X {keyword}",
             "price": "-",
             "in_stock": False,
-            "qty": 0,
             "is_official": True,
             "seller": "M.M小舖",
             "url": search_url,
@@ -1415,31 +1456,19 @@ class MMShopChecker:
             content = b""
             for chunk in r.iter_content(chunk_size=32768):
                 content += chunk
-                if b'prod_quantity' in content:
-                    try:
-                        content += next(r.iter_content(chunk_size=32768))
-                    except StopIteration:
-                        pass
-                    break
                 if b'"@type":"Product"' in content or b'"@type": "Product"' in content:
                     try:
                         content += next(r.iter_content(chunk_size=32768))
                     except StopIteration:
                         pass
-                    if b'prod_quantity' in content or len(content) > 300000:
-                        break
-                if len(content) > 350000:
+                    break
+                if len(content) > 400000:
                     break
             r.close()
         except Exception as e:
             return {"ok": False, "msg": f"M.M小舖連線逾時: {str(e)[:25]}", "has_product_page": False}
 
         html = content.decode("utf-8", errors="ignore")
-        m_qty = (re.search(r'id=["\']prod_quantity["\'][^>]*data-val=["\'](-?\d+)["\']', html) or 
-                 re.search(r'id=["\']prod_quantity["\'][^>]*>\s*(-?\d+)\s*<', html) or 
-                 re.search(r'商品庫存\s*<span[^>]*>\s*(-?\d+)\s*<', html))
-        qty = int(m_qty.group(1)) if m_qty else None
-
         product_ld = None
         for m in re.finditer(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
             try:
@@ -1454,20 +1483,15 @@ class MMShopChecker:
             title = product_ld.get("name", "")
             offers = product_ld.get("offers", {})
             avail = offers.get("availability", "")
-            in_stock = (qty > 0) if (qty is not None) else (("InStock" in avail) and ("OutOfStock" not in avail))
+            in_stock = ("InStock" in avail) and ("OutOfStock" not in avail)
             price_val = offers.get("price", "")
             price_str = f"NT$ {price_val}" if price_val else "未標示"
         else:
             title_m = re.search(r"<title>(.*?)(?: - |\||M\.M).*?</title>", html)
             title = title_m.group(1).strip() if title_m else item_id
-            in_stock = (qty > 0) if (qty is not None) else (("加入購物車" in html or "立即購買" in html) and ("已售完" not in html and "缺貨" not in html))
+            in_stock = ("加入購物車" in html or "立即購買" in html) and ("已售完" not in html and "缺貨" not in html)
             p_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', html)
             price_str = f"NT$ {p_m.group(1)}" if p_m else "未標示"
-
-        if qty is not None:
-            status_text = f"🟢 M.M小舖現貨開放！(庫存: {qty})" if in_stock else f"⚪ 補貨中 / 暫無庫存 (庫存: {qty})"
-        else:
-            status_text = "🟢 M.M小舖現貨開放！" if in_stock else "⚪ 補貨中 / 暫無庫存"
 
         return {
             "ok": True,
@@ -1476,12 +1500,11 @@ class MMShopChecker:
             "title": title or item_id,
             "price": price_str,
             "in_stock": in_stock,
-            "qty": qty,
             "is_official": True,
             "seller": "M.M小舖",
             "url": url,
             "has_product_page": True,
-            "status_text": status_text
+            "status_text": "🟢 M.M小舖現貨開放！" if in_stock else "⚪ 補貨中 / 暫無庫存"
         }
 
 
@@ -1495,164 +1518,102 @@ class CyberbizChecker:
         if not text:
             return ""
         text = text.strip()
-        if "/products/" in text:
-            part = text.split("/products/")[-1].split("?")[0].split("#")[0].strip("/")
-            return urllib.parse.unquote(part)
-        m = re.search(r"/products/([^\s?#]+)", text)
+        m = re.search(r"/products/([a-zA-Z0-9%_-]+)", text)
         if m:
-            return urllib.parse.unquote(m.group(1).strip("/"))
+            return m.group(1)
         return text.replace("https://", "").replace("http://", "").strip("/")
 
-    @staticmethod
-    def _get_colors(text: str) -> List[str]:
-        clean = re.sub(r'金屬(塗裝|塗層)?', '', text)
-        colors = ['水藍', '天藍', '深藍', '藍色', '藍', '紫色', '紫', '黑色', '黑', '紅色', '紅', '綠色', '綠', '黃色', '黃', '白色', '白', '銀色', '銀', '金色', '金']
-        found = []
-        for c in colors:
-            if c in clean and not any(c in f for f in found):
-                found.append(c)
-        return found
-
     @classmethod
-    def _score_match(cls, cand_title: str, target_model: str, c_words: List[str], target_name: str) -> int:
-        title_lower = cand_title.lower()
-        is_bb = any(w in title_lower for w in ['戰鬥陀螺', '陀螺', 'beyblade', 'bx-', 'ux-', 'cx-'])
-        if not is_bb:
-            return 0
-        score = 1
-        t_clean = re.sub(r'[^a-zA-Z0-9\u4e00-\u9fa5]', '', title_lower)
-        m_clean = re.sub(r'[^a-zA-Z0-9]', '', target_model.lower()) if target_model else ''
-        
-        if m_clean and m_clean in t_clean:
-            score += 10
-        
-        matched_words = [w for w in c_words if w in cand_title]
-        if c_words and not matched_words:
-            return 0
-        score += len(matched_words) * 5
-        
-        target_colors = cls._get_colors(target_name)
-        cand_colors = cls._get_colors(cand_title)
-        if target_colors and cand_colors:
-            if any(c in cand_colors for c in target_colors):
-                score += 10
-            else:
-                return 0
-        return score
-
-    @classmethod
-    def check_stealth(cls, store_key: str, asin: str, item_name: str = "", item_keywords: list = None) -> Dict[str, Any]:
-        """麗嬰國際/童無忌突襲關鍵字與型號雙重智慧搜尋"""
-        m = re.search(r'([A-Za-z]{2}-\d{2,3})', asin) or re.search(r'([A-Za-z]{2}-\d{2,3})', item_name)
-        target_model = m.group(1).upper() if m else ""
-        
-        STOP_WORDS = {
-            "戰鬥陀螺", "戰鬥", "陀螺", "金屬塗裝", "金屬塗層", "塗裝", "塗層", "景品", "抽抽樂", "套組",
-            "限定", "大賽", "獎品", "日版", "代理", "代理版", "官方", "正版", "交換", "票券", "交換票券",
-            "兌換", "台灣", "麗嬰", "童無忌", "玩具", "點數", "專用", "配件", "零件", "收納盒", "發射器",
-            "cx00", "cx-00", "bx00", "bx-00", "ux00", "ux-00", "beyblade", "beybladex"
-        }
-        
-        raw_words = re.findall(r"[\u4e00-\u9fa5]{2,}", item_name)
-        if item_keywords:
-            for kw in item_keywords:
-                raw_words.extend(re.findall(r"[\u4e00-\u9fa5]{2,}", str(kw)))
-        c_words = [w for w in set(raw_words) if w.lower() not in STOP_WORDS]
-        
-        queries = []
-        if target_model:
-            queries.append(target_model)
-        query_words = [w for w in c_words if len(w) >= 3 and not any(c in w for c in ['藍', '紫', '金', '黑', '紅', '綠', '黃', '白', '銀'])]
-        for qw in query_words:
-            if qw not in queries:
-                queries.append(qw)
-        if not queries:
-            queries.append(asin)
-            
-        base_search = "https://shop.funbox.com.tw/search?q=" if store_key == "funbox_tw" else "https://www.twj.tw/search?q="
-        seller_name = "麗嬰國際官網 (Funbox)" if store_key == "funbox_tw" else "童無忌玩具"
+    def check_twj_stealth(cls, keyword: str) -> Dict[str, Any]:
+        """童無忌玩具關鍵字突襲搜尋監控"""
+        search_url = f"https://www.twj.tw/search?q={keyword}"
         session = get_shared_session()
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         }
-        
-        candidates = []
-        for q in queries:
-            url = f"{base_search}{urllib.parse.quote(q)}"
-            try:
-                r = session.get(url, headers=headers, timeout=6)
-                if r.status_code != 200:
-                    continue
-                soup = BeautifulSoup(r.text, "html.parser")
-                for a in soup.find_all("a", href=re.compile(r'/products/([a-zA-Z0-9%_-]+)')):
-                    slug_m = re.search(r'/products/([a-zA-Z0-9%_-]+)', a.get('href'))
-                    if not slug_m:
-                        continue
-                    slug = slug_m.group(1)
-                    title = a.get_text(" ", strip=True)
-                    if not title or len(title) < 4:
-                        continue
-                    score = cls._score_match(title, target_model, c_words, item_name)
-                    if score > 0:
-                        candidates.append((score, slug, title))
-                if any(s >= 15 for s, _, _ in candidates):
-                    break
-            except Exception:
-                pass
-                
-        if candidates:
-            candidates.sort(key=lambda x: x[0], reverse=True)
-            best_slug = candidates[0][1]
-            res = cls.check_prod(best_slug, store_key=store_key, item_name=item_name, item_keywords=item_keywords)
-            if res.get("ok"):
-                res["asin"] = asin
-                quoted_best = urllib.parse.quote(urllib.parse.unquote(best_slug))
-                res["url"] = f"https://shop.funbox.com.tw/products/{quoted_best}" if store_key == "funbox_tw" else f"https://www.twj.tw/products/{quoted_best}"
-                res["direct_url"] = res["url"]
-                res["has_product_page"] = True
-                return res
-                
-        first_q = queries[0] if queries else asin
+        try:
+            r = session.get(search_url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for s in set(found_slugs):
+                    s_clean = s.lower().replace("-", "")
+                    if clean_kw in s_clean and any(k in s.lower() for k in ["beyblade", "bx", "ux", "cx"]):
+                        res = cls.check_prod(s, store_key="twj_toys")
+                        if res.get("ok") and res.get("price") != "未標示":
+                            res["asin"] = keyword
+                            res["has_product_page"] = True
+                            return res
+        except Exception:
+            pass
+
         return {
             "ok": True,
-            "store": store_key,
-            "asin": asin,
-            "title": item_name or f"BEYBLADE X {asin}",
+            "store": "twj_toys",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
             "price": "-",
             "in_stock": False,
             "is_official": True,
-            "seller": seller_name,
-            "url": f"{base_search}{urllib.parse.quote(first_q)}",
+            "seller": "童無忌玩具",
+            "url": f"https://www.twj.tw/search?q={keyword}",
             "has_product_page": False,
             "status_text": "⚪ 尚未上架 (待突襲發布)"
         }
 
     @classmethod
-    def check_twj_stealth(cls, keyword: str) -> Dict[str, Any]:
-        """童無忌玩具關鍵字突襲搜尋監控"""
-        return cls.check_stealth("twj_toys", asin=keyword)
-
-    @classmethod
     def check_funbox_stealth(cls, keyword: str) -> Dict[str, Any]:
         """麗嬰國際官網關鍵字突襲搜尋監控"""
-        return cls.check_stealth("funbox_tw", asin=keyword)
+        search_url = f"https://shop.funbox.com.tw/search?q={keyword}"
+        session = get_shared_session()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        try:
+            r = session.get(search_url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                found_slugs = re.findall(r'/products/([a-zA-Z0-9%_-]+)', r.text)
+                clean_kw = keyword.lower().replace("-", "").strip()
+                for s in set(found_slugs):
+                    s_clean = s.lower().replace("-", "")
+                    if clean_kw in s_clean and any(k in s.lower() for k in ["beyblade", "bx", "ux", "cx"]):
+                        res = cls.check_prod(s, store_key="funbox_tw")
+                        if res.get("ok") and res.get("price") != "未標示":
+                            res["asin"] = keyword
+                            res["has_product_page"] = True
+                            return res
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "store": "funbox_tw",
+            "asin": keyword,
+            "title": f"BEYBLADE X {keyword}",
+            "price": "-",
+            "in_stock": False,
+            "is_official": True,
+            "seller": "麗嬰國際官網 (Funbox)",
+            "url": f"https://shop.funbox.com.tw/search?q={keyword}",
+            "has_product_page": False,
+            "status_text": "⚪ 尚未上架 (待突襲發布)"
+        }
 
     @classmethod
-    def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw", item_name: str = "", item_keywords: list = None) -> Dict[str, Any]:
+    def check_prod(cls, slug_or_url: str, store_key: str = "funbox_tw") -> Dict[str, Any]:
         raw_text = str(slug_or_url).strip()
         slug = cls.extract_slug(raw_text)
         if not slug:
             return {"ok": False, "msg": "無效商品編號", "has_product_page": False}
 
-        # 判斷是否為型號突襲或需要搜尋 (例如 "CX-00", "CX-00 (BXH2301)", "BX-52", "UX-15")
-        is_model_asin = bool(re.search(r'\b(?:BX|UX|CX)-\d{2,3}', raw_text, re.I) or ("(" in raw_text and ")" in raw_text))
-        is_search_url = "search?q=" in raw_text or "/search" in raw_text
-        is_model_code = bool(re.match(r'^(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?(?:\s*\([^)]*\))?$', slug.strip(), re.I))
-        is_slug_like = bool(slug and not is_model_code and ("-" in slug or "_" in slug or len(slug) > 6))
-
-        if is_model_asin or is_search_url or not is_slug_like:
-            return cls.check_stealth(store_key, asin=raw_text, item_name=item_name, item_keywords=item_keywords)
+        # 若識別碼為型號關鍵字 (例如 "CX-05", "UX-15", "BX-52") -> 調用突襲搜尋模式
+        if not slug.startswith("http") and ("-" in slug and len(slug) <= 8):
+            if store_key == "twj_toys" and not slug.startswith("202"):
+                return cls.check_twj_stealth(slug)
+            elif store_key == "funbox_tw" and not slug.startswith("sm"):
+                return cls.check_funbox_stealth(slug)
 
         if store_key == "twj_toys":
             base_url = "https://www.twj.tw/products"
@@ -1661,8 +1622,7 @@ class CyberbizChecker:
             base_url = "https://shop.funbox.com.tw/products"
             seller_name = "麗嬰國際官網 (Funbox)"
 
-        encoded_slug = urllib.parse.quote(urllib.parse.unquote(slug))
-        url = f"{base_url}/{encoded_slug}"
+        url = f"{base_url}/{slug}"
         session = get_shared_session()
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
@@ -1672,8 +1632,6 @@ class CyberbizChecker:
         try:
             r = session.get(url, headers=headers, stream=True, timeout=6)
             if r.status_code == 404:
-                if item_name or is_model_asin:
-                    return cls.check_stealth(store_key, asin=raw_text, item_name=item_name, item_keywords=item_keywords)
                 return {"ok": False, "msg": "商品頁面不存在 (404)", "has_product_page": False}
 
             content = b""
@@ -1888,8 +1846,7 @@ SHOPEE_SHOPS = {
         "shop_id": "11664018",
         "username": "renmao",
         "name": "M.M小舖 (蝦皮)",
-        "collection_id": "270873715",
-        "list_url": "https://shopee.tw/renmao?shopCollection=270873715#product_list",
+        "list_url": "https://shopee.tw/renmao#product_list",
     }
 }
 
@@ -2320,12 +2277,7 @@ def check_store_item(
             item_keywords=item.get("keywords", [])
         )
     elif store in ("funbox_tw", "twj_toys"):
-        return CyberbizChecker.check_prod(
-            asin,
-            store_key=store,
-            item_name=item.get("name", ""),
-            item_keywords=item.get("keywords", [])
-        )
+        return CyberbizChecker.check_prod(asin, store_key=store)
     elif store == "eslite":
         return EsliteChecker.check_prod(asin)
     elif store in ("shopee", "shopee_mm"):
@@ -2381,13 +2333,14 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
         if asin.startswith("http") and "/item/" in asin:
             return asin
         return f"https://mmtoyshop.com/category?keyword={urllib.parse.quote(asin)}"
-    elif store in ("funbox_tw", "twj_toys"):
-        base_domain = "https://shop.funbox.com.tw" if store == "funbox_tw" else "https://www.twj.tw"
-        if re.match(r'^[a-z0-9_-]+$', asin, re.I) and not re.search(r'^(?:BX|UX|CX)-\d', asin, re.I):
-            return f"{base_domain}/products/{asin}"
-        m = re.search(r'([A-Za-z]{2}-\d{2,3})', asin)
-        q = m.group(1) if m else asin
-        return f"{base_domain}/search?q={urllib.parse.quote(q)}"
+    elif store == "funbox_tw":
+        if is_model_code:
+            return f"https://shop.funbox.com.tw/search?q={asin}"
+        return f"https://shop.funbox.com.tw/products/{asin}"
+    elif store == "twj_toys":
+        if is_model_code:
+            return f"https://www.twj.tw/search?q={asin}"
+        return f"https://www.twj.tw/products/{asin}"
     elif store == "eslite":
         if is_model_code:
             return f"https://www.eslite.com/search?keyword=BEYBLADE+{asin}"
@@ -2409,7 +2362,7 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
             return f"https://shopee.tw/product/11664018/{SHOPEE_KNOWN_ITEMS['shopee_mm'][asin]}"
         if asin.startswith("http") and not asin.endswith("/search") and "#product_list" not in asin:
             return asin
-        return "https://shopee.tw/renmao?shopCollection=270873715#product_list"
+        return "https://shopee.tw/renmao#product_list"
     elif store == "tcsb":
         if is_model_code:
             return f"https://www.tcsb.com.tw/search?query={urllib.parse.quote(asin)}"
@@ -2498,79 +2451,52 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
     elif store_key in ("twj_toys", "funbox_tw"):
         if store_key == "twj_toys":
-            domain = "https://www.twj.tw"
+            base_search = "https://www.twj.tw/search?q=BEYBLADE&sort_by=created-descending"
             seller_name = "童無忌玩具"
         else:
-            domain = "https://shop.funbox.com.tw"
+            base_search = "https://shop.funbox.com.tw/search?q=BEYBLADE&sort_by=created-descending"
             seller_name = "麗嬰國際官網 (Funbox)"
 
         try:
-            api_url = f"{domain}/search/search.json"
-            payload = {
-                "q": "戰鬥陀螺",
-                "per": 50,
-                "page": 1,
-                "sort_by": "created-descending"
-            }
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-            r = session.post(api_url, json=payload, headers=headers, timeout=8)
+            r = session.get(base_search, timeout=7)
             if r.status_code == 200:
-                data = r.json()
-                prods = data.get("products", {}).get("result", [])
-                seen_handles = set()
-                for p in prods:
-                    title = p.get("title") or ""
-                    handle = p.get("handle") or ""
-                    if not title or not handle or handle in seen_handles:
+                found_slugs = re.findall(r'href=[\'"]/products/([^\'"?#]+)[\'"]', r.text)
+                seen_slugs = set()
+                # 預先過濾：徹底排除 Tomica 多美小汽車、模型車、雜誌、非陀螺其他玩具產線
+                filtered_slugs = []
+                for slug in found_slugs:
+                    decoded = urllib.parse.unquote(slug).lower()
+                    if any(b in decoded for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒"]):
                         continue
+                    if any(w in decoded for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
+                        if slug not in seen_slugs:
+                            seen_slugs.add(slug)
+                            filtered_slugs.append(slug)
 
-                    title_low = title.lower()
-                    if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "玩具總動員", "巴斯光年"]):
-                        continue
-                    if not any(w in title_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1", "cx0"]):
-                        continue
-
-                    seen_handles.add(handle)
-                    variants = p.get("variants", [])
-                    raw_price = variants[0].get("price") if variants else None
-                    qty = variants[0].get("inventory_quantity") if variants else None
-                    is_in_stock = bool(p.get("in_stock", False))
-
-                    if raw_price is not None and raw_price > 0:
-                        price_str = f"NT$ {raw_price:,}"
-                    else:
-                        price_str = "未標示"
-
-                    encoded_slug = urllib.parse.quote(urllib.parse.unquote(handle))
-                    full_url = f"{domain}/products/{encoded_slug}"
-
-                    results.append({
-                        "store": store_key,
-                        "title": title,
-                        "price": price_str,
-                        "url": full_url,
-                        "item_id": handle,
-                        "seller": seller_name,
-                        "in_stock": is_in_stock,
-                        "qty": qty
-                    })
+                for slug in filtered_slugs[:30]:
+                    res = CyberbizChecker.check_prod(slug, store_key=store_key)
+                    if res.get("ok"):
+                        title = res.get("title", slug)
+                        title_low = title.lower()
+                        if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "海綿", "不含陀螺", "紙製收納盒"]):
+                            continue
+                        results.append({
+                            "store": store_key,
+                            "title": title,
+                            "price": res.get("price", "未標示"),
+                            "url": res.get("url", f"https://www.twj.tw/products/{slug}" if store_key == "twj_toys" else f"https://shop.funbox.com.tw/products/{slug}"),
+                            "item_id": slug,
+                            "seller": seller_name,
+                            "in_stock": res.get("in_stock", True)
+                        })
         except Exception:
             pass
 
-    elif store_key in ("shopee", "shopee_mm"):
-        shop_cfg = SHOPEE_SHOPS.get(store_key, SHOPEE_SHOPS["shopee"])
-        seller_name = shop_cfg.get("name", "蝦皮官方店")
-        shop_id = shop_cfg.get("shop_id", "285705541")
-        default_list_url = shop_cfg.get("list_url", "https://shopee.tw")
-
+    elif store_key == "shopee":
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Origin": "https://shopee.tw",
-            "Referer": default_list_url
+            "Referer": "https://shopee.tw/funbox5120"
         }
         s_client = None
         if cffi_requests:
@@ -2581,75 +2507,44 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
         if s_client:
             try:
-                if store_key == "shopee_mm":
-                    target_url = "https://shopee.tw/renmao?shopCollection=270873715#product_list"
-                    r = s_client.get(target_url, headers=headers, timeout=8)
-                    found_item_ids = set()
-                    if r.status_code == 200:
-                        html = r.text
-                        for m_id in re.findall(r'-i\.11664018\.(\d+)', html):
-                            found_item_ids.add(m_id)
-                        for m_id in re.findall(r'/product/11664018/(\d+)', html):
-                            found_item_ids.add(m_id)
-                        for m_id in re.findall(r'"productID":\s*"(\d+)"', html):
-                            found_item_ids.add(m_id)
+                shopee_url = "https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id=285705541&sort_type=1"
+                r = s_client.get(shopee_url, headers=headers, timeout=8)
+                if r.status_code == 200:
+                    data = r.json()
+                    sections = data.get("data", {}).get("sections", [])
+                    items = []
+                    for sec in sections:
+                        items.extend(sec.get("data", {}).get("item", []))
+                    if not items:
+                        items = data.get("items", [])
 
-                    for k_id in SHOPEE_KNOWN_ITEMS.get("shopee_mm", {}).values():
-                        found_item_ids.add(str(k_id))
-
-                    for i_id in list(found_item_ids)[:10]:
-                        item_res = ShopeeChecker.check_item(f"{shop_id}_{i_id}", store_key="shopee_mm")
-                        if item_res.get("ok"):
-                            item_title = item_res.get("title", "")
-                            if any(w in item_title.lower() for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "ux0", "cx0"]):
-                                results.append({
-                                    "store": "shopee_mm",
-                                    "title": item_title,
-                                    "price": item_res.get("price", "未標示"),
-                                    "url": item_res.get("url", target_url),
-                                    "item_id": f"{shop_id}_{i_id}",
-                                    "seller": seller_name,
-                                    "is_official": True,
-                                    "in_stock": item_res.get("in_stock", False)
-                                })
-                else:
-                    shopee_url = f"https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id={shop_id}&sort_type=1"
-                    r = s_client.get(shopee_url, headers=headers, timeout=8)
-                    if r.status_code == 200:
-                        data = r.json()
-                        sections = data.get("data", {}).get("sections", [])
-                        items = []
-                        for sec in sections:
-                            items.extend(sec.get("data", {}).get("item", []))
-                        if not items:
-                            items = data.get("items", [])
-
-                        for it in items:
-                            name = it.get("name") or it.get("title") or ""
-                            name_low = name.lower()
-                            if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "樂高", "lego"]):
-                                continue
-                            if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
-                                continue
-                            price_val = it.get("price") or 0
-                            if price_val > 100000:
-                                price_str = f"NT$ {int(price_val / 100000):,}"
-                            elif price_val > 0:
-                                price_str = f"NT$ {int(price_val):,}"
-                            else:
-                                price_str = "未標示"
-                            item_id = str(it.get("itemid", ""))
-                            prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else default_list_url
-                            results.append({
-                                "store": "shopee",
-                                "title": name,
-                                "price": price_str,
-                                "url": prod_url,
-                                "item_id": f"{shop_id}_{item_id}",
-                                "seller": seller_name,
-                                "is_official": True,
-                                "in_stock": True
-                            })
+                    for it in items:
+                        name = it.get("name") or it.get("title") or ""
+                        name_low = name.lower()
+                        if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "樂高", "lego"]):
+                            continue
+                        if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
+                            continue
+                        price_val = it.get("price") or 0
+                        if price_val > 100000:
+                            price_str = f"NT$ {int(price_val / 100000):,}"
+                        elif price_val > 0:
+                            price_str = f"NT$ {int(price_val):,}"
+                        else:
+                            price_str = "未標示"
+                        item_id = str(it.get("itemid", ""))
+                        shop_id = str(it.get("shopid", "285705541"))
+                        prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else "https://shopee.tw/funbox5120"
+                        results.append({
+                            "store": "shopee",
+                            "title": name,
+                            "price": price_str,
+                            "url": prod_url,
+                            "item_id": f"{shop_id}_{item_id}",
+                            "seller": "fun box 玩具旗艦店",
+                            "is_official": True,
+                            "in_stock": True
+                        })
             except Exception:
                 pass
             finally:
@@ -2683,10 +2578,8 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     real_url = "https://mmtoyshop.com" + href if href.startswith("/") else href
                     price_m = re.search(r'(?:NT\$|\$)\s*([\d,]+)', c.get_text())
                     price_str = f"NT$ {price_m.group(1)}" if price_m else "未標示"
-                    m_qty = re.search(r'庫存\s*<span[^>]*>\s*(-?\d+)\s*<', str(c)) or re.search(r'庫存\s*(-?\d+)', c.get_text())
-                    qty = int(m_qty.group(1)) if m_qty else None
                     soldout = c.find(lambda t: t.has_attr("data-bv") and t["data-bv"] == "product-soldout")
-                    in_stock = (qty > 0) if (qty is not None) else ((soldout is None) and ("補貨中" not in c.get_text()) and ("已售完" not in c.get_text()))
+                    in_stock = (soldout is None) and ("補貨中" not in c.get_text()) and ("已售完" not in c.get_text())
                     results.append({
                         "store": "mm_shop",
                         "title": title,
@@ -2694,8 +2587,7 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                         "url": real_url,
                         "item_id": item_id,
                         "seller": "M.M小舖",
-                        "in_stock": in_stock,
-                        "qty": qty
+                        "in_stock": in_stock
                     })
         except Exception:
             pass
@@ -2809,59 +2701,30 @@ def match_product_with_stealth_catalog(
         
         # 若為 00 限定款系列 (如 BX-00, UX-00, CX-00)，進一步由品名特徵關鍵字區分
         if "-00" in norm_code or norm_code.endswith("00"):
-            cand_colors = CyberbizChecker._get_colors(title_clean)
-            STOP_WORDS_00 = {
-                "戰鬥陀螺", "戰鬥", "陀螺", "金屬塗裝", "金屬塗層", "塗裝", "塗層", "景品", "抽抽樂", "套組",
-                "限定", "大賽", "獎品", "日版", "代理", "代理版", "官方", "正版", "交換", "票券", "交換票券",
-                "兌換", "台灣", "麗嬰", "童無忌", "玩具", "點數", "專用", "配件", "零件", "收納盒", "發射器",
-                "cx00", "cx-00", "bx00", "bx-00", "ux00", "ux-00", "beyblade", "beybladex"
-            }
-            scored_items = []
+            series_prefix = norm_code[:2]
+            title_low = title_clean.lower()
             for it in stealth_catalog:
                 it_asin = str(it.get("asin", "")).upper()
-                it_code = str(it.get("code", "")).upper()
-                is_this_series = (norm_code in it_asin or it_code == norm_code or 
-                                  (norm_code[:2] in it_asin and ("00" in it_asin or it.get("is_00"))))
-                if not is_this_series:
-                    continue
-
-                score = 0
-                pid = str(it.get("pid", "")).upper()
-                if pid and (pid in title_upper or pid.replace("-", "") in title_upper.replace("-", "")):
-                    score += 50
-
-                kws = it.get("keywords", [])
-                distinctive_kws = [k for k in kws if k.lower() not in STOP_WORDS_00]
-                c_name = str(it.get("name", "")).strip()
-                clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
-                name_words = [w for w in re.findall(r"[\u4e00-\u9fa5]{2,}", clean_name) if w not in STOP_WORDS_00]
-                all_words = set(distinctive_kws + name_words)
-
-                all_name_words = [w for w in all_words if not any(c in w for c in ['藍', '紫', '金', '黑', '紅', '綠', '黃', '白', '銀'])]
-                matched_names = [w for w in all_name_words if w.lower() in title_low]
-                if not matched_names and not pid:
-                    continue
-                score += len(matched_names) * 15
-
-                target_colors = CyberbizChecker._get_colors(c_name)
-                if target_colors and cand_colors:
-                    if any(c in cand_colors for c in target_colors):
-                        score += 20
-                    else:
-                        continue
-                elif target_colors and not cand_colors:
-                    score -= 5
-
-                scored_items.append((score, it))
-
-            if scored_items:
-                scored_items.sort(key=lambda x: x[0], reverse=True)
-                best_item = scored_items[0][1]
-                return {
-                    "model": best_item.get("asin", norm_code),
-                    "catalog_item": best_item,
-                    "matched_by": "00_distinctive_keyword"
-                }
+                it_series = it.get("series") or it_asin[:2]
+                if it_series == series_prefix and (it.get("is_00") or "00" in it_asin):
+                    kws = it.get("keywords", [])
+                    # 先由 keywords 嚴格比對
+                    for kw in kws:
+                        if len(kw) >= 2 and kw in title_low:
+                            return {
+                                "model": it.get("asin", norm_code),
+                                "catalog_item": it,
+                                "matched_by": "00_keyword"
+                            }
+                    # 若無 keywords，從品名清理後比對
+                    c_name = str(it.get("name", "")).strip()
+                    clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
+                    if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
+                        return {
+                            "model": it.get("asin", norm_code),
+                            "catalog_item": it,
+                            "matched_by": "00_name"
+                        }
         else:
             # 常規型號 (BX-01 ~ BX-57, UX-01 ~ UX-21, CX-01 ~ CX-19)
             for it in stealth_catalog:
@@ -2874,20 +2737,11 @@ def match_product_with_stealth_catalog(
                     }
 
     # 3. 關鍵字比對 (限定版陀螺特有名稱，如暴風天馬、福音戰士、EVA、巴塞隆納、迪卡狂怒、蜘蛛人等)
-    STOP_WORDS_GENERIC = {
-        "戰鬥陀螺", "戰鬥", "陀螺", "金屬塗裝", "金屬塗層", "塗裝", "塗層", "景品", "抽抽樂", "套組",
-        "限定", "大賽", "獎品", "日版", "代理", "代理版", "官方", "正版", "交換", "票券", "交換票券",
-        "兌換", "台灣", "麗嬰", "童無忌", "玩具", "點數", "專用", "配件", "零件", "收納盒", "發射器",
-        "cx00", "cx-00", "bx00", "bx-00", "ux00", "ux-00", "beyblade", "beybladex"
-    }
     title_low = title_clean.lower()
     for it in stealth_catalog:
         kws = it.get("keywords", [])
         for kw in kws:
-            kw_low = kw.lower()
-            if kw_low in STOP_WORDS_GENERIC:
-                continue
-            if len(kw) >= 3 and kw_low in title_low:
+            if len(kw) >= 3 and kw in title_low:
                 return {
                     "model": it.get("asin", ""),
                     "catalog_item": it,
@@ -2895,7 +2749,7 @@ def match_product_with_stealth_catalog(
                 }
         c_name = str(it.get("name", "")).strip()
         clean_name = re.sub(r'^(?:BEYBLADE\s*X\s*)?(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?\s*', '', c_name, flags=re.I).strip()
-        if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low and clean_name.lower() not in STOP_WORDS_GENERIC:
+        if clean_name and len(clean_name) >= 3 and clean_name.lower() in title_low:
             return {
                 "model": it.get("asin", ""),
                 "catalog_item": it,
