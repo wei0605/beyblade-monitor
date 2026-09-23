@@ -631,7 +631,12 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     elif is_real_page:
         item["has_product_page"] = True
 
-    if is_real_page:
+    if store == "amazon_jp":
+        official_url = f"https://www.amazon.co.jp/dp/{asin}?m=AN1VRQENFRJN5&th=1&psc=1"
+        item["url"] = official_url
+        item["direct_url"] = official_url
+        url = official_url
+    elif is_real_page:
         item["url"] = res_url
         item["direct_url"] = res_url
         url = res_url
@@ -643,7 +648,14 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
 
     if in_stock:
         if store == "amazon_jp":
-            if is_official:
+            # 嚴格確認：必須是官方自營、非官方缺貨且賣家名稱明確為 Amazon 官方
+            is_genuine_official = (
+                is_official and
+                "amazon" in seller.lower() and
+                official_price and
+                official_price not in ("-", "官方缺貨", "缺貨中")
+            )
+            if is_genuine_official:
                 status_text = "🟢 官方現貨/預購" if not is_preorder else "🔵 官方開放預購"
                 is_alert_worthy = True
             else:
@@ -712,6 +724,14 @@ def trigger_notifications(item: dict, name: str, asin: str, price: str, seller: 
     s_settings = state.config.get("store_settings", {}).get(store, {})
     if not s_settings.get("enable_notifications", True):
         return
+
+    # Amazon 官方推播網址終極防護：強制鎖定 m=AN1VRQENFRJN5 官方直達
+    if store == "amazon_jp":
+        if asin and ("m=AN1VRQENFRJN5" not in url or "/dp/" not in url):
+            url = f"https://www.amazon.co.jp/dp/{asin}?m=AN1VRQENFRJN5&th=1&psc=1"
+        elif "m=AN1VRQENFRJN5" not in url:
+            delim = "&" if "?" in url else "?"
+            url = f"{url}{delim}m=AN1VRQENFRJN5&th=1&psc=1"
 
     # 1. Discord 推播 (優先使用該賣場專屬 Webhook，若無則回退全域 Webhook)
     if state.config.get("enable_discord", True):

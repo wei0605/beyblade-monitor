@@ -1961,14 +1961,14 @@
 
     function getItemUrl(it, storeKey) {
       const asin = it.asin || '';
+      const sKey = storeKey || it.store || 'amazon_jp';
+      if (sKey === 'amazon_jp') {
+        return `https://www.amazon.co.jp/dp/${asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
+      }
       const isModelCode = /^(?:BX|UX|CX)-\d{2}[A-Z]?$/i.test(asin);
 
       if (it.direct_url && !it.direct_url.includes('/search') && !it.direct_url.includes('/category?keyword=') && !it.direct_url.includes('#product_list')) return it.direct_url;
-      if (it.url && !it.url.includes('/search') && !it.url.includes('/category?keyword=') && !it.url.includes('#product_list')) return it.url;
-
-      if (storeKey === 'amazon_jp') {
-        return `https://www.amazon.co.jp/dp/${asin}?m=AN1VRQENFRJN5&th=1&psc=1`;
-      } else if (storeKey === 'pchome') {
+      if (it.url && !it.url.includes('/search') && !it.url.includes('/category?keyword=') && !it.url.includes('#product_list')) return it.url; else if (storeKey === 'pchome') {
         return isModelCode ? `https://24h.pchome.com.tw/search/?q=${asin}` : `https://24h.pchome.com.tw/prod/${asin}`;
       } else if (storeKey === 'mm_shop') {
         if (asin.startsWith('Shopee') || /^[a-f0-9]{20,}$/i.test(asin)) return `https://mmtoyshop.com/item/${asin}`;

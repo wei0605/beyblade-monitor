@@ -282,9 +282,9 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
     if status_code == 404 or "申し訳ございません。お探しのページが見つかりませんでした" in html:
         return {"ok": False, "msg": "頁面不存在 (404 未上架)"}
     elif status_code == 503:
-        return {"ok": False, "msg": "Amazon 頻率限制 (503，已觸發自動冷卻)"}
+        return {"ok": False, "msg": "Amazon 頻率限制 (503)"}
     elif "/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html:
-        return {"ok": False, "msg": "Amazon 頻率限制 (CAPTCHA 驗證，已觸發自動冷卻)"}
+        return {"ok": False, "msg": "Amazon 驗證碼阻擋 (CAPTCHA)"}
     elif status_code != 200 and not ("<html" in html.lower()):
         return {"ok": False, "msg": f"HTTP {status_code}"}
 
@@ -501,13 +501,14 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
 
             # 先判斷是否為官方自營專屬文案 (必須是 Amazon「販売/销售」或「sold by Amazon」，且不可帶有第三方連結)
             official_keywords = [
-                "Amazon.co.jp が販売", "アマゾンが販売", "Amazon.co.jpが販売", "アマゾン が販売", "販売、発送します",
+                "Amazon.co.jp が販売", "アマゾンが販売", "Amazon.co.jpが販売", "アマゾン が販売",
                 "Amazon.co.jp 发货和销售", "Amazon.co.jp 销售并", "由 Amazon.co.jp 发货并销售", "由 Amazon.co.jp 销售",
-                "由 Amazon.co.jp 發貨並銷售", "由 Amazon.co.jp 銷售", "发货并销售", "發貨並銷售"
+                "由 Amazon.co.jp 發貨並銷售", "由 Amazon.co.jp 銷售"
             ]
-            if any(k in m_txt for k in official_keywords) or "sold by amazon" in m_txt.lower():
-                if not seller_link:
-                    raw_seller = "Amazon.co.jp"
+            if (any(k in m_txt for k in official_keywords) or "sold by amazon" in m_txt.lower()) and not seller_link:
+                raw_seller = "Amazon.co.jp"
+                if any(k in m_txt for k in ["発送します", "発送", "发货", "發貨", "ships from and sold by"]):
+                    raw_fulfiller = "Amazon.co.jp"
 
             if not raw_seller:
                 # 日文: 提取 が販売 之前的店名
@@ -528,7 +529,12 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
 
             # 檢查運送
             if not raw_fulfiller:
-                if any(k in m_txt for k in ["Amazon.co.jp が発送", "amazon が発送", "アマゾンが発送", "Amazon.co.jpが発送", "販売、発送します", "由 Amazon 配送", "由 Amazon.co.jp 配送", "由Amazon配送", "Amazon配送", "由 Amazon 发货", "由 Amazon 發貨"]):
+                if any(k in m_txt for k in [
+                    "Amazon.co.jp が発送", "amazon が発送", "アマゾンが発送", "Amazon.co.jpが発送",
+                    "Amazon.co.jp が販売、発送", "Amazon.co.jpが販売、発送", "アマゾンが販売、発送",
+                    "由 Amazon 配送", "由 Amazon.co.jp 配送", "由Amazon配送", "Amazon配送",
+                    "由 Amazon 发货", "由 Amazon 發貨", "由 Amazon.co.jp 发货", "由 Amazon.co.jp 發貨"
+                ]):
                     raw_fulfiller = "Amazon.co.jp"
                 elif "ships from amazon" in m_txt.lower() or "fulfilled by amazon" in m_txt.lower() or "ships from and sold by amazon" in m_txt.lower():
                     raw_fulfiller = "Amazon.co.jp"
@@ -617,7 +623,7 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         "is_official": is_official,
         "is_preorder": has_preorder,
         "seller": seller_name,
-        "url": url,
+        "url": get_product_url(asin, official_only=True),
         "raw_merchant": f"Seller: {raw_seller}, Fulfiller: {raw_fulfiller}",
         "no_featured_offer": no_featured_offer
     }
@@ -825,18 +831,12 @@ class AmazonJPChecker:
     """Amazon Japan 核心檢測器 (支援自訂登入 Cookie + Keepa 自動備援 + 真實 Headers 輪換 + Jitter 隨機延遲 + Chrome TLS 偽裝)"""
     _last_req_time: float = 0.0
     _lock = threading.Lock()
-    _cooloff_until: float = 0.0
 
     @classmethod
     def throttle(cls, interval: float = 0.6, enable_jitter: bool = True, jitter_min: float = 0.1, jitter_max: float = 0.35):
-        """保證請求間隔 + Jitter 隨機延遲，遇到風控自動冷卻"""
+        """保證請求間隔 + Jitter 隨機延遲 (遇到風控不卡死等待，直接跳過處理下一個)"""
         with cls._lock:
             now = time.time()
-            if now < cls._cooloff_until:
-                wait_cool = cls._cooloff_until - now
-                time.sleep(wait_cool)
-                now = time.time()
-
             delay = interval
             if enable_jitter and jitter_max > 0:
                 jitter = random.uniform(jitter_min, jitter_max)
@@ -848,9 +848,9 @@ class AmazonJPChecker:
             cls._last_req_time = time.time()
 
     @classmethod
-    def trigger_cooloff(cls, seconds: float = 180.0):
-        with cls._lock:
-            cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
+    def trigger_cooloff(cls, seconds: float = 0.0):
+        """風控處理：不進行長時間線程休眠阻塞，立即放行以跳至下一項"""
+        pass
 
     _session_lock = threading.Lock()
     _cffi_session = None
@@ -989,19 +989,19 @@ class AmazonJPChecker:
         is_503 = (status_code == 503)
 
         if is_captcha or is_503:
-            cls.trigger_cooloff(180.0)
-            # 【方案 5 關鍵】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
+            # 遇到風控立即重置 session，避免後續請求持續沿用已被標記或封鎖的 Cookie/連線
+            cls.reset_cffi_session()
+
+            # 若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢
             if keepa_api_key and keepa_mode in ("fallback", "primary"):
                 kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
                 if kp_res.get("ok"):
                     kp_res["status_note"] = "Amazon 觸發風控，已由 Keepa 官方 API 接手"
                     return kp_res
 
-            if PlaywrightAmazonChecker.is_available():
-                return PlaywrightAmazonChecker.check_asin(asin)
-            
             reason = "CAPTCHA 驗證" if is_captcha else "503 頻率限制"
-            return {"ok": False, "msg": f"Amazon {reason} (建議填寫 Cookie/住宅代理，或填入 Keepa API Key 啟用自動備援)"}
+            # 使用者明確要求：遇到驗證碼阻擋或 503 等風控，立即回傳異常並跳過抓下一個，絕不卡在迴圈或長時間阻塞
+            return {"ok": False, "msg": f"Amazon {reason}"}
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
 
@@ -2263,7 +2263,7 @@ def check_store_item(
             enable_jitter=amazon_jitter,
             use_playwright=use_playwright,
             proxy=proxy,
-            official_only=False,
+            official_only=True,
             custom_cookie=custom_cookie,
             keepa_api_key=keepa_api_key,
             keepa_mode=keepa_mode
@@ -2302,7 +2302,7 @@ def check_store_item(
             enable_jitter=amazon_jitter,
             use_playwright=use_playwright,
             proxy=proxy,
-            official_only=False,
+            official_only=True,
             custom_cookie=custom_cookie,
             keepa_api_key=keepa_api_key,
             keepa_mode=keepa_mode
@@ -2311,6 +2311,21 @@ def check_store_item(
 
 def get_item_direct_url(item: Dict[str, Any]) -> str:
     """取得該商品的官方直接購買連結 (Amazon 帶有 m=AN1VRQENFRJN5 官方直達)"""
+    store = item.get("store", "amazon_jp")
+    asin = item.get("asin", "")
+
+    # 若為 Amazon 商品，無論原本存入何種網址，一律強制包含 m=AN1VRQENFRJN5 官方直達參數
+    if store == "amazon_jp":
+        if asin:
+            return f"https://www.amazon.co.jp/dp/{asin}?m=AN1VRQENFRJN5&th=1&psc=1"
+        url = item.get("direct_url") or item.get("url") or ""
+        if "amazon.co.jp" in url:
+            if "m=AN1VRQENFRJN5" not in url:
+                delim = "&" if "?" in url else "?"
+                return f"{url}{delim}m=AN1VRQENFRJN5&th=1&psc=1"
+            return url
+        return "https://www.amazon.co.jp/"
+
     url = item.get("direct_url") or item.get("url")
     if url and not url.endswith("/search") and "/search?q" not in url and "/search?q-" not in url and not url.endswith("#product_list") and "/category?keyword=" not in url:
         return url
