@@ -132,7 +132,7 @@ STORE_CONFIG = {
         "flag": "🏬",
         "color": "#ea580c",
         "btn_text": "⚡ 1-Click 官方直達",
-        "default_url": "https://shopee.tw/renmao#product_list",
+        "default_url": "https://shopee.tw/renmao?shopCollection=270873715#product_list",
         "id_label": "蝦皮商品網址或代號",
         "id_placeholder": "例如: https://shopee.tw/product/11664018/... 或 -i.11664018.{itemid}",
     },
@@ -1495,9 +1495,12 @@ class CyberbizChecker:
         if not text:
             return ""
         text = text.strip()
-        m = re.search(r"/products/([a-zA-Z0-9%_-]+)", text)
+        if "/products/" in text:
+            part = text.split("/products/")[-1].split("?")[0].split("#")[0].strip("/")
+            return urllib.parse.unquote(part)
+        m = re.search(r"/products/([^\s?#]+)", text)
         if m:
-            return m.group(1)
+            return urllib.parse.unquote(m.group(1).strip("/"))
         return text.replace("https://", "").replace("http://", "").strip("/")
 
     @staticmethod
@@ -1604,7 +1607,8 @@ class CyberbizChecker:
             res = cls.check_prod(best_slug, store_key=store_key, item_name=item_name, item_keywords=item_keywords)
             if res.get("ok"):
                 res["asin"] = asin
-                res["url"] = f"https://shop.funbox.com.tw/products/{best_slug}" if store_key == "funbox_tw" else f"https://www.twj.tw/products/{best_slug}"
+                quoted_best = urllib.parse.quote(urllib.parse.unquote(best_slug))
+                res["url"] = f"https://shop.funbox.com.tw/products/{quoted_best}" if store_key == "funbox_tw" else f"https://www.twj.tw/products/{quoted_best}"
                 res["direct_url"] = res["url"]
                 res["has_product_page"] = True
                 return res
@@ -1644,7 +1648,8 @@ class CyberbizChecker:
         # 判斷是否為型號突襲或需要搜尋 (例如 "CX-00", "CX-00 (BXH2301)", "BX-52", "UX-15")
         is_model_asin = bool(re.search(r'\b(?:BX|UX|CX)-\d{2,3}', raw_text, re.I) or ("(" in raw_text and ")" in raw_text))
         is_search_url = "search?q=" in raw_text or "/search" in raw_text
-        is_slug_like = bool(re.match(r'^[a-z0-9_-]+$', slug, re.I) and not re.search(r'^(?:BX|UX|CX)-\d', slug, re.I))
+        is_model_code = bool(re.match(r'^(?:BX|UX|CX)[-_]?\d{1,3}[A-Z]?(?:\s*\([^)]*\))?$', slug.strip(), re.I))
+        is_slug_like = bool(slug and not is_model_code and ("-" in slug or "_" in slug or len(slug) > 6))
 
         if is_model_asin or is_search_url or not is_slug_like:
             return cls.check_stealth(store_key, asin=raw_text, item_name=item_name, item_keywords=item_keywords)
@@ -1656,7 +1661,8 @@ class CyberbizChecker:
             base_url = "https://shop.funbox.com.tw/products"
             seller_name = "麗嬰國際官網 (Funbox)"
 
-        url = f"{base_url}/{slug}"
+        encoded_slug = urllib.parse.quote(urllib.parse.unquote(slug))
+        url = f"{base_url}/{encoded_slug}"
         session = get_shared_session()
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
@@ -1882,7 +1888,8 @@ SHOPEE_SHOPS = {
         "shop_id": "11664018",
         "username": "renmao",
         "name": "M.M小舖 (蝦皮)",
-        "list_url": "https://shopee.tw/renmao#product_list",
+        "collection_id": "270873715",
+        "list_url": "https://shopee.tw/renmao?shopCollection=270873715#product_list",
     }
 }
 
@@ -2402,7 +2409,7 @@ def get_item_direct_url(item: Dict[str, Any]) -> str:
             return f"https://shopee.tw/product/11664018/{SHOPEE_KNOWN_ITEMS['shopee_mm'][asin]}"
         if asin.startswith("http") and not asin.endswith("/search") and "#product_list" not in asin:
             return asin
-        return "https://shopee.tw/renmao#product_list"
+        return "https://shopee.tw/renmao?shopCollection=270873715#product_list"
     elif store == "tcsb":
         if is_model_code:
             return f"https://www.tcsb.com.tw/search?query={urllib.parse.quote(asin)}"
@@ -2491,26 +2498,34 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
     elif store_key in ("twj_toys", "funbox_tw"):
         if store_key == "twj_toys":
-            base_search = "https://www.twj.tw/search?q=戰鬥陀螺&sort_by=created-descending"
-            seller_name = "童無忌玩具"
             domain = "https://www.twj.tw"
+            seller_name = "童無忌玩具"
         else:
-            base_search = "https://shop.funbox.com.tw/search?q=戰鬥陀螺&sort_by=created-descending"
-            seller_name = "麗嬰國際官網 (Funbox)"
             domain = "https://shop.funbox.com.tw"
+            seller_name = "麗嬰國際官網 (Funbox)"
 
         try:
-            r = session.get(base_search, timeout=7)
+            api_url = f"{domain}/search/search.json"
+            payload = {
+                "q": "戰鬥陀螺",
+                "per": 50,
+                "page": 1,
+                "sort_by": "created-descending"
+            }
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            r = session.post(api_url, json=payload, headers=headers, timeout=8)
             if r.status_code == 200:
-                soup = BeautifulSoup(r.text, "html.parser")
-                seen_slugs = set()
-                for a in soup.find_all("a", href=re.compile(r'/products/([a-zA-Z0-9%_-]+)')):
-                    m_slug = re.search(r'/products/([a-zA-Z0-9%_-]+)', a.get('href'))
-                    if not m_slug:
-                        continue
-                    slug = m_slug.group(1).split("?")[0]
-                    title = a.get_text(" ", strip=True)
-                    if not title or len(title) < 4 or slug in seen_slugs:
+                data = r.json()
+                prods = data.get("products", {}).get("result", [])
+                seen_handles = set()
+                for p in prods:
+                    title = p.get("title") or ""
+                    handle = p.get("handle") or ""
+                    if not title or not handle or handle in seen_handles:
                         continue
 
                     title_low = title.lower()
@@ -2519,43 +2534,43 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
                     if not any(w in title_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1", "cx0"]):
                         continue
 
-                    seen_slugs.add(slug)
+                    seen_handles.add(handle)
+                    variants = p.get("variants", [])
+                    raw_price = variants[0].get("price") if variants else None
+                    qty = variants[0].get("inventory_quantity") if variants else None
+                    is_in_stock = bool(p.get("in_stock", False))
 
-                    # 從商品卡片 DOM 直接提取價格與在庫狀態 (單次請求完成，省去數十次子請求)
-                    card = a
-                    found_card = None
-                    for _ in range(5):
-                        if card.parent:
-                            card = card.parent
-                            txt = card.get_text(" ", strip=True)
-                            if re.search(r'(?:NT\$|\$)\s*[\d,]+', txt):
-                                found_card = card
-                                break
-                    card_el = found_card if found_card else a
-                    card_text = card_el.get_text(" ", strip=True)
-                    m_price = re.search(r'(?:NT\$|\$)\s*([\d,]+)', card_text)
-                    price_str = f"NT$ {m_price.group(1)}" if m_price else "未標示"
-                    soldout_keywords = ["已售完", "售完", "缺貨", "補貨中", "sold out", "售罄"]
-                    is_sold_out = any(k in card_text.lower() for k in soldout_keywords)
+                    if raw_price is not None and raw_price > 0:
+                        price_str = f"NT$ {raw_price:,}"
+                    else:
+                        price_str = "未標示"
 
-                    full_url = f"{domain}/products/{slug}"
+                    encoded_slug = urllib.parse.quote(urllib.parse.unquote(handle))
+                    full_url = f"{domain}/products/{encoded_slug}"
+
                     results.append({
                         "store": store_key,
                         "title": title,
                         "price": price_str,
                         "url": full_url,
-                        "item_id": slug,
+                        "item_id": handle,
                         "seller": seller_name,
-                        "in_stock": not is_sold_out
+                        "in_stock": is_in_stock,
+                        "qty": qty
                     })
         except Exception:
             pass
 
-    elif store_key == "shopee":
+    elif store_key in ("shopee", "shopee_mm"):
+        shop_cfg = SHOPEE_SHOPS.get(store_key, SHOPEE_SHOPS["shopee"])
+        seller_name = shop_cfg.get("name", "蝦皮官方店")
+        shop_id = shop_cfg.get("shop_id", "285705541")
+        default_list_url = shop_cfg.get("list_url", "https://shopee.tw")
+
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Origin": "https://shopee.tw",
-            "Referer": "https://shopee.tw/funbox5120"
+            "Referer": default_list_url
         }
         s_client = None
         if cffi_requests:
@@ -2566,44 +2581,75 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
         if s_client:
             try:
-                shopee_url = "https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id=285705541&sort_type=1"
-                r = s_client.get(shopee_url, headers=headers, timeout=8)
-                if r.status_code == 200:
-                    data = r.json()
-                    sections = data.get("data", {}).get("sections", [])
-                    items = []
-                    for sec in sections:
-                        items.extend(sec.get("data", {}).get("item", []))
-                    if not items:
-                        items = data.get("items", [])
+                if store_key == "shopee_mm":
+                    target_url = "https://shopee.tw/renmao?shopCollection=270873715#product_list"
+                    r = s_client.get(target_url, headers=headers, timeout=8)
+                    found_item_ids = set()
+                    if r.status_code == 200:
+                        html = r.text
+                        for m_id in re.findall(r'-i\.11664018\.(\d+)', html):
+                            found_item_ids.add(m_id)
+                        for m_id in re.findall(r'/product/11664018/(\d+)', html):
+                            found_item_ids.add(m_id)
+                        for m_id in re.findall(r'"productID":\s*"(\d+)"', html):
+                            found_item_ids.add(m_id)
 
-                    for it in items:
-                        name = it.get("name") or it.get("title") or ""
-                        name_low = name.lower()
-                        if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "樂高", "lego"]):
-                            continue
-                        if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
-                            continue
-                        price_val = it.get("price") or 0
-                        if price_val > 100000:
-                            price_str = f"NT$ {int(price_val / 100000):,}"
-                        elif price_val > 0:
-                            price_str = f"NT$ {int(price_val):,}"
-                        else:
-                            price_str = "未標示"
-                        item_id = str(it.get("itemid", ""))
-                        shop_id = str(it.get("shopid", "285705541"))
-                        prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else "https://shopee.tw/funbox5120"
-                        results.append({
-                            "store": "shopee",
-                            "title": name,
-                            "price": price_str,
-                            "url": prod_url,
-                            "item_id": f"{shop_id}_{item_id}",
-                            "seller": "fun box 玩具旗艦店",
-                            "is_official": True,
-                            "in_stock": True
-                        })
+                    for k_id in SHOPEE_KNOWN_ITEMS.get("shopee_mm", {}).values():
+                        found_item_ids.add(str(k_id))
+
+                    for i_id in list(found_item_ids)[:10]:
+                        item_res = ShopeeChecker.check_item(f"{shop_id}_{i_id}", store_key="shopee_mm")
+                        if item_res.get("ok"):
+                            item_title = item_res.get("title", "")
+                            if any(w in item_title.lower() for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "ux0", "cx0"]):
+                                results.append({
+                                    "store": "shopee_mm",
+                                    "title": item_title,
+                                    "price": item_res.get("price", "未標示"),
+                                    "url": item_res.get("url", target_url),
+                                    "item_id": f"{shop_id}_{i_id}",
+                                    "seller": seller_name,
+                                    "is_official": True,
+                                    "in_stock": item_res.get("in_stock", False)
+                                })
+                else:
+                    shopee_url = f"https://shopee.tw/api/v4/recommend/recommend?bundle=shop_page_product_tab_main&limit=30&offset=0&section_id=0&shop_id={shop_id}&sort_type=1"
+                    r = s_client.get(shopee_url, headers=headers, timeout=8)
+                    if r.status_code == 200:
+                        data = r.json()
+                        sections = data.get("data", {}).get("sections", [])
+                        items = []
+                        for sec in sections:
+                            items.extend(sec.get("data", {}).get("item", []))
+                        if not items:
+                            items = data.get("items", [])
+
+                        for it in items:
+                            name = it.get("name") or it.get("title") or ""
+                            name_low = name.lower()
+                            if any(b in name_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "樂高", "lego"]):
+                                continue
+                            if not any(w in name_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
+                                continue
+                            price_val = it.get("price") or 0
+                            if price_val > 100000:
+                                price_str = f"NT$ {int(price_val / 100000):,}"
+                            elif price_val > 0:
+                                price_str = f"NT$ {int(price_val):,}"
+                            else:
+                                price_str = "未標示"
+                            item_id = str(it.get("itemid", ""))
+                            prod_url = f"https://shopee.tw/product/{shop_id}/{item_id}" if item_id else default_list_url
+                            results.append({
+                                "store": "shopee",
+                                "title": name,
+                                "price": price_str,
+                                "url": prod_url,
+                                "item_id": f"{shop_id}_{item_id}",
+                                "seller": seller_name,
+                                "is_official": True,
+                                "in_stock": True
+                            })
             except Exception:
                 pass
             finally:

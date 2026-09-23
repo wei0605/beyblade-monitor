@@ -550,6 +550,12 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
                 qty = prod.get("qty")
 
                 now_str = get_now_gmt8().strftime("%H:%M:%S")
+                prev_price = target_item.get("last_price", "-")
+                price_changed = bool(prev_price and prev_price not in ("-", "未標示") and prod_price not in ("-", "未標示") and prev_price != prod_price)
+                if price_changed:
+                    item_display = target_item.get("name", matched_model)
+                    state.add_log(f"🏷️【價格變動】[{s_name}] {item_display} 售價變動: {prev_price} ➔ {prod_price}", "INFO")
+
                 target_item["price"] = prod_price
                 target_item["last_price"] = prod_price
                 target_item["last_seller"] = prod_seller
@@ -569,8 +575,8 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
                     target_item["last_status"] = f"🟢 現貨在庫{qty_str}"
                     state.in_stock_state[item_key] = True
 
-                    # 庫存變動或首次發現現貨時，觸發推播
-                    if not prev_in_stock or (qty is not None and target_item.get("_last_qty") != qty):
+                    # 庫存變動、價格變動或首次發現現貨時，觸發推播
+                    if not prev_in_stock or price_changed or (qty is not None and target_item.get("_last_qty") != qty):
                         new_in_stock_items.append((target_item, matched_model, prod_price, prod_seller, prod_url, qty))
                         target_item["_last_qty"] = qty
                 else:
