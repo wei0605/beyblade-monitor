@@ -899,12 +899,12 @@ class AmazonJPChecker:
     _cooloff_until: float = 0.0
 
     @classmethod
-    def throttle(cls, interval: float = 0.6, enable_jitter: bool = True, jitter_min: float = 0.05, jitter_max: float = 0.2):
-        """保證請求間隔 + Jitter 隨機延遲，遇到風控自動冷卻 (至多 5 秒短暫冷卻)"""
+    def throttle(cls, interval: float = 0.5, enable_jitter: bool = True, jitter_min: float = 0.05, jitter_max: float = 0.2):
+        """保證請求間隔 + Jitter 隨機延遲，遇風控極速冷卻"""
         with cls._lock:
             now = time.time()
             if now < cls._cooloff_until:
-                wait_cool = min(cls._cooloff_until - now, 5.0)
+                wait_cool = min(cls._cooloff_until - now, 0.5)
                 if wait_cool > 0:
                     time.sleep(wait_cool)
                 now = time.time()
@@ -920,9 +920,9 @@ class AmazonJPChecker:
             cls._last_req_time = time.time()
 
     @classmethod
-    def trigger_cooloff(cls, seconds: float = 3.0):
+    def trigger_cooloff(cls, seconds: float = 0.5):
         with cls._lock:
-            safe_sec = min(seconds, 5.0)
+            safe_sec = min(seconds, 0.5)
             cls._cooloff_until = max(cls._cooloff_until, time.time() + safe_sec)
 
     _session_lock = threading.Lock()
@@ -940,38 +940,16 @@ class AmazonJPChecker:
                 proxies = {"http": proxy, "https": proxy} if proxy else None
                 try:
                     s = cffi_requests.Session(impersonate=imp, proxies=proxies)
-                    headers, _ = get_amazon_stealth_headers(custom_cookie=custom_cookie)
-                    try:
-                        # 1. 若使用者有提供自訂 Cookie，直接注入，不進行可能觸發驗證碼的初始首頁訪問
-                        if custom_cookie and custom_cookie.strip():
-                            for part in custom_cookie.split(";"):
-                                if "=" in part:
-                                    k, v = part.strip().split("=", 1)
-                                    s.cookies.set(k.strip(), v.strip(), domain=".amazon.co.jp")
-                        else:
-                            # 2. 先訪問首頁建立 session-id 與基礎 Cookie
-                            s.get("https://www.amazon.co.jp/", headers=headers, timeout=10)
-                            # 注入日本境內郵遞區號 103-0003 (東京都中央區日本橋)
-                            addr_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
-                            s.post(
-                                addr_url,
-                                headers={**headers, "Content-Type": "application/x-www-form-urlencoded"},
-                                data={
-                                    "locationType": "LOCATION_INPUT",
-                                    "zipCode": AMAZON_DEFAULT_ZIPCODE,
-                                    "storeContext": "generic",
-                                    "deviceType": "web",
-                                    "pageType": "Detail",
-                                    "actionSource": "glow"
-                                },
-                                timeout=8
-                            )
-                        # 3. 嚴格鎖定幣別為日圓 JPY 與日語 ja_JP
-                        s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
-                        s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
-                        s.cookies.set("glow-zipcode", AMAZON_DEFAULT_ZIPCODE, domain=".amazon.co.jp")
-                    except Exception:
-                        pass
+                    # 1. 若使用者有提供自訂 Cookie，直接注入
+                    if custom_cookie and custom_cookie.strip():
+                        for part in custom_cookie.split(";"):
+                            if "=" in part:
+                                k, v = part.strip().split("=", 1)
+                                s.cookies.set(k.strip(), v.strip(), domain=".amazon.co.jp")
+                    # 2. 嚴格鎖定幣別為日圓 JPY 與日語 ja_JP，日本境內郵遞區號
+                    s.cookies.set("i18n-prefs", "JPY", domain=".amazon.co.jp")
+                    s.cookies.set("lc-acbjp", "ja_JP", domain=".amazon.co.jp")
+                    s.cookies.set("glow-zipcode", AMAZON_DEFAULT_ZIPCODE, domain=".amazon.co.jp")
                     cls._cffi_session = s
                     cls._session_proxy = proxy
                     cls._session_cookie = custom_cookie
@@ -988,7 +966,7 @@ class AmazonJPChecker:
     def check_asin(
         cls,
         asin: str,
-        interval: float = 0.6,
+        interval: float = 0.5,
         enable_jitter: bool = True,
         use_playwright: bool = False,
         proxy: Optional[str] = None,
@@ -1007,7 +985,6 @@ class AmazonJPChecker:
             keepa_res = KeepaChecker.check_asin(asin, keepa_api_key)
             if keepa_res.get("ok"):
                 return keepa_res
-            # 若 Keepa 失敗，自動嘗試降級回爬蟲繼續執行
 
         # 若使用者指定啟用 Playwright 且環境支援，直接走真實瀏覽器
         if use_playwright and PlaywrightAmazonChecker.is_available():
@@ -1027,7 +1004,7 @@ class AmazonJPChecker:
             try:
                 session = cls.get_cffi_session(proxy=proxy, imp=imp, custom_cookie=custom_cookie)
                 if session:
-                    r = session.get(url, headers=headers, timeout=12)
+                    r = session.get(url, headers=headers, timeout=5)
                     status_code = r.status_code
                     html = r.text
             except Exception:
@@ -1038,7 +1015,7 @@ class AmazonJPChecker:
         if not html:
             try:
                 session = get_shared_session(proxy=proxy)
-                r = session.get(url, headers=headers, proxies=proxies, timeout=10)
+                r = session.get(url, headers=headers, proxies=proxies, timeout=5)
                 status_code = r.status_code
                 html = r.text
             except Exception as e:
@@ -1047,7 +1024,7 @@ class AmazonJPChecker:
                     if kp_res.get("ok"):
                         kp_res["status_note"] = "連線超時，Keepa 備援接手"
                         return kp_res
-                return {"ok": False, "msg": f"網路超時: {str(e)[:25]}"}
+                return {"ok": False, "rate_limited": True, "msg": f"網路逾時 (暫略): {str(e)[:25]}"}
 
         if not html:
             if keepa_api_key and keepa_mode in ("fallback", "primary"):
@@ -1055,7 +1032,7 @@ class AmazonJPChecker:
                 if kp_res.get("ok"):
                     kp_res["status_note"] = "頁面為空，Keepa 備援接手"
                     return kp_res
-            return {"ok": False, "msg": "無法獲取頁面內容"}
+            return {"ok": False, "rate_limited": True, "msg": "無法獲取頁面內容 (暫略)"}
 
         # 檢測 CAPTCHA 或 503 頻率限制
         is_captcha = ("/errors_page/validateCaptcha" in html or "api-services-support@amazon.com" in html)
@@ -1063,7 +1040,7 @@ class AmazonJPChecker:
 
         if is_captcha or is_503:
             cls.reset_cffi_session()
-            cls.trigger_cooloff(3.0)
+            cls.trigger_cooloff(0.5)
             # 【關鍵備援】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
             if keepa_api_key and keepa_mode in ("fallback", "primary"):
                 kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
@@ -1071,11 +1048,11 @@ class AmazonJPChecker:
                     kp_res["status_note"] = "Amazon 觸發風控，已由 Keepa 官方 API 接手"
                     return kp_res
 
-            if PlaywrightAmazonChecker.is_available():
+            if use_playwright and PlaywrightAmazonChecker.is_available():
                 return PlaywrightAmazonChecker.check_asin(asin)
             
             reason = "CAPTCHA 驗證" if is_captcha else "503 頻率限制"
-            return {"ok": False, "msg": f"Amazon {reason} (官方缺貨/風控暫阻)"}
+            return {"ok": False, "rate_limited": True, "msg": f"Amazon {reason} (頻繁暫略)"}
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
         return res

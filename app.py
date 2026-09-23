@@ -465,14 +465,13 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             keepa_mode=keepa_mode
         )
         if not res or not res.get("ok"):
-            # 使用者明確指示：當除 Amazon 以外的電商遇到太頻繁讀取不給讀取時就跳過，以避免卡住
-            if store_key != "amazon_jp":
-                msg = str(res.get("msg", "") if res else "")
-                is_rate_limited = res.get("rate_limited") or any(k in msg.lower() for k in ["429", "too many requests", "403", "503", "頻率限制", "逾時", "timeout", "過於頻繁", "連線失敗", "異常"])
-                if is_rate_limited:
-                    unfetched_count += 1
-                    item["last_status"] = "⚪ 讀取頻繁 (暫略)"
-                    item["last_time"] = get_now_gmt8().strftime("%H:%M:%S")
+            # 使用者明確指示：所有電商 (包含 Amazon) 遇到太頻繁讀取不給讀取/驗證碼/逾時時都跳過，以避免卡住，並統計暫略數量
+            msg = str(res.get("msg", "") if res else "")
+            is_rate_limited = (not res) or res.get("rate_limited") or any(k in msg.lower() for k in ["429", "too many requests", "403", "503", "頻率限制", "逾時", "timeout", "過於頻繁", "連線失敗", "異常", "captcha", "驗證", "風控", "暫略"])
+            if is_rate_limited:
+                unfetched_count += 1
+                item["last_status"] = "⚪ 讀取頻繁 (暫略)"
+                item["last_time"] = get_now_gmt8().strftime("%H:%M:%S")
             continue
 
         if handle_result(idx, item, res, is_manual=is_manual):
