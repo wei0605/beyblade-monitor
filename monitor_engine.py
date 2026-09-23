@@ -2491,47 +2491,63 @@ def fetch_latest_store_products(store_key: str, proxy: Optional[str] = None) -> 
 
     elif store_key in ("twj_toys", "funbox_tw"):
         if store_key == "twj_toys":
-            base_search = "https://www.twj.tw/search?q=BEYBLADE&sort_by=created-descending"
+            base_search = "https://www.twj.tw/search?q=戰鬥陀螺&sort_by=created-descending"
             seller_name = "童無忌玩具"
+            domain = "https://www.twj.tw"
         else:
-            base_search = "https://shop.funbox.com.tw/search?q=BEYBLADE&sort_by=created-descending"
+            base_search = "https://shop.funbox.com.tw/search?q=戰鬥陀螺&sort_by=created-descending"
             seller_name = "麗嬰國際官網 (Funbox)"
+            domain = "https://shop.funbox.com.tw"
 
         try:
             r = session.get(base_search, timeout=7)
             if r.status_code == 200:
                 soup = BeautifulSoup(r.text, "html.parser")
                 seen_slugs = set()
-                parsed_cards = []
                 for a in soup.find_all("a", href=re.compile(r'/products/([a-zA-Z0-9%_-]+)')):
                     m_slug = re.search(r'/products/([a-zA-Z0-9%_-]+)', a.get('href'))
                     if not m_slug:
                         continue
-                    slug = m_slug.group(1)
+                    slug = m_slug.group(1).split("?")[0]
                     title = a.get_text(" ", strip=True)
                     if not title or len(title) < 4 or slug in seen_slugs:
                         continue
-                    seen_slugs.add(slug)
 
                     title_low = title.lower()
                     if any(b in title_low for b in ["tomica", "多美", "小汽車", "小車", "模型車", "四驅車", "超人力霸王", "奧特曼", "小美樂", "莉卡", "プラレール", "アニア", "特攻隊", "魔動王", "海綿", "不含陀螺", "紙製收納盒", "玩具總動員", "巴斯光年"]):
                         continue
-                    if any(w in title_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1"]):
-                        parsed_cards.append((slug, title))
+                    if not any(w in title_low for w in ["beyblade", "戰鬥陀螺", "陀螺", "bx-", "ux-", "cx-", "bxg-", "bxh-", "bxc-", "bxa-", "bx0", "ux0", "cx0", "bx1", "bx2", "bx3", "bx4", "bx5", "ux1", "ux2", "cx1", "cx0"]):
+                        continue
 
-                for slug, card_title in parsed_cards[:30]:
-                    res = CyberbizChecker.check_prod(slug, store_key=store_key)
-                    if res.get("ok"):
-                        title = res.get("title") or card_title
-                        results.append({
-                            "store": store_key,
-                            "title": title,
-                            "price": res.get("price", "未標示"),
-                            "url": res.get("url", f"https://www.twj.tw/products/{slug}" if store_key == "twj_toys" else f"https://shop.funbox.com.tw/products/{slug}"),
-                            "item_id": slug,
-                            "seller": seller_name,
-                            "in_stock": res.get("in_stock", True)
-                        })
+                    seen_slugs.add(slug)
+
+                    # 從商品卡片 DOM 直接提取價格與在庫狀態 (單次請求完成，省去數十次子請求)
+                    card = a
+                    found_card = None
+                    for _ in range(5):
+                        if card.parent:
+                            card = card.parent
+                            txt = card.get_text(" ", strip=True)
+                            if re.search(r'(?:NT\$|\$)\s*[\d,]+', txt):
+                                found_card = card
+                                break
+                    card_el = found_card if found_card else a
+                    card_text = card_el.get_text(" ", strip=True)
+                    m_price = re.search(r'(?:NT\$|\$)\s*([\d,]+)', card_text)
+                    price_str = f"NT$ {m_price.group(1)}" if m_price else "未標示"
+                    soldout_keywords = ["已售完", "售完", "缺貨", "補貨中", "sold out", "售罄"]
+                    is_sold_out = any(k in card_text.lower() for k in soldout_keywords)
+
+                    full_url = f"{domain}/products/{slug}"
+                    results.append({
+                        "store": store_key,
+                        "title": title,
+                        "price": price_str,
+                        "url": full_url,
+                        "item_id": slug,
+                        "seller": seller_name,
+                        "in_stock": not is_sold_out
+                    })
         except Exception:
             pass
 

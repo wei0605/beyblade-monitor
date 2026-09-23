@@ -414,93 +414,203 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     s_name = s_cfg["short_name"]
 
     items = state.config.get("items", [])
-    store_items = []
-    for idx, it in enumerate(items):
-        if not it.get("enabled", True) or not it.get("asin"):
-            continue
-        if it.get("store", "amazon_jp") == store_key:
-            store_items.append((idx, it))
 
-    if not store_items:
-        if is_manual:
-            state.add_log(f"提示: [{s_name}] 目前無啟用一般價格監控的商品", "INFO")
-        return
-
-    amazon_delay = state.get_amazon_item_interval()
-    amazon_jitter = state.get_amazon_jitter()
-    proxy = state.get_proxy_url()
-    only_official = state.config.get("only_amazon_seller", True)
-    custom_cookie = state.get_amazon_custom_cookie() if store_key == "amazon_jp" else None
-    keepa_key = state.get_keepa_api_key() if store_key == "amazon_jp" else None
-    keepa_mode = state.get_keepa_mode() if store_key == "amazon_jp" else "fallback"
-
-    extras = []
     if store_key == "amazon_jp":
+        # Amazon 依使用者明確指示：不跑防突襲雷達，只針對有開啟監控 (enabled=True) 的商品進行極速直查！
+        store_items = []
+        for idx, it in enumerate(items):
+            if (it.get("store", "amazon_jp") == "amazon_jp") and it.get("enabled", True) and it.get("asin"):
+                store_items.append((idx, it))
+
+        if not store_items:
+            if is_manual:
+                state.add_log(f"提示: [Amazon JP] 目前無勾選監控中的商品 (請點擊卡片勾選「☑ 監控」)", "INFO")
+            state.store_check_status[store_key] = {
+                "last_time": get_now_gmt8().strftime("%H:%M:%S"),
+                "total": 0,
+                "in_stock": 0,
+                "unfetched": 0,
+                "duration": 0.0
+            }
+            return
+
+        amazon_delay = state.get_amazon_item_interval()
+        amazon_jitter = state.get_amazon_jitter()
+        proxy = state.get_proxy_url()
+        only_official = state.config.get("only_amazon_seller", True)
+        custom_cookie = state.get_amazon_custom_cookie()
+        keepa_key = state.get_keepa_api_key()
+        keepa_mode = state.get_keepa_mode()
+
+        extras = []
         if proxy:
             extras.append("住宅代理")
         if custom_cookie:
             extras.append("自訂Cookie")
         if keepa_key and keepa_mode != "disabled":
             extras.append(f"Keepa {keepa_mode}")
-    tag = f" ({', '.join(extras)})" if extras else ""
-    state.add_log(f"⚡ 檢查 [{s_name}] {len(store_items)} 項商品價格與庫存{tag}...", "INFO")
-    t0 = time.time()
+        tag = f" ({', '.join(extras)})" if extras else ""
+        state.add_log(f"⚡ 檢查 [Amazon JP] {len(store_items)} 項監控商品官方售價與庫存{tag}...", "INFO")
+        t0 = time.time()
 
+        in_stock_hits = 0
+        unfetched_count = 0
+        for count, (idx, item) in enumerate(store_items, start=1):
+            if state.stop_event.is_set():
+                break
+
+            res = check_store_item(
+                item,
+                amazon_interval=amazon_delay,
+                amazon_jitter=amazon_jitter,
+                proxy=proxy,
+                only_amazon_seller=only_official,
+                custom_cookie=custom_cookie,
+                keepa_api_key=keepa_key,
+                keepa_mode=keepa_mode
+            )
+            if not res or not res.get("ok"):
+                msg = str(res.get("msg", "") if res else "")
+                is_rate_limited = (not res) or res.get("rate_limited") or any(k in msg.lower() for k in ["429", "too many requests", "403", "503", "頻率限制", "逾時", "timeout", "過於頻繁", "連線失敗", "異常", "captcha", "驗證", "風控", "暫略"])
+                if is_rate_limited:
+                    unfetched_count += 1
+                    item["last_status"] = "⚪ 讀取頻繁 (暫略)"
+                    item["last_time"] = get_now_gmt8().strftime("%H:%M:%S")
+                continue
+
+            if handle_result(idx, item, res, is_manual=is_manual):
+                in_stock_hits += 1
+
+            time.sleep(0.05)
+
+        dt = time.time() - t0
+        now_str = get_now_gmt8().strftime("%H:%M:%S")
+        state.store_check_status[store_key] = {
+            "last_time": now_str,
+            "total": len(store_items),
+            "in_stock": in_stock_hits,
+            "unfetched": unfetched_count,
+            "duration": round(dt, 1)
+        }
+        unfetched_msg = f"，其中 {unfetched_count} 項因讀取頻繁/逾時暫略" if unfetched_count > 0 else ""
+        if in_stock_hits > 0:
+            state.add_log(f"🎉 [Amazon JP] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有官方現貨{unfetched_msg}！", "SUCCESS")
+        else:
+            state.add_log(f"⚡ [Amazon JP] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨{unfetched_msg}", "INFO")
+
+        if state._config_dirty:
+            state.save_config(force=True)
+        force_release_memory()
+        return
+
+    # 非 Amazon 電商：依使用者明確要求，不逐筆發送 208 次耗時請求，改採【流式快照 + 智慧逆向比對回填】！
+    # 單次請求 (耗時約 0.5 ~ 1.5 秒) 取得該賣場最新上架與在庫清單，自動逆向回填型號之價格、庫存與直接連結
+    store_catalog = [it for it in items if (it.get("store") or "amazon_jp") == store_key]
+    if not store_catalog:
+        return
+
+    proxy = state.get_proxy_url()
+    t0 = time.time()
     in_stock_hits = 0
     unfetched_count = 0
-    # 徹底移除賣場內層 ThreadPoolExecutor，改為各賣場專屬線程內循序掃描：
-    # 避免 9 賣場 × 2 子線程 = 18 額外執行緒與數千個 Future 物件堆積在記憶體中引發 Render OOM！
-    for count, (idx, item) in enumerate(store_items, start=1):
-        if state.stop_event.is_set():
-            break
 
-        res = check_store_item(
-            item,
-            amazon_interval=amazon_delay,
-            amazon_jitter=amazon_jitter,
-            proxy=proxy,
-            only_amazon_seller=only_official,
-            custom_cookie=custom_cookie,
-            keepa_api_key=keepa_key,
-            keepa_mode=keepa_mode
-        )
-        if not res or not res.get("ok"):
-            # 使用者明確指示：所有電商 (包含 Amazon) 遇到太頻繁讀取不給讀取/驗證碼/逾時時都跳過，以避免卡住，並統計暫略數量
-            msg = str(res.get("msg", "") if res else "")
-            is_rate_limited = (not res) or res.get("rate_limited") or any(k in msg.lower() for k in ["429", "too many requests", "403", "503", "頻率限制", "逾時", "timeout", "過於頻繁", "連線失敗", "異常", "captcha", "驗證", "風控", "暫略"])
-            if is_rate_limited:
-                unfetched_count += 1
-                item["last_status"] = "⚪ 讀取頻繁 (暫略)"
-                item["last_time"] = get_now_gmt8().strftime("%H:%M:%S")
-            continue
+    try:
+        latest_prods = fetch_latest_store_products(store_key, proxy=proxy)
+    except Exception as e:
+        logger.warning(f"[{s_name}] 最新商品流抓取異常: {e}")
+        latest_prods = []
+        unfetched_count = 1
 
-        if handle_result(idx, item, res, is_manual=is_manual):
-            in_stock_hits += 1
+    matched_item_keys = set()
+    new_in_stock_items = []
 
-        # 微幅延遲 50ms 讓出 CPU (Amazon 請求間隔已由 AmazonJPChecker.throttle 統一精準控管，不再重複空轉等待)
-        time.sleep(0.05)
+    if latest_prods:
+        for prod in latest_prods:
+            title = prod.get("title", "")
+            if not title:
+                continue
 
-        # 每檢查 15 項商品，強制釋放記憶體歸還 OS
-        if count % 15 == 0:
-            force_release_memory()
+            # 若為 PChome 通路，檢核是否為 Funbox 麗嬰國際官方直營上架商品
+            if store_key == "pchome":
+                if not prod.get("is_official") and not any(k in title.lower() for k in ["funbox", "麗嬰"]):
+                    continue
+                prod["seller"] = "funbox 麗嬰國際 (PChome 官方)"
+
+            match_res = match_product_with_stealth_catalog(title, store_catalog)
+            if match_res:
+                matched_model = match_res["model"]
+                target_item = match_res["catalog_item"]
+                item_key = f"{store_key}_{matched_model}"
+                matched_item_keys.add(item_key)
+
+                prod_url = prod.get("url", "")
+                prod_price = prod.get("price", "未標示")
+                prod_seller = prod.get("seller", s_cfg.get("name", store_key))
+                is_in_stock = bool(prod.get("in_stock", False))
+                qty = prod.get("qty")
+
+                now_str = get_now_gmt8().strftime("%H:%M:%S")
+                target_item["price"] = prod_price
+                target_item["last_price"] = prod_price
+                target_item["last_seller"] = prod_seller
+                target_item["last_time"] = now_str
+                if prod_url:
+                    target_item["url"] = prod_url
+                    target_item["direct_url"] = prod_url
+                target_item["has_product_page"] = True
+                if qty is not None:
+                    target_item["stock_qty"] = qty
+
+                prev_in_stock = bool(target_item.get("last_status") and ("現貨" in target_item["last_status"] or "預購" in target_item["last_status"]))
+
+                if is_in_stock:
+                    in_stock_hits += 1
+                    qty_str = f" [庫存:{qty}件]" if qty is not None else ""
+                    target_item["last_status"] = f"🟢 現貨在庫{qty_str}"
+                    state.in_stock_state[item_key] = True
+
+                    # 庫存變動或首次發現現貨時，觸發推播
+                    if not prev_in_stock or (qty is not None and target_item.get("_last_qty") != qty):
+                        new_in_stock_items.append((target_item, matched_model, prod_price, prod_seller, prod_url, qty))
+                        target_item["_last_qty"] = qty
+                else:
+                    target_item["last_status"] = "⚪ 已售完 (無庫存)"
+                    state.in_stock_state[item_key] = False
+
+                state.mark_config_dirty()
+
+    # 針對不在最新在售流中的商品：若原本標示為現貨但本次最新榜單已無庫存，自動更新為售完
+    for it in store_catalog:
+        asin = it.get("asin", "")
+        item_key = f"{store_key}_{asin}"
+        if item_key not in matched_item_keys:
+            if it.get("last_status") and "現貨" in it["last_status"]:
+                it["last_status"] = "⚪ 已售完 (無庫存)"
+                state.in_stock_state[item_key] = False
+                state.mark_config_dirty()
+
+    # 發送即時通知
+    for t_item, m_model, p_price, p_seller, p_url, p_qty in new_in_stock_items:
+        qty_tag = f" (現貨庫存 {p_qty} 件)" if p_qty is not None else ""
+        item_name = t_item.get("name", m_model)
+        state.add_log(f"🚨【最新動態】[{s_name}] {item_name} 現貨上架{qty_tag}！售價: {p_price}", "SUCCESS")
+        trigger_notifications(t_item, item_name, m_model, p_price, p_seller, p_url)
 
     dt = time.time() - t0
     now_str = get_now_gmt8().strftime("%H:%M:%S")
     state.store_check_status[store_key] = {
         "last_time": now_str,
-        "total": len(store_items),
+        "total": len(store_catalog),
         "in_stock": in_stock_hits,
         "unfetched": unfetched_count,
         "duration": round(dt, 1)
     }
 
-    unfetched_msg = f"，其中 {unfetched_count} 項因讀取頻繁/逾時暫略" if unfetched_count > 0 else ""
     if in_stock_hits > 0:
-        state.add_log(f"🎉 [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 發現 {in_stock_hits} 項有現貨{unfetched_msg}！", "SUCCESS")
+        state.add_log(f"🎉 [{s_name}] 最新動態掃描完成 (耗時 {dt:.2f} 秒) • 比對 {len(store_catalog)} 款型號，發現 {in_stock_hits} 項有現貨！", "SUCCESS")
     else:
-        state.add_log(f"⚡ [{s_name}] 本輪檢查完成 (耗時 {dt:.2f} 秒) • 檢查 {len(store_items)} 項，目前無現貨{unfetched_msg}", "INFO")
+        state.add_log(f"⚡ [{s_name}] 最新動態掃描完成 (耗時 {dt:.2f} 秒) • 比對 {len(store_catalog)} 款型號，目前無現貨", "INFO")
 
-    # 每賣場檢查結束後，批量將狀態寫入磁碟並強制呼叫 malloc_trim 將記憶體歸還 OS
     if state._config_dirty:
         state.save_config(force=True)
     force_release_memory()
