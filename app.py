@@ -466,12 +466,8 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
             if handle_result(idx, item, res, is_manual=is_manual):
                 in_stock_hits += 1
 
-        # Amazon 依設定延遲，其他賣場微幅延遲 50ms 讓出 CPU
-        if store_key == "amazon_jp" and amazon_delay > 0:
-            stagger = amazon_delay + (random.uniform(0.08, 0.25) if amazon_jitter else 0)
-            time.sleep(stagger)
-        else:
-            time.sleep(0.05)
+        # 微幅延遲 50ms 讓出 CPU (Amazon 請求間隔已由 AmazonJPChecker.throttle 統一精準控管，不再重複空轉等待)
+        time.sleep(0.05)
 
         # 每檢查 15 項商品，強制釋放記憶體歸還 OS
         if count % 15 == 0:
@@ -629,39 +625,30 @@ def handle_result(idx: int, item: dict, res: dict, is_manual: bool = False):
     status_text = ""
     is_alert_worthy = False
 
-    if in_stock:
-        if store == "amazon_jp":
-            if is_official:
-                status_text = "🟢 官方現貨/預購" if not is_preorder else "🔵 官方開放預購"
-                is_alert_worthy = True
-            else:
-                tp_val = third_party_price if (third_party_price and third_party_price != "-") else price
-                if third_party_condition == "collectible":
-                    status_text = f"🟠 收藏品/近全新最低(含運): {tp_val}" if tp_val and tp_val != "-" else "🟠 收藏品/近全新最低(含運)"
-                else:
-                    status_text = f"🟡 第三方最低(含運): {tp_val}" if tp_val and tp_val != "-" else "🟡 第三方最低(含運)"
-                # 使用者明確要求：推播只要推播官方補貨的通知就好 金額也顯示官方金額就好
-                is_alert_worthy = False
+    if store == "amazon_jp":
+        # 使用者指示：不用顯示第三方價格，直接抓官方售價就好，沒抓到就顯示官方沒貨
+        if in_stock and is_official:
+            status_text = "🟢 官方現貨" if not is_preorder else "🔵 官方開放預購"
+            is_alert_worthy = True
         else:
+            in_stock = False
+            is_official = False
+            status_text = "⚪ 官方缺貨中"
+            official_price = "官方缺貨"
+            third_party_price = "-"
+            price = "-"
+            is_alert_worthy = False
+    else:
+        if in_stock:
             status_text = res.get("status_text") or "🟢 平台現貨開放！"
             is_alert_worthy = True
-    else:
-        if store == "amazon_jp":
-            if third_party_price and third_party_price != "-":
-                if third_party_condition == "collectible":
-                    status_text = f"🟠 收藏品/近全新最低(含運): {third_party_price}"
-                else:
-                    status_text = f"🟡 第三方最低(含運): {third_party_price}"
+        else:
+            if res.get("status_text"):
+                status_text = res["status_text"]
             elif res.get("no_featured_offer", False):
                 status_text = "⚪ 官方缺貨中 (僅轉賣選項)"
             else:
-                status_text = "⚪ 官方缺貨中 / 暫無庫存"
-        elif res.get("status_text"):
-            status_text = res["status_text"]
-        elif res.get("no_featured_offer", False):
-            status_text = "⚪ 官方缺貨中 (僅轉賣選項)"
-        else:
-            status_text = "⚪ 缺貨中 / 暫無庫存"
+                status_text = "⚪ 缺貨中 / 暫無庫存"
 
     # 庫存數量處理 (若賣場支援庫存回傳，如 M.M小舖)
     qty = res.get("qty")

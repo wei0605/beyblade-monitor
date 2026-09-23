@@ -663,43 +663,17 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         seller_name = "-"
         is_official = False
 
-    # 5. 官方自營價 vs 第三方最低價提取
+    # 5. 官方自營價提取 (使用者明確指示：不用顯示第三方價格，直接抓官方售價就好，沒抓到就顯示官方沒貨)
     if in_stock and is_official:
         official_price = price
+        status_text = "🟢 官方現貨" if not has_preorder else "🔵 官方開放預購"
     else:
+        in_stock = False
+        is_official = False
+        price = "-"
         official_price = "官方缺貨"
-
-    # 第三方最低價提取 (從第三方 Buybox、#dynamic-aod-ingress-box、#olp_feature_div 等容器提取，嚴格只抓全新品)
-    tp_ints = []
-    if in_stock and not is_official and price and price != "-" and not is_buybox_used:
-        m = re.search(r"[\d,]+", price)
-        if m:
-            val = int(m.group(0).replace(",", ""))
-            if val >= 500:
-                tp_ints.append(val)
-
-    for box in soup.select("#dynamic-aod-ingress-box, #olp_feature_div, #moreBuyingChoices_feature_div, .olp-touch-link, div[id*='aod-ingress'], div[id*='unqualified-buybox'], div[id*='buying-options']"):
-        rows = box.select(".olp-touch-link, li, tr, .a-section, .a-row, .a-box") or [box]
-        for row in rows:
-            row_txt = row.get_text(" ", strip=True).lower()
-            if any(k in row_txt for k in AMZ_USED_KEYWORDS):
-                continue
-            for p_el in row.select(".a-color-price, .a-price .a-offscreen, .a-price-whole, .a-size-small.a-color-price, .apex-pricetopay-value"):
-                t = p_el.get_text(strip=True)
-                m = re.search(r"(?:JP)?\s*[￥¥]\s*([\d,]+)", t)
-                if m:
-                    v = int(m.group(1).replace(",", ""))
-                    if v >= 500:
-                        tp_ints.append(v)
-
-    # 當官方自營有貨時，第三方價格必須嚴格排除官方自營金額 (官方售價絕不可變為第三方價格)
-    if is_official and in_stock and price:
-        m_off = re.search(r"[\d,]+", price)
-        if m_off:
-            off_val = int(m_off.group(0).replace(",", ""))
-            tp_ints = [p for p in tp_ints if p != off_val]
-
-    third_party_cheapest = f"￥{min(tp_ints):,}" if tp_ints else "-"
+        seller_name = "Amazon.co.jp (官方缺貨)"
+        status_text = "⚪ 官方缺貨中"
 
     return {
         "ok": True,
@@ -708,14 +682,15 @@ def parse_amazon_html(html: str, asin: str, status_code: int = 200, url: str = "
         "title": title,
         "price": price,
         "official_price": official_price,
-        "third_party_price": third_party_cheapest,
+        "third_party_price": "-",
         "in_stock": in_stock,
         "is_official": is_official,
         "is_preorder": has_preorder,
         "seller": seller_name,
         "url": url,
         "raw_merchant": f"Seller: {raw_seller}, Fulfiller: {raw_fulfiller}",
-        "no_featured_offer": no_featured_offer
+        "no_featured_offer": no_featured_offer,
+        "status_text": status_text
     }
 
 
@@ -924,13 +899,14 @@ class AmazonJPChecker:
     _cooloff_until: float = 0.0
 
     @classmethod
-    def throttle(cls, interval: float = 0.6, enable_jitter: bool = True, jitter_min: float = 0.1, jitter_max: float = 0.35):
-        """保證請求間隔 + Jitter 隨機延遲，遇到風控自動冷卻"""
+    def throttle(cls, interval: float = 0.6, enable_jitter: bool = True, jitter_min: float = 0.05, jitter_max: float = 0.2):
+        """保證請求間隔 + Jitter 隨機延遲，遇到風控自動冷卻 (至多 5 秒短暫冷卻)"""
         with cls._lock:
             now = time.time()
             if now < cls._cooloff_until:
-                wait_cool = cls._cooloff_until - now
-                time.sleep(wait_cool)
+                wait_cool = min(cls._cooloff_until - now, 5.0)
+                if wait_cool > 0:
+                    time.sleep(wait_cool)
                 now = time.time()
 
             delay = interval
@@ -944,9 +920,10 @@ class AmazonJPChecker:
             cls._last_req_time = time.time()
 
     @classmethod
-    def trigger_cooloff(cls, seconds: float = 180.0):
+    def trigger_cooloff(cls, seconds: float = 3.0):
         with cls._lock:
-            cls._cooloff_until = max(cls._cooloff_until, time.time() + seconds)
+            safe_sec = min(seconds, 5.0)
+            cls._cooloff_until = max(cls._cooloff_until, time.time() + safe_sec)
 
     _session_lock = threading.Lock()
     _cffi_session = None
@@ -1085,8 +1062,9 @@ class AmazonJPChecker:
         is_503 = (status_code == 503)
 
         if is_captcha or is_503:
-            cls.trigger_cooloff(180.0)
-            # 【方案 5 關鍵】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
+            cls.reset_cffi_session()
+            cls.trigger_cooloff(3.0)
+            # 【關鍵備援】：若有 Keepa API Key，無縫自動降級切換為 Keepa API 查詢！
             if keepa_api_key and keepa_mode in ("fallback", "primary"):
                 kp_res = KeepaChecker.check_asin(asin, keepa_api_key)
                 if kp_res.get("ok"):
@@ -1097,120 +1075,9 @@ class AmazonJPChecker:
                 return PlaywrightAmazonChecker.check_asin(asin)
             
             reason = "CAPTCHA 驗證" if is_captcha else "503 頻率限制"
-            return {"ok": False, "msg": f"Amazon {reason} (建議填寫 Cookie/住宅代理，或填入 Keepa API Key 啟用自動備援)"}
+            return {"ok": False, "msg": f"Amazon {reason} (官方缺貨/風控暫阻)"}
 
         res = parse_amazon_html(html, asin, status_code=status_code, url=url)
-
-        # 深度提取：若非官方自營有貨，或沒有精選優惠(no_featured_offer)，或目前無第三方報價，
-        # 額外自 AOD (All Offers Display) 提取所有第三方賣家 (包含運送為個人賣家/非官方自出貨 FBM) 的最低價
-        if not res.get("is_official", False) or res.get("no_featured_offer", False) or res.get("third_party_price") == "-":
-            try:
-                aod_url = f"https://www.amazon.co.jp/gp/product/ajax/aodAjaxMain?asin={asin}&pc=dp"
-                s_to_use = session if ('session' in locals() and session) else get_shared_session(proxy=proxy)
-                if s_to_use:
-                    aod_headers = {k: v for k, v in headers.items() if k.lower() != "cookie"}
-                    aod_headers["Referer"] = url
-                    r_aod = s_to_use.get(aod_url, headers=aod_headers, proxies=proxies, timeout=6)
-                    if r_aod.status_code == 200 and len(r_aod.text) > 500:
-                        aod_soup = BeautifulSoup(r_aod.text, "html.parser")
-                        aod_tp_ints = []
-                        aod_collectible_ints = []
-                        for of in aod_soup.select("#aod-pinned-offer, #aod-offer"):
-                            # 1. 狀況檢查：徹底排除二手/中古/非全新品/再生翻新品，區分全新品 (Brand New) 與收藏品 (Collectible / ほぼ新品)
-                            cond_el = of.select_one("#aod-offer-heading, [id*='heading'], [id*='condition'], [id*='Condition'], .aod-offer-heading")
-                            cond_text = cond_el.get_text(" ", strip=True).lower() if cond_el else ""
-                            
-                            is_used = any(b in cond_text for b in [
-                                "中古", "非全新品", "二手", "再生品",
-                                "used", "renewed", "refurbished", "pre-owned"
-                            ])
-                            is_collectible = any(b in cond_text for b in ["收藏品", "コレクター", "collectible"])
-                            is_explicit_new = any(w in cond_text for w in ["新品", "全新", "new"])
-                            
-                            # 嚴格排除真正的中古二手/瑕疵再生品
-                            if is_used or (cond_text and not is_explicit_new and not is_collectible):
-                                continue
-
-                            s_el = of.select_one("#aod-offer-soldBy, [id*='soldBy']")
-                            f_el = of.select_one("#aod-offer-shipsFrom, [id*='shipsFrom']")
-
-                            s_txt = ""
-                            if s_el:
-                                s_right = s_el.select_one(".a-col-right, td:last-child")
-                                if s_right:
-                                    s_link = s_right.select_one("a")
-                                    s_txt = s_link.get_text(strip=True) if s_link else s_right.get_text(" ", strip=True)
-                                else:
-                                    s_txt = s_el.get_text(" ", strip=True)
-
-                            f_txt = ""
-                            if f_el:
-                                f_right = f_el.select_one(".a-col-right, td:last-child")
-                                f_txt = f_right.get_text(" ", strip=True) if f_right else f_el.get_text(" ", strip=True)
-
-                            has_tp_link = bool(s_el and s_el.select_one("a[href*='seller'], a[href*='shops'], #sellerProfileTriggerId"))
-                            is_s_amz = is_amazon_name(s_txt) and not has_tp_link
-                            is_f_amz = is_amazon_name(f_txt)
-                            is_offer_official = is_s_amz and is_f_amz
-
-                            found_p = None
-                            for p_el in of.select(".a-price .a-offscreen, .a-price-whole, .apex-pricetopay-value, [id^='aod-price-']"):
-                                t = p_el.get_text(strip=True)
-                                m = re.search(r"[\d,]+", t)
-                                if m:
-                                    v = int(m.group(0).replace(",", ""))
-                                    if v >= 500:
-                                        found_p = v
-                                        break
-
-                            if not found_p:
-                                continue
-
-                            # 提取運費 (含自出貨 FBM 個人賣家、未達免運門檻等運費，嚴格加總)
-                            shipping_fee = 0
-                            deliv_p_el = of.select_one("[data-csa-c-delivery-price]")
-                            if deliv_p_el and deliv_p_el.get("data-csa-c-delivery-price"):
-                                m_shp = re.search(r"[\d,]+", deliv_p_el.get("data-csa-c-delivery-price"))
-                                if m_shp:
-                                    shipping_fee = int(m_shp.group(0).replace(",", ""))
-
-                            if shipping_fee == 0:
-                                deliv_box = of.select_one(".aod-delivery-promise-column, .aod-unified-delivery, [id*='delivery'], [id*='ship']")
-                                deliv_text = deliv_box.get_text(" ", strip=True) if deliv_box else of.get_text(" ", strip=True)
-                                if not any(k in deliv_text for k in ["無料配送", "送料無料", "Free Delivery", "Prime", "免運", "免費配送"]):
-                                    m_shp = re.search(r'(?:配送料|送料|配送費|配送|delivery)[^\d￥¥]{0,10}[￥¥]\s*([\d,]+)', deliv_text, re.I)
-                                    if not m_shp:
-                                        m_shp = re.search(r'\+\s*[￥¥]\s*([\d,]+)', deliv_text)
-                                    if m_shp:
-                                        shipping_fee = int(m_shp.group(1).replace(",", ""))
-
-                            total_offer_price = found_p + shipping_fee
-                            if is_offer_official:
-                                res["is_official"] = True
-                                res["official_price"] = f"￥{found_p:,}"
-                                res["seller"] = "Amazon.co.jp (官方自營)"
-                                res["in_stock"] = True
-                            elif is_collectible:
-                                aod_collectible_ints.append(total_offer_price)
-                            else:
-                                # 包含所有個人賣家、FBM (賣家自出貨) 以及 FBA，嚴格加上運費
-                                aod_tp_ints.append(total_offer_price)
-
-                        # AOD 狀況優先級判定 (方案 B)：
-                        # 1. 第一優先：全新品 (Brand New)
-                        # 2. 第二備選：若無全新品，但有「收藏品 / ほぼ新品」，納入並標記為收藏品最低價
-                        if aod_tp_ints:
-                            res["third_party_price"] = f"￥{min(aod_tp_ints):,}"
-                            res["third_party_condition"] = "new"
-                        elif aod_collectible_ints:
-                            res["third_party_price"] = f"￥{min(aod_collectible_ints):,}"
-                            res["third_party_condition"] = "collectible"
-                        elif aod_soup.select("#aod-pinned-offer, #aod-offer"):
-                            res["third_party_price"] = "-"
-                            res["third_party_condition"] = "none"
-            except Exception:
-                pass
-
         return res
 
 

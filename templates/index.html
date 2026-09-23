@@ -2154,13 +2154,15 @@
         }
 
         const card = document.createElement('div');
-        const isInStock = it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低') || it.last_status.includes('突襲上架') || it.last_status.includes('收藏品') || it.last_status.includes('近全新'));
+        let isInStock = false;
+        if (storeKey === 'amazon_jp') {
+          isInStock = Boolean(it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購')));
+        } else {
+          isInStock = Boolean(it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架')));
+        }
+
         let statusColor = '#94a3b8';
-        if (it.last_status && (it.last_status.includes('🟠') || it.last_status.includes('收藏品') || it.last_status.includes('近全新'))) {
-          statusColor = '#fb923c';
-        } else if (it.last_status && (it.last_status.includes('🟡') || it.last_status.includes('優質賣家') || it.last_status.includes('第三方最低'))) {
-          statusColor = '#fbbf24';
-        } else if (isInStock) {
+        if (isInStock) {
           statusColor = '#34d399';
         }
         card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
@@ -2182,13 +2184,12 @@
 
         let displayStatus = it.last_status || '待檢查';
         if (storeKey === 'amazon_jp') {
-          if (displayStatus.includes('第三方優質賣家') || (it.third_party_price && it.third_party_price !== '-' && (!it.last_seller || !it.last_seller.includes('官方自營')) && (displayStatus.includes('僅轉賣選項') || displayStatus.includes('暫無庫存') || displayStatus.includes('缺貨')))) {
-            const tpVal = (it.third_party_price && it.third_party_price !== '-') ? it.third_party_price : (it.last_price || '');
-            if (it.third_party_condition === 'collectible' || displayStatus.includes('收藏品') || displayStatus.includes('近全新')) {
-              displayStatus = tpVal ? `🟠 收藏品/近全新最低(含運): ${tpVal}` : '🟠 收藏品/近全新最低(含運)';
-            } else {
-              displayStatus = tpVal ? `🟡 第三方最低(含運): ${tpVal}` : '🟡 第三方最低(含運)';
-            }
+          if (!isInStock) {
+            displayStatus = '⚪ 官方缺貨中';
+            statusColor = '#94a3b8';
+          } else {
+            displayStatus = it.last_status && it.last_status.includes('預購') ? '🔵 官方開放預購' : '🟢 官方現貨';
+            statusColor = '#34d399';
           }
         }
 
@@ -2215,12 +2216,12 @@
           <div class="item-meta">
             <div>
               <div class="item-status" style="color: ${statusColor}">${escapeHtml(displayStatus)}</div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(it.last_seller || cfg.name || '-')} | 時間: ${escapeHtml(it.last_time || '-')}${it.qty !== undefined && it.qty !== null ? ` | <span style="color: ${it.qty > 0 ? '#34d399' : '#94a3b8'}; font-weight: 600;">庫存: ${it.qty}</span>` : ''}</div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 2px;">通路: ${escapeHtml(storeKey === 'amazon_jp' ? (isInStock ? 'Amazon.co.jp (官方自營)' : 'Amazon.co.jp') : (it.last_seller || cfg.name || '-'))} | 時間: ${escapeHtml(it.last_time || '-')}${it.qty !== undefined && it.qty !== null ? ` | <span style="color: ${it.qty > 0 ? '#34d399' : '#94a3b8'}; font-weight: 600;">庫存: ${it.qty}</span>` : ''}</div>
             </div>
             ${storeKey === 'amazon_jp' ? `
               <div class="item-price" style="text-align: right; display: flex; flex-direction: column; gap: 2px; align-items: flex-end;">
-                <div style="font-size: 13px; font-weight: 700; color: ${it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' ? '#34d399' : '#94a3b8'}; white-space: nowrap;">
-                  <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">官方: </span>${escapeHtml(it.official_price || (it.last_seller && it.last_seller.includes('官方') ? it.last_price : '官方缺貨'))}
+                <div style="font-size: 14px; font-weight: 700; color: ${isInStock ? '#34d399' : '#94a3b8'}; white-space: nowrap;">
+                  ${escapeHtml(isInStock ? (it.official_price || it.last_price || '-') : '官方缺貨')}
                 </div>
               </div>
             ` : `
