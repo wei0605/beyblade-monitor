@@ -15,6 +15,7 @@ import threading
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
+import re
 
 # Render / Linux 記憶體瘦身環境變數：限制 glibc 記憶體 arena 與釋放閾值，杜絕記憶體碎片化
 os.environ["MALLOC_ARENA_MAX"] = "2"
@@ -341,6 +342,13 @@ def scan_stealth_for_single_store(s_key: str, is_manual: bool = False, proxy: Op
 
                 now_str = get_now_gmt8().strftime("%H:%M:%S")
                 is_in_stock = bool(prod.get("in_stock", False))
+
+                # 排除店家佔位天價 (例如 9999/999999) 避免誤判突襲現貨
+                m_p = re.search(r'[\d,]+', prod_price)
+                price_num = int(m_p.group(0).replace(",", "")) if m_p else 0
+                if price_num in (9999, 99999, 999999):
+                    continue
+
                 target_item["last_price"] = prod_price
                 target_item["last_seller"] = prod_seller
                 target_item["last_time"] = now_str
@@ -525,6 +533,7 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
     new_in_stock_items = []
 
     if latest_prods:
+        candidates_by_item = {}
         for prod in latest_prods:
             title = prod.get("title", "")
             if not title:
@@ -541,49 +550,71 @@ def check_items_for_store(store_key: str, is_manual: bool = False):
                 matched_model = match_res["model"]
                 target_item = match_res["catalog_item"]
                 item_key = f"{store_key}_{matched_model}"
-                matched_item_keys.add(item_key)
+                candidates_by_item.setdefault(item_key, []).append((matched_model, target_item, prod))
 
-                prod_url = prod.get("url", "")
-                prod_price = prod.get("price", "未標示")
-                prod_seller = prod.get("seller", s_cfg.get("name", store_key))
-                is_in_stock = bool(prod.get("in_stock", False))
-                qty = prod.get("qty")
+        # 對同一型號的候選商品進行智慧評選：優先現貨，排除店家佔位天價 (如 9999/999999)，避免同秒互洗
+        for item_key, cand_list in candidates_by_item.items():
+            matched_item_keys.add(item_key)
 
-                now_str = get_now_gmt8().strftime("%H:%M:%S")
-                prev_price = target_item.get("last_price", "-")
-                price_changed = bool(prev_price and prev_price not in ("-", "未標示") and prod_price not in ("-", "未標示") and prev_price != prod_price)
-                if price_changed:
-                    item_display = target_item.get("name", matched_model)
-                    state.add_log(f"🏷️【價格變動】[{s_name}] {item_display} 售價變動: {prev_price} ➔ {prod_price}", "INFO")
+            def _candidate_score(cand):
+                _, _, p = cand
+                score = 0
+                if p.get("in_stock"):
+                    score += 1000
+                p_str = p.get("price", "")
+                m_val = re.search(r'[\d,]+', p_str)
+                price_num = int(m_val.group(0).replace(",", "")) if m_val else 0
+                # 扣除常見未開賣佔位天價 (9999, 99999, 999999)
+                if price_num in (9999, 99999, 999999) or (price_num >= 9000 and len(cand_list) > 1):
+                    score -= 500
+                elif price_num > 0:
+                    score += 100 - min(99, int(price_num / 100))
+                return score
 
-                target_item["price"] = prod_price
-                target_item["last_price"] = prod_price
-                target_item["last_seller"] = prod_seller
-                target_item["last_time"] = now_str
-                if prod_url:
-                    target_item["url"] = prod_url
-                    target_item["direct_url"] = prod_url
-                target_item["has_product_page"] = True
-                if qty is not None:
-                    target_item["stock_qty"] = qty
+            cand_list.sort(key=_candidate_score, reverse=True)
+            matched_model, target_item, prod = cand_list[0]
 
-                prev_in_stock = bool(target_item.get("last_status") and ("現貨" in target_item["last_status"] or "預購" in target_item["last_status"]))
+            prod_url = prod.get("url", "")
+            prod_price = prod.get("price", "未標示")
+            prod_seller = prod.get("seller", s_cfg.get("name", store_key))
+            is_in_stock = bool(prod.get("in_stock", False))
+            qty = prod.get("qty")
 
-                if is_in_stock:
-                    in_stock_hits += 1
-                    qty_str = f" [庫存:{qty}件]" if qty is not None else ""
-                    target_item["last_status"] = f"🟢 現貨在庫{qty_str}"
-                    state.in_stock_state[item_key] = True
+            now_str = get_now_gmt8().strftime("%H:%M:%S")
+            prev_price = target_item.get("last_price", "-")
+            price_changed = bool(prev_price and prev_price not in ("-", "未標示") and prod_price not in ("-", "未標示") and prev_price != prod_price)
+            if price_changed:
+                item_display = target_item.get("name", matched_model)
+                state.add_log(f"🏷️【價格變動】[{s_name}] {item_display} 售價變動: {prev_price} ➔ {prod_price}", "INFO")
 
-                    # 庫存變動、價格變動或首次發現現貨時，觸發推播
-                    if not prev_in_stock or price_changed or (qty is not None and target_item.get("_last_qty") != qty):
-                        new_in_stock_items.append((target_item, matched_model, prod_price, prod_seller, prod_url, qty))
-                        target_item["_last_qty"] = qty
-                else:
-                    target_item["last_status"] = "⚪ 已售完 (無庫存)"
-                    state.in_stock_state[item_key] = False
+            target_item["price"] = prod_price
+            target_item["last_price"] = prod_price
+            target_item["last_seller"] = prod_seller
+            target_item["last_time"] = now_str
+            if prod_url:
+                target_item["url"] = prod_url
+                target_item["direct_url"] = prod_url
+            target_item["has_product_page"] = True
+            if qty is not None:
+                target_item["stock_qty"] = qty
 
-                state.mark_config_dirty()
+            prev_in_stock = bool(target_item.get("last_status") and ("現貨" in target_item["last_status"] or "預購" in target_item["last_status"]))
+
+            if is_in_stock:
+                in_stock_hits += 1
+                qty_str = f" [庫存:{qty}件]" if qty is not None else ""
+                target_item["last_status"] = f"🟢 現貨在庫{qty_str}"
+                state.in_stock_state[item_key] = True
+
+                # 庫存變動、價格變動或首次發現現貨時，觸發推播
+                if not prev_in_stock or price_changed or (qty is not None and target_item.get("_last_qty") != qty):
+                    new_in_stock_items.append((target_item, matched_model, prod_price, prod_seller, prod_url, qty))
+                    target_item["_last_qty"] = qty
+            else:
+                target_item["last_status"] = "⚪ 已售完 (無庫存)"
+                state.in_stock_state[item_key] = False
+
+            state.mark_config_dirty()
 
     # 針對不在最新在售流中的商品：若原本標示為現貨但本次最新榜單已無庫存，自動更新為售完
     for it in store_catalog:

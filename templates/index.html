@@ -466,7 +466,9 @@
     /* Item Card */
     .item-card { background: var(--card-bg); border-radius: 12px; padding: 14px; border: 1px solid var(--border); position: relative; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
     .item-card.in-stock { border-color: var(--success); background: rgba(16, 185, 129, 0.08); box-shadow: 0 0 16px rgba(16, 185, 129, 0.18); }
+    .item-card.skipped { border-color: rgba(245, 158, 11, 0.55); background: rgba(245, 158, 11, 0.06); }
     .item-card.disabled { opacity: 0.55; }
+    .badge-skipped { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 11px; padding: 2px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
     .item-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .store-badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
     .item-asin { font-size: 11px; font-family: monospace; color: var(--text-muted); background: #0f172a; padding: 2px 6px; border-radius: 4px; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -2171,18 +2173,30 @@
         }
 
         const card = document.createElement('div');
+        const isSkipped = Boolean(
+          it.last_status && (
+            it.last_status.includes('暫略') ||
+            it.last_status.includes('跳過') ||
+            it.last_status.includes('頻繁') ||
+            it.last_status.includes('逾時') ||
+            it.last_status.includes('風控')
+          )
+        );
+
         let isInStock = false;
         if (storeKey === 'amazon_jp') {
-          isInStock = Boolean(it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購')));
+          isInStock = Boolean(!isSkipped && it.official_price && it.official_price !== '官方缺貨' && it.official_price !== '-' && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購')));
         } else {
-          isInStock = Boolean(it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架')));
+          isInStock = Boolean(!isSkipped && it.last_status && (it.last_status.includes('現貨') || it.last_status.includes('預購') || it.last_status.includes('突襲上架')));
         }
 
         let statusColor = '#94a3b8';
         if (isInStock) {
           statusColor = '#34d399';
+        } else if (isSkipped) {
+          statusColor = '#fbbf24';
         }
-        card.className = `item-card ${isInStock ? 'in-stock' : ''} ${!isEnabled ? 'disabled' : ''}`;
+        card.className = `item-card ${isInStock ? 'in-stock' : ''} ${isSkipped ? 'skipped' : ''} ${!isEnabled ? 'disabled' : ''}`;
         
         const hasRealPage = hasRealProductPage(it);
         const buyUrl = getItemUrl(it, storeKey);
@@ -2201,7 +2215,13 @@
 
         let displayStatus = it.last_status || '待檢查';
         if (storeKey === 'amazon_jp') {
-          if (!isInStock) {
+          if (!isEnabled) {
+            displayStatus = '⚪ 未開啟監控 (已略過)';
+            statusColor = '#94a3b8';
+          } else if (isSkipped) {
+            displayStatus = it.last_status;
+            statusColor = '#fbbf24';
+          } else if (!isInStock) {
             displayStatus = '⚪ 官方缺貨中';
             statusColor = '#94a3b8';
           } else {
@@ -2215,6 +2235,11 @@
             <span class="store-badge" style="background: ${cfg.color}22; color: ${cfg.color}; border: 1px solid ${cfg.color}55;">
               <i class="${cfg.icon || 'fa-solid fa-store'}"></i> ${cfg.name || '線上賣場'}
             </span>
+            ${isSkipped ? `
+              <span class="badge-skipped">
+                <i class="fa-solid fa-forward"></i> 本輪暫略 (防風控)
+              </span>
+            ` : ''}
             ${storeKey !== 'amazon_jp' ? (hasRealPage ? `
               <span class="badge-page-locked" style="background: #05966922; color: #34d399; border: 1px solid #05966955; font-size: 11px; padding: 2px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
                 <i class="fa-solid fa-link"></i> 已鎖定商品頁
@@ -2237,8 +2262,8 @@
             </div>
             ${storeKey === 'amazon_jp' ? `
               <div class="item-price" style="text-align: right; display: flex; flex-direction: column; gap: 2px; align-items: flex-end;">
-                <div style="font-size: 14px; font-weight: 700; color: ${isInStock ? '#34d399' : '#94a3b8'}; white-space: nowrap;">
-                  ${escapeHtml(isInStock ? (it.official_price || it.last_price || '-') : '官方缺貨')}
+                <div style="font-size: 14px; font-weight: 700; color: ${isInStock ? '#34d399' : (isSkipped ? '#fbbf24' : '#94a3b8')}; white-space: nowrap;">
+                  ${escapeHtml(isSkipped ? '本輪暫略' : (isInStock ? (it.official_price || it.last_price || '-') : '官方缺貨'))}
                 </div>
               </div>
             ` : `
